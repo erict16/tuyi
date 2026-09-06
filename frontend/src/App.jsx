@@ -1149,6 +1149,7 @@ export default function App() {
               >一起译</button>
             )}
             <span className="grow" />
+            <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(false)}>导出 PDF</button>
             <button type="button" className={`tbtn${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>词汇库</button>
             <button type="button" className="tbtn" onClick={openSettings}>设置</button>
           </>
