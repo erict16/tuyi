@@ -149,6 +149,13 @@ export default function App() {
   const [view, setView] = useState("work");
   const [theme, setTheme] = useState(readTheme);
   const [settingsTab, setSettingsTab] = useState("tr");
+  const [railW, setRailW] = useState(() => {
+    try {
+      const n = Number(localStorage.getItem("tuyi-rail"));
+      if (n >= 160 && n <= 420) return n;
+    } catch { /* ignore */ }
+    return 220;
+  });
 
   const [files, setFiles] = useState([]);
   const [current, setCurrent] = useState("");
@@ -215,6 +222,10 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
   }, [theme]);
+
+  useEffect(() => {
+    try { localStorage.setItem("tuyi-rail", String(railW)); } catch { /* ignore */ }
+  }, [railW]);
 
   useEffect(() => {
     const shot = new URLSearchParams(window.location.search).get("shot");
@@ -390,7 +401,7 @@ export default function App() {
       });
       const items = Array.isArray(data.items) ? data.items : [];
       setRows(items);
-      setStatus(`提取 ${asCount(data.count)} 条，去掉重复后 ${asCount(data.unique)}。可以改译文再写回。`);
+      setStatus(`这张图有 ${asCount(data.unique)} 句。点翻译就会写出新文件。`);
       return items;
     } catch (error) {
       setRows([]);
@@ -479,11 +490,12 @@ export default function App() {
         if (handle) byKey.set(`${handle}\t${field}`, item);
         if (item?.id != null) byKey.set(`id:${item.id}`, item);
       });
-      setRows((prev) => (Array.isArray(prev) ? prev : []).map((row) => {
+      const nextRows = (Array.isArray(rows) ? rows : []).map((row) => {
         const handle = asText(row?.handle);
         const field = asText(row?.field) || "text";
         return (handle && byKey.get(`${handle}\t${field}`)) || (row?.id != null && byKey.get(`id:${row.id}`)) || row;
-      }));
+      });
+      setRows(nextRows);
       const bits = [`术语对上 ${asCount(data.glossary)}`, `网上译了 ${asCount(data.mt)}`];
       if (asCount(data.skipped)) bits.push(`未译 ${asCount(data.skipped)}`);
       if (data.skipped && !data.has_engine) {
@@ -495,7 +507,8 @@ export default function App() {
         setStatus(`${bits.join("，")}。${hint}`);
         if (engine !== "local") openSettings();
       } else {
-        setStatus(`译完。${bits.join("，")}。可以改译文再写回。`);
+        setStatus(`译完。${bits.join("，")}。正在写出新文件…`);
+        await writeBackRows(nextRows);
       }
     } catch (error) {
       setStatus(error.message);
@@ -506,17 +519,21 @@ export default function App() {
   }
 
   async function writeBack() {
+    await writeBackRows(visibleRows);
+  }
+
+  async function writeBackRows(items) {
     if (!current) {
       setStatus("先打开图纸。");
       return;
     }
-    const ready = visibleRows.filter((row) => row.selected !== false && asText(row.target).trim());
+    const list = Array.isArray(items) ? items : [];
+    const ready = list.filter((row) => row.selected !== false && asText(row.target).trim());
     if (!ready.length) {
       setStatus("没有可写回的译文。先点翻译，或手填译文。");
       return;
     }
-    setBusy(true);
-    setStatus("正在写回图纸…");
+    setStatus("正在写出新文件…");
     try {
       const named = await api(
         `/api/default-output-name?mode=${encodeURIComponent(modeKey(sourceLang, targetLang))}&base=${encodeURIComponent(selected?.name?.replace(/\.[^.]+$/, "") || "drawing")}&translate_filename=${params.filename ? "true" : "false"}`
@@ -525,7 +542,7 @@ export default function App() {
         method: "POST",
         body: JSON.stringify({
           input_file: current,
-          items: visibleRows,
+          items: list,
           output_dir: config.output_dir,
           output_name: named.name,
           translation_mode: modeKey(sourceLang, targetLang),
@@ -535,13 +552,11 @@ export default function App() {
       });
       setWrittenPath(data.path || "");
       setLastOutput(data.path || "");
-      setStatus(`已写回 ${data.written} 条（${layoutLabel(layout)}）→ ${data.path}`);
+      setStatus(`译完，已写出新文件 ${asCount(data.written)} 句 → ${data.path}`);
       const native = py();
       if (native?.reveal_file && data.path) native.reveal_file(data.path);
     } catch (error) {
       setStatus(error.message);
-    } finally {
-      setBusy(false);
     }
   }
 
@@ -1061,9 +1076,6 @@ export default function App() {
     if (kind === "max") native?.toggle_maximize?.();
   }
 
-  const emptyHint = files.length
-    ? (view === "batch" ? "一批一起译、一起写回。目录按原来的放。" : "点一张图看它的字。译完再写回。")
-    : (view === "batch" ? "打开后再点批量。" : "打开 DWG 或 DXF。字会进右边这张表。");
   const footBusy = checking || updating;
   const termFilter = termQuery.trim();
   const mineShown = terms.filter((term) => !termFilter || asText(term.source).includes(termFilter) || asText(term.target).includes(termFilter));
@@ -1126,7 +1138,6 @@ export default function App() {
         ) : (
           <>
             <button type="button" className="tbtn" onClick={openDrawings}>打开图纸</button>
-            <button type="button" className="tbtn" disabled={busy || !current} onClick={writeBack}>写回</button>
             <button
               type="button"
               className={`tbtn${view === "batch" ? " on" : ""}`}
@@ -1147,6 +1158,7 @@ export default function App() {
         <div className="body page-enter">
           <aside
             className="rail"
+            style={{ width: railW }}
             aria-label="图纸队列"
             onDragEnter={(event) => { event.preventDefault(); setDropOver(true); }}
             onDragOver={(event) => { event.preventDefault(); setDropOver(true); }}
@@ -1189,8 +1201,28 @@ export default function App() {
                 ))}
               </div>
             )}
-            {!files.length && <p className="hint" style={{ padding: "0 12px 12px" }}>{emptyHint}</p>}
           </aside>
+          <div
+            className="split"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="调整左右宽度"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              const startX = event.clientX;
+              const startW = railW;
+              const move = (ev) => {
+                const next = Math.min(420, Math.max(160, startW + ev.clientX - startX));
+                setRailW(next);
+              };
+              const up = () => {
+                window.removeEventListener("pointermove", move);
+                window.removeEventListener("pointerup", up);
+              };
+              window.addEventListener("pointermove", move);
+              window.addEventListener("pointerup", up);
+            }}
+          />
 
           {view === "work" && (
             <section className="stage" id="main">
@@ -1205,42 +1237,14 @@ export default function App() {
                   </select>
                 </div>
                 <span className="grow" />
-                <button type="button" className="tbtn ghost" disabled={busy || !current} onClick={writeBack}>写回</button>
                 <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
                   <i className="spin" aria-hidden="true" />
                   <span className="go-label">{translating ? "正在译…" : "翻译"}</span>
                 </button>
               </div>
               <div className="status" aria-live="polite">{status}</div>
-              <div className="chips" role="radiogroup" aria-label="用哪个翻译">
-                {ENGINES.map(([value, label]) => (
-                  <button
-                    type="button"
-                    key={value}
-                    className={`chip${engine === value ? " on" : ""}`}
-                    onClick={() => setEngine(value)}
-                  >{label}</button>
-                ))}
-              </div>
               {current ? (
                 <>
-                  <div className="filters">
-                    <label title="尺寸数字、纯符号，一般不用译">
-                      <input type="checkbox" checked={filters.numbers} onChange={(event) => setFilters((prev) => ({ ...prev, numbers: event.target.checked }))} /> 数字、尺寸
-                    </label>
-                    <label title="同一句在图上出现多次，只译一次">
-                      <input type="checkbox" checked={filters.dupes} onChange={(event) => setFilters((prev) => ({ ...prev, dupes: event.target.checked }))} /> 重复的句子
-                    </label>
-                    <label title="已经是目标语言或夹杂别的文字，先跳过">
-                      <input type="checkbox" checked={filters.nonsource} onChange={(event) => setFilters((prev) => ({ ...prev, nonsource: event.target.checked }))} /> 不是原文那种语言
-                    </label>
-                    <span className="grow">
-                      写回
-                      <select className="mini" value={layout} onChange={(event) => setLayout(event.target.value)} aria-label="图纸上怎么写">
-                        {LAYOUTS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                    </span>
-                  </div>
                   <div className="table">
                     <table>
                       <thead>
@@ -1398,7 +1402,7 @@ export default function App() {
           <section className="set-page" aria-label="设置">
             <div className="set-tabs" role="tablist" aria-label="设置分页">
               <button type="button" role="tab" className={settingsTab === "tr" ? "on" : ""} aria-selected={settingsTab === "tr"} onClick={() => setSettingsTab("tr")}>翻译</button>
-              <button type="button" role="tab" className={settingsTab === "wr" ? "on" : ""} aria-selected={settingsTab === "wr"} onClick={() => setSettingsTab("wr")}>写回</button>
+              <button type="button" role="tab" className={settingsTab === "wr" ? "on" : ""} aria-selected={settingsTab === "wr"} onClick={() => setSettingsTab("wr")}>图上怎么写</button>
               <button type="button" role="tab" className={settingsTab === "more" ? "on" : ""} aria-selected={settingsTab === "more"} onClick={() => setSettingsTab("more")}>外观和更新</button>
             </div>
             <div className="set-pane" key={settingsTab}>
@@ -1468,8 +1472,8 @@ export default function App() {
               )}
               {settingsTab === "wr" && (
                 <>
-                  <h1>写回</h1>
-                  <p className="help">译完写回图里，留什么字。导出 PDF 也按这个。</p>
+                  <h1>图上怎么写</h1>
+                  <p className="help">译完的新文件里，图上留什么字。导出 PDF 也按这个。</p>
                   <div className="card">
                     <Seg
                       label="图纸上怎么写"

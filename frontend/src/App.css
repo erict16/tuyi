@@ -167,6 +167,18 @@ select.mini, .pair select {
   to { opacity: 1; transform: none; }
 }
 
+.split {
+  width: 6px;
+  flex: none;
+  cursor: col-resize;
+  background: transparent;
+  touch-action: none;
+  transition: background 160ms var(--ease-out);
+}
+.split:hover, .split:active {
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
 .rail {
   width: 220px;
   flex: none;

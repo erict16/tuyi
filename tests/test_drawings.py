@@ -1599,7 +1599,7 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertIn("已经是外文的先别译", text)
         self.assertIn("图纸上只留译文", text)
         self.assertIn("原文和译文都留", text)
-        self.assertIn("去掉重复后", text)
+        self.assertIn("这张图有", text)
         self.assertIn(">设置<", text)
         self.assertNotIn(">参数<", text)
         self.assertNotIn('aria-label="参数"', text)
