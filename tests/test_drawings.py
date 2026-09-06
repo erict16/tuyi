@@ -1559,7 +1559,7 @@ class DrawingsApiTests(unittest.TestCase):
         text = source.read_text(encoding="utf-8")
         self.assertIn("过滤后没有可显示的文字。", text)
         self.assertIn("这张图没有可译文字。", text)
-        self.assertIn("还没打开图纸，点左上角打开", text)
+        self.assertIn("还没打开图纸，点左边添加", text)
         self.assertIn("function asCount(value)", text)
         self.assertIn("function asText(value)", text)
         self.assertIn("/^[\\d.\\-\\s]+$/", text)

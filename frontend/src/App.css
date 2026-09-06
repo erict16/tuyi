@@ -189,27 +189,52 @@ select.mini, .pair select {
   border-right: 1px solid var(--border);
 }
 .drop {
-  display: grid;
-  place-items: center;
-  margin: 10px 10px 8px;
-  padding: 14px 10px;
-  min-height: 88px;
-  width: calc(100% - 20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  margin: 12px;
+  min-height: 0;
   text-align: center;
   border: 1.5px dashed var(--drop);
-  border-radius: 10px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--bg) 70%, transparent);
   cursor: pointer;
   transition: border-color 160ms var(--ease-out), background 160ms var(--ease-out);
 }
-.drop h2 { margin: 0 0 4px; font-size: 13px; font-weight: 650; color: var(--text); }
-.drop p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
-.rail .hint { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.plus {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--muted);
+  background: var(--soft);
+  border: 1px solid var(--border);
+}
+.drop h2 { margin: 0; font-size: 14px; font-weight: 650; color: var(--text); }
+.drop p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
 .drop.over, .drop:hover {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
-.win[data-files="1"] .drop { min-height: 0; padding: 8px; }
+.drop.over .plus, .drop:hover .plus {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.win[data-files="1"] .drop {
+  flex: none;
+  min-height: 76px;
+  margin: 10px 10px 8px;
+  padding: 8px;
+  gap: 4px;
+}
+.win[data-files="1"] .plus { width: 28px; height: 28px; font-size: 18px; border-radius: 8px; }
 .win[data-files="1"] .drop h2 { font-size: 12px; }
 .win[data-files="1"] .drop .long { display: none; }
 
@@ -284,10 +309,10 @@ select.mini, .pair select {
   padding: 10px 12px 0;
 }
 .go {
-  height: 26px;
-  padding: 0 12px;
-  border-radius: 7px;
-  font-weight: 700;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-weight: 650;
   font-size: 12px;
   background: var(--accent);
   color: #fff;
@@ -524,10 +549,23 @@ td input[type="text"]:focus {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 20px 24px 28px;
+  padding: 28px 32px 36px;
   animation: enter 180ms var(--ease-out);
 }
-.set-pane .card { max-width: 520px; }
+.set-pane > h1 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+.set-pane > .help {
+  margin: 0 0 20px;
+  max-width: 42ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.set-pane .card { max-width: 480px; padding: 16px 18px 18px; }
 .seg {
   display: flex;
   border: 1px solid var(--border);
@@ -591,16 +629,16 @@ td input[type="text"]:focus {
   color: var(--muted);
 }
 .card p.help {
-  margin: 0 0 6px;
-  font-size: 12px;
+  margin: 0 0 12px;
+  font-size: 13px;
   color: var(--muted);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 .card label.row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 0;
+  padding: 10px 0;
   font-size: 13px;
   color: var(--text);
   border-bottom: 1px solid var(--border);
@@ -608,23 +646,33 @@ td input[type="text"]:focus {
 .card label.row:last-of-type { border-bottom: 0; }
 .field {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  font-size: 13px;
-  color: var(--text);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 10px 0 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--muted);
 }
 .field input[type="text"],
 .field input[type="password"],
-.field input[type="url"] {
-  flex: 1;
+.field input[type="url"],
+.field select {
+  width: 100%;
   min-width: 0;
-  height: 26px;
+  height: 32px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 7px;
   background: var(--soft);
   color: var(--text);
-  padding: 0 8px;
+  font-weight: 500;
+  padding: 0 10px;
+}
+.field-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
 }
 .group {
   background: var(--elev);

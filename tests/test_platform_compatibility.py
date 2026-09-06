@@ -221,6 +221,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn('accept=".dwg,.dxf"', ui)
         self.assertIn("multiple hidden", ui)
         self.assertIn("onClick={openDrawings}", ui)
+        self.assertIn("添加图纸", ui)
+        self.assertIn("className=\"plus\"", ui)
         self.assertIn("自己配接口", ui)
         self.assertNotIn(">这台电脑<", ui)
         self.assertNotIn("自己的接口", ui)

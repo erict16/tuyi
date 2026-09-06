@@ -181,7 +181,7 @@ export default function App() {
   });
   const [oda, setOda] = useState({ installed: false, path: "" });
   const [glossary, setGlossary] = useState(0);
-  const [status, setStatus] = useState("还没打开图纸，点左上角打开");
+  const [status, setStatus] = useState("还没打开图纸，点左边添加");
   const [appVersion, setAppVersion] = useState("");
   const [config, setConfig] = useState({
     provider: "deepl",
@@ -332,7 +332,7 @@ export default function App() {
       } else {
         setCurrent("");
         setRows([]);
-        setStatus("还没打开图纸，点「打开图纸」");
+        setStatus("还没打开图纸，点左边添加");
       }
     }
     try {
@@ -1137,12 +1137,17 @@ export default function App() {
           </>
         ) : (
           <>
-            <button type="button" className="tbtn" onClick={openDrawings}>打开图纸</button>
-            <button
-              type="button"
-              className={`tbtn${view === "batch" ? " on" : ""}`}
-              onClick={() => setView(view === "batch" ? "work" : "batch")}
-            >批量</button>
+            <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
+              <i className="spin" aria-hidden="true" />
+              <span className="go-label">{translating ? "正在译…" : "翻译"}</span>
+            </button>
+            {files.length > 1 && (
+              <button
+                type="button"
+                className={`tbtn${view === "batch" ? " on" : ""}`}
+                onClick={() => setView(view === "batch" ? "work" : "batch")}
+              >一起译</button>
+            )}
             <span className="grow" />
             <button type="button" className={`tbtn${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>词汇库</button>
             <button type="button" className="tbtn" onClick={openSettings}>设置</button>
@@ -1170,11 +1175,9 @@ export default function App() {
               className={`drop${dropOver ? " over" : ""}`}
               onClick={openDrawings}
             >
-              <div>
-                <h2>把图纸拖进来，或点这里选</h2>
-                <p className="long">只认 DWG、DXF，一次可以多张</p>
-                <p>{oda.installed ? "DWG 和 DXF 都行" : "没装 ODA，先用 DXF"}</p>
-              </div>
+              <span className="plus" aria-hidden="true">+</span>
+              <h2>添加图纸</h2>
+              <p className="long">DWG、DXF，一次可多张</p>
             </button>
             {files.length > 0 && (
               <div className="queue">
@@ -1236,11 +1239,6 @@ export default function App() {
                     {LANGS.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
                   </select>
                 </div>
-                <span className="grow" />
-                <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
-                  <i className="spin" aria-hidden="true" />
-                  <span className="go-label">{translating ? "正在译…" : "翻译"}</span>
-                </button>
               </div>
               <div className="status" aria-live="polite">{status}</div>
               {current ? (
@@ -1304,7 +1302,7 @@ export default function App() {
                 </>
               ) : (
                 <div className="empty">
-                  <p>还没打开图纸，点「打开图纸」<span>DWG、DXF 都可以</span></p>
+                  <p>还没打开图纸，点左边添加<span>DWG、DXF 都可以</span></p>
                 </div>
               )}
             </section>
@@ -1327,7 +1325,7 @@ export default function App() {
               <div className="jobs">
                 {!files.length ? (
                   <div className="empty">
-                    <p>还没打开图纸，点「打开图纸」<span>打开后再点批量</span></p>
+                    <p>还没打开图纸，点左边添加<span>打开后再一起译</span></p>
                   </div>
                 ) : (
                   <>
@@ -1498,7 +1496,7 @@ export default function App() {
                       options={[["light", "浅色"], ["dark", "深色"]]}
                       onChange={setTheme}
                     />
-                    <div className="field">
+                    <div className="field-actions">
                       <button type="button" className="tbtn" onClick={openGlossary}>打开词汇库</button>
                       <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
                     </div>
