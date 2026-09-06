@@ -251,8 +251,39 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("/api/updates/cancel", ui)
         self.assertIn("检查更新", ui)
         self.assertNotIn(">全部文字", ui)
+        self.assertIn("set-tabs", ui)
+        self.assertIn("外观和更新", ui)
+        self.assertIn("style: layout", ui)
         self.assertIn(".go.busy .spin", css)
         self.assertIn("prefers-reduced-motion", css)
+
+    def test_windows_setup_lets_user_pick_folder(self):
+        iss = (Path(__file__).resolve().parents[1] / "installer" / "Dwglot_Setup.iss").read_text(encoding="utf-8")
+        self.assertIn("DisableDirPage=no", iss)
+        self.assertIn("UsePreviousAppDir=yes", iss)
+        self.assertIn("PrivilegesRequiredOverridesAllowed=dialog", iss)
+        self.assertIn("PrivilegesRequired=lowest", iss)
+        self.assertNotIn("DisableDirPage=yes", iss)
+        from backend.updates import copy_payload, install_dir, launch_path, windows_helper_text
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "D_drive" / "Tuyi"
+            staging = Path(tmp) / "stage"
+            staging.mkdir()
+            dest.mkdir(parents=True)
+            (staging / "Tuyi.exe").write_bytes(b"new")
+            copy_payload(staging, dest)
+            self.assertTrue((dest / "Tuyi.exe").is_file())
+            self.assertEqual(launch_path(dest).name, "Tuyi.exe")
+        helper = windows_helper_text()
+        self.assertIn("$Dest", helper)
+        self.assertIn("robocopy", helper)
+        self.assertIn("$Exe", helper)
+        with tempfile.TemporaryDirectory() as tmp:
+            exe = Path(tmp) / "Tuyi.exe"
+            exe.write_bytes(b"x")
+            with patch("backend.updates.is_frozen", return_value=True), patch("backend.updates.sys.platform", "win32"), patch("backend.updates.sys.executable", str(exe)):
+                folder = install_dir()
+            self.assertEqual(folder, Path(tmp).resolve())
 
     def test_windows_keeps_edgechromium_and_exe_candidates(self):
         with patch("desktop.launcher.sys.platform", "win32"):

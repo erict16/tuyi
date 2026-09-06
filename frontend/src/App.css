@@ -469,9 +469,63 @@ td input[type="text"]:focus {
 .set-page {
   flex: 1;
   min-width: 0;
-  overflow: auto;
-  padding: 16px 22px 28px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
+}
+.set-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 16px;
+  flex: none;
+  background: var(--elev);
+  border-bottom: 1px solid var(--border);
+}
+.set-tabs button {
+  height: 34px;
+  padding: 0 14px;
+  font-weight: 650;
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+}
+.set-tabs button.on {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.set-tabs button:active { transform: scale(0.97); }
+.set-pane {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 24px 28px;
+  animation: enter 180ms var(--ease-out);
+}
+.set-pane .card { max-width: 520px; }
+.seg {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0 12px;
+}
+.seg button {
+  flex: 1;
+  height: 32px;
+  font-weight: 650;
+  font-size: 13px;
+  background: var(--elev);
+  color: var(--text);
+  transition: background 160ms var(--ease-out), color 160ms var(--ease-out);
+}
+.seg button.on {
+  background: var(--accent);
+  color: #fff;
+}
+@media (hover: hover) and (pointer: fine) {
+  .seg button:hover:not(.on) { background: var(--soft); }
 }
 .set-h {
   display: flex;

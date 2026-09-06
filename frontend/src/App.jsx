@@ -89,6 +89,16 @@ function Choice({ on, onClick, children, title }) {
   );
 }
 
+function Seg({ value, options, onChange, label }) {
+  return (
+    <div className="seg" role="radiogroup" aria-label={label}>
+      {options.map(([id, text]) => (
+        <button type="button" key={id} className={value === id ? "on" : ""} onClick={() => onChange(id)}>{text}</button>
+      ))}
+    </div>
+  );
+}
+
 function asCount(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -138,6 +148,7 @@ export default function App() {
   const nativeTitlebar = hasNativeTitlebar();
   const [view, setView] = useState("work");
   const [theme, setTheme] = useState(readTheme);
+  const [settingsTab, setSettingsTab] = useState("tr");
 
   const [files, setFiles] = useState([]);
   const [current, setCurrent] = useState("");
@@ -390,6 +401,7 @@ export default function App() {
   function openSettings() {
     extractSnap.current = extractKey();
     rememberReturn();
+    setSettingsTab("tr");
     setView("settings");
   }
 
@@ -535,7 +547,7 @@ export default function App() {
           path: sourcePath,
           output_dir: config.output_dir,
           output_name: `${stem}.pdf`,
-          style: fromWriteback ? "纯译文" : layout,
+          style: layout,
           items: fromWriteback ? [] : visibleRows,
         }),
       });
@@ -1355,103 +1367,116 @@ export default function App() {
       {view === "settings" && (
         <div className="body page-enter">
           <section className="set-page" aria-label="设置">
-            <div className="set-h">
-              <h1>设置</h1>
-              <p>改完点「返回」。这里不是弹窗。</p>
+            <div className="set-tabs" role="tablist" aria-label="设置分页">
+              <button type="button" role="tab" className={settingsTab === "tr" ? "on" : ""} aria-selected={settingsTab === "tr"} onClick={() => setSettingsTab("tr")}>翻译</button>
+              <button type="button" role="tab" className={settingsTab === "wr" ? "on" : ""} aria-selected={settingsTab === "wr"} onClick={() => setSettingsTab("wr")}>写回</button>
+              <button type="button" role="tab" className={settingsTab === "more" ? "on" : ""} aria-selected={settingsTab === "more"} onClick={() => setSettingsTab("more")}>外观和更新</button>
             </div>
-            <div className="set-grid">
-              <div className="card">
-                <h2>用哪里翻译</h2>
-                <p className="help">网上翻译用 DeepL 或 Azure，要密钥。自己配接口就填网址。不联网要用本机 Ollama。</p>
-                {ENGINES.map(([value, label]) => (
-                  <label className="row" key={value}>
-                    <input type="radio" name="set-eng" checked={engine === value} onChange={() => setEngine(value)} /> {label}
-                  </label>
-                ))}
-                {engine === "cloud" && (
-                  <>
-                    <div className="field">网上用哪家
-                      <select className="mini" aria-label="网上翻译服务" value={config.provider === "azure" ? "azure" : "deepl"} onChange={(event) => setConfig((prev) => ({ ...prev, provider: event.target.value }))}>
-                        <option value="deepl">DeepL</option>
-                        <option value="azure">Azure</option>
-                      </select>
+            <div className="set-pane" key={settingsTab}>
+              {settingsTab === "tr" && (
+                <>
+                  <h1>翻译</h1>
+                  <p className="help">图上的字默认全译。只要选送到哪。</p>
+                  <div className="card">
+                    <Seg
+                      label="用哪个翻译"
+                      value={engine === "local" ? "custom" : engine}
+                      options={[["cloud", "网上翻译"], ["custom", "自己配接口"]]}
+                      onChange={(id) => setEngine(id)}
+                    />
+                    {engine !== "custom" && engine !== "local" && (
+                      <>
+                        <p className="help">网上翻译用 DeepL 或 Azure，要密钥。</p>
+                        <div className="field">网上用哪家
+                          <select className="mini" aria-label="网上翻译服务" value={config.provider === "azure" ? "azure" : "deepl"} onChange={(event) => setConfig((prev) => ({ ...prev, provider: event.target.value }))}>
+                            <option value="deepl">DeepL</option>
+                            <option value="azure">Azure</option>
+                          </select>
+                        </div>
+                        <div className="field">DeepL 密钥 <input type="password" name="deepl" autoComplete="off" spellCheck={false} placeholder="没有就空着" aria-label="DeepL 密钥" value={config.deepl_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, deepl_key: event.target.value }))} /></div>
+                        <div className="field">Azure 密钥 <input type="password" name="azure" autoComplete="off" spellCheck={false} placeholder="没有就空着" aria-label="Azure 密钥" value={config.azure_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, azure_key: event.target.value }))} /></div>
+                        <div className="field">Azure 区域 <input type="text" name="azure-region" autoComplete="off" spellCheck={false} placeholder="eastasia" aria-label="Azure 区域" value={config.azure_region || ""} onChange={(event) => setConfig((prev) => ({ ...prev, azure_region: event.target.value }))} /></div>
+                      </>
+                    )}
+                    {(engine === "custom" || engine === "local") && (
+                      <>
+                        <p className="help">填网址和密钥。本机 Ollama 也填在这里。</p>
+                        <div className="field">网址 <input type="url" name="openai-base" autoComplete="off" spellCheck={false} placeholder="https://api.deepseek.com/v1 或 http://127.0.0.1:11434" aria-label="接口网址" value={engine === "local" ? (config.ollama_host || "") : (config.openai_base || "")} onChange={(event) => {
+                          const value = event.target.value;
+                          if (engine === "local") setConfig((prev) => ({ ...prev, ollama_host: value }));
+                          else setConfig((prev) => ({ ...prev, openai_base: value }));
+                        }} /></div>
+                        <div className="field">密钥 <input type="password" name="openai-key" autoComplete="off" spellCheck={false} placeholder="没有就空着" aria-label="接口密钥" value={config.openai_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, openai_key: event.target.value }))} /></div>
+                        <div className="field">模型 <input type="text" name="openai-model" autoComplete="off" spellCheck={false} placeholder="deepseek-chat 或 llama3.1" aria-label="模型名" value={engine === "local" ? (config.ollama_model || "") : (config.openai_model || "")} onChange={(event) => {
+                          const value = event.target.value;
+                          if (engine === "local") setConfig((prev) => ({ ...prev, ollama_model: value }));
+                          else setConfig((prev) => ({ ...prev, openai_model: value }));
+                        }} /></div>
+                      </>
+                    )}
+                    <label className="row" title="勾上后，这张图会先查词汇库"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查词汇库</label>
+                  </div>
+                  <div className="card">
+                    <details>
+                      <summary>少用的</summary>
+                      <p className="help">图上的字默认全译。一般不用改。</p>
+                      <label className="row"><input type="radio" name="set-eng-adv" checked={engine === "local"} onChange={() => setEngine("local")} /> 不联网</label>
+                      <label className="row" title="尺寸数字、纯符号，一般不用译"><input type="checkbox" checked={filters.numbers} onChange={(event) => setFilters((prev) => ({ ...prev, numbers: event.target.checked }))} /> 数字、尺寸先别译</label>
+                      <label className="row" title="同一句在图上出现多次，只译一次"><input type="checkbox" checked={filters.dupes} onChange={(event) => setFilters((prev) => ({ ...prev, dupes: event.target.checked }))} /> 重复的句子先别译</label>
+                      <label className="row" title="已经是目标语言或夹杂别的文字，先跳过"><input type="checkbox" checked={filters.nonsource} onChange={(event) => setFilters((prev) => ({ ...prev, nonsource: event.target.checked }))} /> 已经是外文的先别译</label>
+                      <label className="row"><input type="checkbox" checked={params.attribs} onChange={(event) => setParams((prev) => ({ ...prev, attribs: event.target.checked }))} /> 块属性</label>
+                      <label className="row"><input type="checkbox" checked={params.blocks} onChange={(event) => setParams((prev) => ({ ...prev, blocks: event.target.checked }))} /> 块里的字</label>
+                      <label className="row"><input type="checkbox" checked={params.dims} onChange={(event) => setParams((prev) => ({ ...prev, dims: event.target.checked }))} /> 标注、表格</label>
+                      <label className="row"><input type="checkbox" checked={params.model} onChange={(event) => setParams((prev) => ({ ...prev, model: event.target.checked }))} /> 模型空间</label>
+                      <label className="row"><input type="checkbox" checked={params.paper} onChange={(event) => setParams((prev) => ({ ...prev, paper: event.target.checked }))} /> 图纸空间</label>
+                      <label className="row"><input type="checkbox" checked={params.filename} onChange={(event) => setParams((prev) => ({ ...prev, filename: event.target.checked }))} /> 文件名也译</label>
+                      <label className="row"><input type="checkbox" checked={params.frozen} onChange={(event) => setParams((prev) => ({ ...prev, frozen: event.target.checked }))} /> 冻住看不见的图层</label>
+                      <label className="row"><input type="checkbox" checked={params.locked} onChange={(event) => setParams((prev) => ({ ...prev, locked: event.target.checked }))} /> 锁住改不了的图层</label>
+                      <label className="row"><input type="checkbox" checked={params.off} onChange={(event) => setParams((prev) => ({ ...prev, off: event.target.checked }))} /> 关掉藏起来的图层</label>
+                    </details>
+                  </div>
+                </>
+              )}
+              {settingsTab === "wr" && (
+                <>
+                  <h1>写回</h1>
+                  <p className="help">译完写回图里，留什么字。导出 PDF 也按这个。</p>
+                  <div className="card">
+                    <Seg
+                      label="图纸上怎么写"
+                      value={layout}
+                      options={LAYOUTS.map(([value, text]) => [value, text])}
+                      onChange={setLayout}
+                    />
+                    <label className="row" title="输出目录按原来的文件夹一层层放"><input type="checkbox" checked={params.tree} onChange={(event) => setParams((prev) => ({ ...prev, tree: event.target.checked }))} /> 按原来的文件夹放</label>
+                    <label className="row" title="没有 ODA 时，写不出 DWG 就改成 DXF"><input type="checkbox" checked={params.odaDxf} onChange={(event) => setParams((prev) => ({ ...prev, odaDxf: event.target.checked }))} /> 打不开 DWG 时改存成 DXF</label>
+                    <p className="help">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>
+                  </div>
+                </>
+              )}
+              {settingsTab === "more" && (
+                <>
+                  <h1>外观和更新</h1>
+                  <p className="help">只改这个窗口。词汇库在单独一页。</p>
+                  <div className="card">
+                    <Seg
+                      label="窗口颜色"
+                      value={theme}
+                      options={[["light", "浅色"], ["dark", "深色"]]}
+                      onChange={setTheme}
+                    />
+                    <div className="field">
+                      <button type="button" className="tbtn" onClick={openGlossary}>打开词汇库</button>
+                      <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
                     </div>
-                    <div className="field">DeepL 密钥 <input type="password" name="deepl" autoComplete="off" spellCheck={false} placeholder="没有就空着…" aria-label="DeepL 密钥" value={config.deepl_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, deepl_key: event.target.value }))} /></div>
-                    <div className="field">Azure 密钥 <input type="password" name="azure" autoComplete="off" spellCheck={false} placeholder="没有就空着…" aria-label="Azure 密钥" value={config.azure_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, azure_key: event.target.value }))} /></div>
-                    <div className="field">Azure 区域 <input type="text" name="azure-region" autoComplete="off" spellCheck={false} placeholder="eastasia" aria-label="Azure 区域" value={config.azure_region || ""} onChange={(event) => setConfig((prev) => ({ ...prev, azure_region: event.target.value }))} /></div>
-                  </>
-                )}
-                {engine === "local" && (
-                  <>
-                    <div className="field">Ollama 地址 <input type="url" name="ollama" autoComplete="off" spellCheck={false} placeholder="http://127.0.0.1:11434" aria-label="Ollama 地址" value={config.ollama_host || ""} onChange={(event) => setConfig((prev) => ({ ...prev, ollama_host: event.target.value }))} /></div>
-                    <div className="field">模型 <input type="text" name="ollama-model" autoComplete="off" spellCheck={false} placeholder="llama3.1" aria-label="Ollama 模型" value={config.ollama_model || ""} onChange={(event) => setConfig((prev) => ({ ...prev, ollama_model: event.target.value }))} /></div>
-                  </>
-                )}
-                {engine === "custom" && (
-                  <>
-                    <div className="field">网址 <input type="url" name="openai-base" autoComplete="off" spellCheck={false} placeholder="https://api.deepseek.com/v1" aria-label="接口网址" value={config.openai_base || ""} onChange={(event) => setConfig((prev) => ({ ...prev, openai_base: event.target.value }))} /></div>
-                    <div className="field">密钥 <input type="password" name="openai-key" autoComplete="off" spellCheck={false} placeholder="填密钥…" aria-label="接口密钥" value={config.openai_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, openai_key: event.target.value }))} /></div>
-                    <div className="field">模型 <input type="text" name="openai-model" autoComplete="off" spellCheck={false} placeholder="deepseek-chat" aria-label="模型名" value={config.openai_model || ""} onChange={(event) => setConfig((prev) => ({ ...prev, openai_model: event.target.value }))} /></div>
-                  </>
-                )}
-              </div>
-              <div className="card">
-                <h2>图纸上怎么写</h2>
-                <p className="help">写回 CAD 时，图面上留什么字。</p>
-                {LAYOUTS.map(([value, label, title]) => (
-                  <label className="row" key={value} title={title}>
-                    <input type="radio" name="set-lay" checked={layout === value} onChange={() => setLayout(value)} /> {label}
-                  </label>
-                ))}
-              </div>
-              <div className="card">
-                <h2>不译这些</h2>
-                <p className="help">勾上的不送去翻译，表里也不列。</p>
-                <label className="row" title="尺寸数字、纯符号，一般不用译"><input type="checkbox" checked={filters.numbers} onChange={(event) => setFilters((prev) => ({ ...prev, numbers: event.target.checked }))} /> 数字、尺寸</label>
-                <label className="row" title="同一句在图上出现多次，只译一次"><input type="checkbox" checked={filters.dupes} onChange={(event) => setFilters((prev) => ({ ...prev, dupes: event.target.checked }))} /> 重复的句子</label>
-                <label className="row" title="已经是目标语言或夹杂别的文字，先跳过"><input type="checkbox" checked={filters.nonsource} onChange={(event) => setFilters((prev) => ({ ...prev, nonsource: event.target.checked }))} /> 不是原文那种语言</label>
-                <label className="row" title="勾上后，这张图会先查词汇库"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查词汇库</label>
-              </div>
-              <div className="card wide">
-                <details>
-                  <summary>少用的</summary>
-                  <p className="help">图上的字默认全拿来译，包括看不见的图层。一般不用改。</p>
-                  <label className="row"><input type="checkbox" checked={params.attribs} onChange={(event) => setParams((prev) => ({ ...prev, attribs: event.target.checked }))} /> 块属性</label>
-                  <label className="row"><input type="checkbox" checked={params.blocks} onChange={(event) => setParams((prev) => ({ ...prev, blocks: event.target.checked }))} /> 块里的字</label>
-                  <label className="row"><input type="checkbox" checked={params.dims} onChange={(event) => setParams((prev) => ({ ...prev, dims: event.target.checked }))} /> 标注、表格</label>
-                  <label className="row"><input type="checkbox" checked={params.model} onChange={(event) => setParams((prev) => ({ ...prev, model: event.target.checked }))} /> 模型空间</label>
-                  <label className="row"><input type="checkbox" checked={params.paper} onChange={(event) => setParams((prev) => ({ ...prev, paper: event.target.checked }))} /> 图纸空间</label>
-                  <label className="row" title="输出文件名里的中文也一起译"><input type="checkbox" checked={params.filename} onChange={(event) => setParams((prev) => ({ ...prev, filename: event.target.checked }))} /> 文件名也一起译</label>
-                  <label className="row" title="冻住的图层在图上看不见"><input type="checkbox" checked={params.frozen} onChange={(event) => setParams((prev) => ({ ...prev, frozen: event.target.checked }))} /> 冻住看不见的图层</label>
-                  <label className="row" title="锁住的图层改不了"><input type="checkbox" checked={params.locked} onChange={(event) => setParams((prev) => ({ ...prev, locked: event.target.checked }))} /> 锁住改不了的图层</label>
-                  <label className="row" title="关掉的图层藏起来了"><input type="checkbox" checked={params.off} onChange={(event) => setParams((prev) => ({ ...prev, off: event.target.checked }))} /> 关掉藏起来的图层</label>
-                </details>
-              </div>
-              <div className="card">
-                <h2>批量怎么放</h2>
-                <label className="row" title="输出目录按原来的文件夹一层层放"><input type="checkbox" checked={params.tree} onChange={(event) => setParams((prev) => ({ ...prev, tree: event.target.checked }))} /> 按原来的文件夹放</label>
-                <label className="row" title="没有 ODA 时，写不出 DWG 就改成 DXF"><input type="checkbox" checked={params.odaDxf} onChange={(event) => setParams((prev) => ({ ...prev, odaDxf: event.target.checked }))} /> 打不开 DWG 时改存成 DXF</label>
-                <p className="help">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>
-              </div>
-              <div className="card">
-                <h2>界面</h2>
-                <p className="help">只改这个窗口的颜色。</p>
-                <label className="row"><input type="radio" name="set-theme" checked={theme === "light"} onChange={() => setTheme("light")} /> 浅色</label>
-                <label className="row"><input type="radio" name="set-theme" checked={theme === "dark"} onChange={() => setTheme("dark")} /> 深色</label>
-              </div>
-              <div className="card">
-                <h2>版本和更新</h2>
-                <p className="help">图译 {appVersion || updateInfo?.current || "—"}。词汇库在单独一页改。</p>
-                <div className="field">ODA <span>{oda.installed ? "已装" : "未装"}</span></div>
-                <div className="field">
-                  <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
-                  <button type="button" className="tbtn ghost" onClick={openGlossary}>词汇库</button>
-                </div>
-                {updateMsg && <p className="help">{updateMsg}</p>}
-                {updateInfo?.available && (
-                  <p className="help">有新版本 {updateInfo.latest}。点检查更新会开那一页。</p>
-                )}
-              </div>
+                    <p className="help">图译 {appVersion || updateInfo?.current || "—"} · ODA {oda.installed ? "已装" : "未装"}</p>
+                    {updateMsg && <p className="help">{updateMsg}</p>}
+                    {updateInfo?.available && (
+                      <p className="help">有新版本 {updateInfo.latest}。</p>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </section>
         </div>
