@@ -3,33 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=1280, height=800" />
-  <meta name="theme-color" content="#0b0f14" />
-  <title>F · Converter Pro 左右栏 · 图译</title>
+  <meta name="theme-color" content="#f4f7fb" />
+  <title>F 浅 · Converter Pro 左右栏 · 图译</title>
   <style>
     /* Plus: Application UI sidebar layout (narrow rail + stacked header)
        + two-column settings form.
-       Recolor: Converter Pro tokens (dark #0b0f14, accent #3d9cf0, Segoe).
+       Recolor: Converter Pro light tokens (#f4f7fb, accent #1d7ed8, Segoe).
        Native titlebar once — no second lights. No hero, no stat cards. */
     :root {
-      --bg: #0b0f14;
-      --elev: #121821;
-      --soft: #182131;
-      --border: #273246;
-      --text: #e8eef7;
-      --muted: #8b9bb3;
-      --accent: #3d9cf0;
-      --accent-2: #2dd4bf;
-      --on-accent: #041018;
-      --ok: #3dd68c;
-      --warn: #f5a524;
-      --danger: #f07178;
+      --bg: #f4f7fb;
+      --elev: #ffffff;
+      --soft: #eef3f9;
+      --border: #d5dee9;
+      --text: #142033;
+      --muted: #5b6b82;
+      --accent: #1d7ed8;
+      --accent-2: #0f9f8a;
+      --on-accent: #ffffff;
+      --ok: #1a9a5c;
+      --warn: #c47d08;
+      --danger: #d64550;
       --red: #ff5f57;
       --yel: #febc2e;
       --grn: #28c840;
-      --drop: #3a4b66;
+      --drop: #b7c5d8;
       --ease: cubic-bezier(0.23, 1, 0.32, 1);
-      --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-      color-scheme: dark;
+      --shadow: 0 14px 40px rgba(20, 40, 80, 0.1);
+      color-scheme: light;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -37,7 +37,7 @@
       width: 1280px;
       height: 800px;
       overflow: hidden;
-      background: #070b10;
+      background: #e8eef4;
       color: var(--text);
       font: 13px/1.35 "Segoe UI", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
       letter-spacing: 0;
@@ -68,7 +68,7 @@
       flex-direction: column;
       background: var(--bg);
       border-radius: 10px;
-      box-shadow: var(--shadow), 0 0 0 0.5px #1c2736;
+      box-shadow: var(--shadow), 0 0 0 0.5px #c9d4e3;
       overflow: hidden;
     }
 
@@ -79,7 +79,7 @@
       display: grid;
       grid-template-columns: 78px 1fr 78px;
       align-items: center;
-      background: color-mix(in srgb, var(--elev) 88%, #000);
+      background: color-mix(in srgb, var(--elev) 92%, #dce4ee);
       border-bottom: 1px solid var(--border);
     }
     .lights {
@@ -548,7 +548,7 @@
       padding: 0 12px;
       font-size: 11px;
       color: var(--muted);
-      background: color-mix(in srgb, var(--elev) 80%, #000);
+      background: color-mix(in srgb, var(--elev) 88%, #dce4ee);
       border-top: 1px solid var(--border);
     }
     .foot b { color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; }
