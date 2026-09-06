@@ -152,12 +152,12 @@ export default function App() {
     dims: true,
     model: true,
     paper: true,
-    frozen: false,
-    locked: false,
-    off: false,
-    filename: false,
+    frozen: true,
+    locked: true,
+    off: true,
+    filename: true,
     glossary: true,
-    blocks: false,
+    blocks: true,
     tree: true,
     odaDxf: true,
   });
@@ -1412,21 +1412,20 @@ export default function App() {
                 <label className="row" title="已经是目标语言或夹杂别的文字，先跳过"><input type="checkbox" checked={filters.nonsource} onChange={(event) => setFilters((prev) => ({ ...prev, nonsource: event.target.checked }))} /> 不是原文那种语言</label>
                 <label className="row" title="勾上后，这张图会先查词汇库"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查词汇库</label>
               </div>
-              <div className="card">
-                <h2>从哪里取字</h2>
-                <label className="row"><input type="checkbox" checked={params.attribs} onChange={(event) => setParams((prev) => ({ ...prev, attribs: event.target.checked }))} /> 块属性</label>
-                <label className="row"><input type="checkbox" checked={params.blocks} onChange={(event) => setParams((prev) => ({ ...prev, blocks: event.target.checked }))} /> 块里的字</label>
-                <label className="row"><input type="checkbox" checked={params.dims} onChange={(event) => setParams((prev) => ({ ...prev, dims: event.target.checked }))} /> 标注、表格</label>
-                <label className="row"><input type="checkbox" checked={params.model} onChange={(event) => setParams((prev) => ({ ...prev, model: event.target.checked }))} /> 模型空间</label>
-                <label className="row"><input type="checkbox" checked={params.paper} onChange={(event) => setParams((prev) => ({ ...prev, paper: event.target.checked }))} /> 图纸空间</label>
-                <label className="row" title="输出文件名里的中文也一起译"><input type="checkbox" checked={params.filename} onChange={(event) => setParams((prev) => ({ ...prev, filename: event.target.checked }))} /> 文件名也一起译</label>
-              </div>
-              <div className="card">
-                <h2>图层</h2>
-                <p className="help">图层关掉或冻住以后，图上看不见。默认不译那些字。要译就勾上。</p>
-                <label className="row" title="冻住的图层在图上看不见"><input type="checkbox" checked={params.frozen} onChange={(event) => setParams((prev) => ({ ...prev, frozen: event.target.checked }))} /> 冻住看不见的图层</label>
-                <label className="row" title="锁住的图层改不了"><input type="checkbox" checked={params.locked} onChange={(event) => setParams((prev) => ({ ...prev, locked: event.target.checked }))} /> 锁住改不了的图层</label>
-                <label className="row" title="关掉的图层藏起来了"><input type="checkbox" checked={params.off} onChange={(event) => setParams((prev) => ({ ...prev, off: event.target.checked }))} /> 关掉藏起来的图层</label>
+              <div className="card wide">
+                <details>
+                  <summary>少用的</summary>
+                  <p className="help">图上的字默认全拿来译，包括看不见的图层。一般不用改。</p>
+                  <label className="row"><input type="checkbox" checked={params.attribs} onChange={(event) => setParams((prev) => ({ ...prev, attribs: event.target.checked }))} /> 块属性</label>
+                  <label className="row"><input type="checkbox" checked={params.blocks} onChange={(event) => setParams((prev) => ({ ...prev, blocks: event.target.checked }))} /> 块里的字</label>
+                  <label className="row"><input type="checkbox" checked={params.dims} onChange={(event) => setParams((prev) => ({ ...prev, dims: event.target.checked }))} /> 标注、表格</label>
+                  <label className="row"><input type="checkbox" checked={params.model} onChange={(event) => setParams((prev) => ({ ...prev, model: event.target.checked }))} /> 模型空间</label>
+                  <label className="row"><input type="checkbox" checked={params.paper} onChange={(event) => setParams((prev) => ({ ...prev, paper: event.target.checked }))} /> 图纸空间</label>
+                  <label className="row" title="输出文件名里的中文也一起译"><input type="checkbox" checked={params.filename} onChange={(event) => setParams((prev) => ({ ...prev, filename: event.target.checked }))} /> 文件名也一起译</label>
+                  <label className="row" title="冻住的图层在图上看不见"><input type="checkbox" checked={params.frozen} onChange={(event) => setParams((prev) => ({ ...prev, frozen: event.target.checked }))} /> 冻住看不见的图层</label>
+                  <label className="row" title="锁住的图层改不了"><input type="checkbox" checked={params.locked} onChange={(event) => setParams((prev) => ({ ...prev, locked: event.target.checked }))} /> 锁住改不了的图层</label>
+                  <label className="row" title="关掉的图层藏起来了"><input type="checkbox" checked={params.off} onChange={(event) => setParams((prev) => ({ ...prev, off: event.target.checked }))} /> 关掉藏起来的图层</label>
+                </details>
               </div>
               <div className="card">
                 <h2>批量怎么放</h2>

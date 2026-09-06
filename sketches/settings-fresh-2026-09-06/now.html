@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>现状</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; font: 13px/1.35 "Segoe UI", "PingFang SC", system-ui; background: #e8eef4; color: #142033; }
+    button, input, select { font: inherit; }
+    .win { width: 1280px; height: 800px; display: flex; flex-direction: column; background: #f4f7fb; }
+    .tb { height: 36px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #d5dee9; }
+    .page { flex: 1; overflow: auto; padding: 16px 22px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { background: #fff; border: 1px solid #d5dee9; border-radius: 10px; padding: 10px 14px; }
+    .card.wide { grid-column: 1 / -1; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    h2 { font-size: 15px; margin: 0 0 6px; }
+    p { color: #5b6b82; margin: 0 0 8px; }
+    label { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid #d5dee9; }
+  </style>
+</head>
+<body>
+  <div class="win">
+    <div class="tb"><button type="button">返回</button></div>
+    <div class="page">
+      <h1>设置</h1>
+      <div class="grid">
+        <div class="card"><h2>用哪里翻译</h2><p>网上翻译 / 自己配接口 / 不联网</p><label><input type="radio" checked /> 网上翻译</label></div>
+        <div class="card"><h2>图纸上怎么写</h2><label><input type="radio" checked /> 只留译文</label></div>
+        <div class="card"><h2>界面</h2><label><input type="radio" /> 浅色</label></div>
+        <div class="card"><h2>版本和更新</h2><button type="button">检查更新</button></div>
+        <div class="card wide"><p>取字、图层现在收在「少用的」。默认全译。</p></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

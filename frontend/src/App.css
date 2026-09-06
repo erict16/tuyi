@@ -498,6 +498,14 @@ td input[type="text"]:focus {
   border-radius: 10px;
   padding: 4px 14px 10px;
 }
+.card.wide { grid-column: 1 / -1; }
+.card summary {
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 13px;
+  padding: 10px 0 6px;
+  color: var(--text);
+}
 .card h2 {
   margin: 10px 0 4px;
   font-size: 11px;

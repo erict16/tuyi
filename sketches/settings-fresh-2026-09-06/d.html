@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>方案 D · 一张纸</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; font: 16px/1.5 "Iowan Old Style", "Songti SC", "Source Han Serif SC", serif; background: #cfc6b4; color: #2a2418; }
+    button, input { font: inherit; }
+    .win { width: 1280px; height: 800px; display: flex; flex-direction: column; background: #e8dfcc; }
+    .tb { height: 36px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #d3c7ae; font-family: -apple-system, sans-serif; font-size: 12px; }
+    .page { flex: 1; overflow: auto; }
+    .paper { width: 640px; margin: 24px auto; background: #f7f1e4; padding: 36px 44px 48px; box-shadow: 0 8px 24px rgba(80,60,30,.12); }
+    h1 { font-size: 28px; font-weight: 600; margin: 0 0 6px; }
+    .lead { color: #6b614e; font-size: 14px; margin: 0 0 28px; }
+    h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: none; margin: 22px 0 8px; color: #6b614e; font-family: -apple-system, sans-serif; }
+    label { display: block; padding: 6px 0; }
+    .line { display: flex; gap: 10px; align-items: center; margin: 8px 0 0; font-family: -apple-system, sans-serif; font-size: 13px; }
+    .line input { flex: 1; height: 32px; border: 0; border-bottom: 1px solid #c4b79a; background: transparent; }
+    button.ink { border: 1px solid #2a2418; background: transparent; height: 32px; padding: 0 12px; }
+  </style>
+</head>
+<body>
+  <div class="win">
+    <div class="tb"><button type="button" style="border:0;background:none">返回</button></div>
+    <div class="page">
+      <div class="paper">
+        <h1>设置</h1>
+        <p class="lead">图上的字一律拿来译。没有图层选项。</p>
+        <h2>怎么译</h2>
+        <label><input type="radio" name="e" checked /> 网上翻译</label>
+        <label><input type="radio" name="e" /> 自己配接口</label>
+        <div class="line">密钥 <input type="password" placeholder="没有就空着" /></div>
+        <h2>写回图里</h2>
+        <label><input type="radio" name="l" checked /> 只留译文</label>
+        <label><input type="radio" name="l" /> 原文和译文都留</label>
+        <h2>窗口</h2>
+        <label><input type="radio" name="t" /> 浅色</label>
+        <label><input type="radio" name="t" checked /> 深色</label>
+        <h2>还有</h2>
+        <div class="line">
+          <button type="button" class="ink">打开词汇库</button>
+          <button type="button" class="ink">检查更新</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
