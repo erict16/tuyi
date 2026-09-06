@@ -4,9 +4,7 @@
   <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
 </p>
 
-<h1 align="center">图译 Tuyi</h1>
-
-<p align="center">A powerful, open-source DWG translator</p>
+<h1 align="center">图译 Tuyi - A powerful, open-source DWG/DXF translator</h1>
 
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
@@ -23,27 +21,27 @@ Open a DWG or DXF. Translate the text. Get a new file. The original stays put. N
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>Home</h3>
-      <img src="docs/screenshots/home.png" alt="Add a drawing on the left, translate at the bottom">
+      <img src="docs/screenshots/ui-home.png" alt="Add a drawing on the left, translate at the bottom">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Glossary</h3>
-      <img src="docs/screenshots/glossary.png" alt="Your terms hit first">
+      <img src="docs/screenshots/ui-glossary.png" alt="Your terms hit first">
     </td>
   </tr>
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>Settings</h3>
-      <img src="docs/screenshots/settings.png" alt="Cloud translate or your own endpoint">
+      <img src="docs/screenshots/ui-settings.png" alt="Cloud translate or your own endpoint">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>On the drawing</h3>
-      <img src="docs/screenshots/appearance.png" alt="Keep translation only, or keep both">
+      <img src="docs/screenshots/ui-write.png" alt="Keep translation only, or keep both">
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
       <h3>Dark</h3>
-      <img src="docs/screenshots/dark.png" width="860" alt="Dark mode, including the system titlebar">
+      <img src="docs/screenshots/ui-dark.png" width="860" alt="Dark mode, including the system titlebar">
     </td>
   </tr>
 </table>

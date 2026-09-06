@@ -4,9 +4,7 @@
   <img src="docs/icons/app-rounded.png" width="128" alt="图译">
 </p>
 
-<h1 align="center">图译</h1>
-
-<p align="center">强大且开源的 DWG 翻译工具</p>
+<h1 align="center">图译 Tuyi - 强大且开源的 DWG/DXF 翻译工具</h1>
 
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
@@ -23,27 +21,27 @@
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>主界面</h3>
-      <img src="docs/screenshots/home.png" alt="左边加图纸，底下点翻译">
+      <img src="docs/screenshots/ui-home.png" alt="左边加图纸，底下点翻译">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>词汇库</h3>
-      <img src="docs/screenshots/glossary.png" alt="自己的词先命中">
+      <img src="docs/screenshots/ui-glossary.png" alt="自己的词先命中">
     </td>
   </tr>
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>设置</h3>
-      <img src="docs/screenshots/settings.png" alt="网上翻译或自己配接口">
+      <img src="docs/screenshots/ui-settings.png" alt="网上翻译或自己配接口">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>图上怎么写</h3>
-      <img src="docs/screenshots/appearance.png" alt="图纸上只留译文，或原文译文都留">
+      <img src="docs/screenshots/ui-write.png" alt="图纸上只留译文，或原文译文都留">
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
       <h3>深色</h3>
-      <img src="docs/screenshots/dark.png" width="860" alt="深色模式，系统标题栏一起变暗">
+      <img src="docs/screenshots/ui-dark.png" width="860" alt="深色模式，系统标题栏一起变暗">
     </td>
   </tr>
 </table>
