@@ -11,7 +11,7 @@ from pathlib import Path
 
 import uvicorn
 
-from desktop.native_bridge import NativeBridge
+from desktop.native_bridge import NativeBridge, apply_chrome_theme, read_saved_dark
 from backend.api import API_PORT, FRONTEND_DIST, app, service
 from backend.app_meta import APP_TITLE, APP_VERSION
 from backend.cad import unmount_embedded_odafc
@@ -46,6 +46,7 @@ def _prepare_macos_gui() -> None:
         # 0 = NSApplicationActivationPolicyRegular
         NSApp.setActivationPolicy_(0)
         NSApp.activateIgnoringOtherApps_(True)
+        apply_chrome_theme(read_saved_dark())
         _log("macos gui: activation policy regular")
     except Exception:
         _log("macos gui prepare failed:\n" + traceback.format_exc())
@@ -156,6 +157,7 @@ def _run_web_app():
         webview.settings["DRAG_REGION_DIRECT_TARGET_ONLY"] = True
 
     bridge = NativeBridge()
+    dark = read_saved_dark()
     # Borderless NSWindow on recent macOS can never become key, so Finder
     # "opens" the app and you get a Dock icon with zero windows. Use a
     # normal titled window on Mac. Windows keeps the frameless shell.
@@ -168,17 +170,37 @@ def _run_web_app():
         min_size=(1024, 680),
         resizable=True,
         transparent=False,
-        background_color="#e8e8ed",
+        background_color="#0e141c" if dark else "#e8e8ed",
         frameless=not mac,
         easy_drag=False,
         shadow=True,
     )
+    apply_chrome_theme(dark)
 
-    window.events.loaded += lambda: threading.Timer(0.6, _enable_windows_acrylic).start()
+    def _on_loaded():
+        dark_now = read_saved_dark()
+        try:
+            stored = window.evaluate_js("localStorage.getItem('tuyi-theme')")
+            if stored == "dark":
+                dark_now = True
+            elif stored == "light":
+                dark_now = False
+        except Exception:
+            pass
+        apply_chrome_theme(dark_now)
+        if sys.platform == "win32":
+            threading.Timer(0.6, _enable_windows_acrylic).start()
+            threading.Timer(0.8, lambda: apply_chrome_theme(read_saved_dark())).start()
+
+    window.events.loaded += _on_loaded
     window.events.closing += lambda *_: service.shutdown()
     _prepare_macos_gui()
     _log("starting webview")
-    webview.start(gui="cocoa" if mac else _webview_gui())
+
+    def _on_gui_ready():
+        apply_chrome_theme(read_saved_dark())
+
+    webview.start(_on_gui_ready, gui="cocoa" if mac else _webview_gui())
     service.shutdown()
     unmount_embedded_odafc()
     os._exit(0)

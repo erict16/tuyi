@@ -224,7 +224,10 @@ export default function App() {
     try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    py()?.set_chrome_theme?.(theme === "dark");
+    const paint = () => py()?.set_chrome_theme?.(theme === "dark");
+    paint();
+    window.addEventListener("pywebviewready", paint);
+    return () => window.removeEventListener("pywebviewready", paint);
   }, [theme]);
 
   useEffect(() => {

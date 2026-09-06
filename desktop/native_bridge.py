@@ -8,6 +8,123 @@ from pathlib import Path
 
 import webview
 
+THEME_FILE = Path.home() / ".tuyi_theme"
+
+
+def _as_dark(value) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "dark", "yes"}
+    return bool(value)
+
+
+def read_saved_dark() -> bool:
+    try:
+        return THEME_FILE.read_text(encoding="utf-8").strip() == "dark"
+    except OSError:
+        return False
+
+
+def _paint_macos(dark: bool) -> None:
+    from AppKit import NSAppearance, NSApp, NSColor
+
+    name = "NSAppearanceNameDarkAqua" if dark else "NSAppearanceNameAqua"
+    appearance = NSAppearance.appearanceNamed_(name)
+    if dark:
+        bg = NSColor.colorWithCalibratedRed_green_blue_alpha_(0.055, 0.078, 0.110, 1.0)
+    else:
+        bg = NSColor.colorWithCalibratedRed_green_blue_alpha_(0.910, 0.910, 0.929, 1.0)
+    NSApp.setAppearance_(appearance)
+    windows = list(NSApp.windows() or [])
+    try:
+        import webview
+
+        for item in webview.windows:
+            native = getattr(item, "native", None)
+            if native is not None and native not in windows:
+                windows.append(native)
+    except Exception:
+        pass
+
+    def walk(view) -> None:
+        if view is None:
+            return
+        try:
+            view.setAppearance_(appearance)
+        except Exception:
+            pass
+        try:
+            subs = view.subviews()
+        except Exception:
+            return
+        for sub in list(subs or []):
+            walk(sub)
+
+    for window in windows:
+        try:
+            window.setAppearance_(appearance)
+        except Exception:
+            pass
+        try:
+            window.setBackgroundColor_(bg)
+        except Exception:
+            pass
+        try:
+            window.setTitlebarAppearsTransparent_(False)
+        except Exception:
+            pass
+        try:
+            walk(window.contentView())
+        except Exception:
+            pass
+        try:
+            window.displayIfNeeded()
+        except Exception:
+            pass
+
+
+def apply_chrome_theme(dark: bool = False) -> dict:
+    """Paint the OS titlebar. AppKit / DWM must run on the GUI thread."""
+    dark = _as_dark(dark)
+    try:
+        THEME_FILE.write_text("dark" if dark else "light", encoding="utf-8")
+    except OSError:
+        pass
+    if sys.platform == "darwin":
+        try:
+            from Foundation import NSOperationQueue, NSThread
+
+            if NSThread.isMainThread():
+                _paint_macos(dark)
+            else:
+                NSOperationQueue.mainQueue().addOperationWithBlock_(lambda: _paint_macos(dark))
+                try:
+                    _paint_macos(dark)
+                except Exception:
+                    pass
+        except Exception:
+            try:
+                _paint_macos(dark)
+            except Exception:
+                return {"ok": False}
+        return {"ok": True}
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            from backend.app_meta import APP_TITLE, APP_VERSION
+
+            user32 = ctypes.windll.user32
+            hwnd = user32.FindWindowW(None, f"{APP_TITLE} v{APP_VERSION}")
+            if not hwnd:
+                return {"ok": False}
+            value = wintypes.BOOL(1 if dark else 0)
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(value), ctypes.sizeof(value))
+        except Exception:
+            return {"ok": False}
+        return {"ok": True}
+    return {"ok": True}
+
 
 class NativeBridge:
     @staticmethod
@@ -57,37 +174,7 @@ class NativeBridge:
         return {"path": path or ""}
 
     def set_chrome_theme(self, dark: bool = False) -> dict:
-        """Match the OS titlebar to the in-app light/dark theme."""
-        dark = bool(dark)
-        if sys.platform == "darwin":
-            try:
-                from AppKit import NSAppearance, NSApp
-
-                name = "NSAppearanceNameDarkAqua" if dark else "NSAppearanceNameAqua"
-                appearance = NSAppearance.appearanceNamed_(name)
-                NSApp.setAppearance_(appearance)
-                for window in NSApp.windows():
-                    window.setAppearance_(appearance)
-            except Exception:
-                return {"ok": False}
-            return {"ok": True}
-        if sys.platform == "win32":
-            try:
-                import ctypes
-                from ctypes import wintypes
-
-                from backend.app_meta import APP_TITLE, APP_VERSION
-
-                user32 = ctypes.windll.user32
-                hwnd = user32.FindWindowW(None, f"{APP_TITLE} v{APP_VERSION}")
-                if not hwnd:
-                    return {"ok": False}
-                value = wintypes.BOOL(1 if dark else 0)
-                ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(value), ctypes.sizeof(value))
-            except Exception:
-                return {"ok": False}
-            return {"ok": True}
-        return {"ok": True}
+        return apply_chrome_theme(dark)
 
     def open_url(self, url: str) -> dict:
         if not url or not url.startswith(("https://", "http://")):

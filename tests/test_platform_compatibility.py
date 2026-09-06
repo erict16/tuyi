@@ -11,6 +11,7 @@ from backend import cad
 from backend.api import system_accent_theme
 from desktop.launcher import _webview_gui
 from desktop.native_bridge import NativeBridge
+from desktop import native_bridge as native_bridge_mod
 from backend.api import TranslationService, service
 from backend.app_meta import DROPPED_FILES_DIR, LEGACY_DROPPED_FILES_DIR, migrate_legacy_dir
 
@@ -129,6 +130,17 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertEqual(data[25], 6)  # IHDR color type RGBA
         readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
         self.assertIn("docs/icons/app-rounded.png", readme)
+        self.assertIn('width="860"', readme)
+        self.assertIn('width="430"', readme)
+        self.assertIn("docs/screenshots/appearance.png", readme)
+        self.assertIn("docs/screenshots/settings.png", readme)
+        self.assertIn("docs/screenshots/dark.png", readme)
+        from PIL import Image
+
+        for name in ("home.png", "settings.png", "appearance.png", "dark.png"):
+            shot = Path(__file__).resolve().parents[1] / "docs" / "screenshots" / name
+            px = Image.open(shot).convert("RGB").getpixel((0, 0))
+            self.assertGreater(sum(px), 80, name)
 
     def test_release_workflows_use_app_version_and_tag_only(self):
         root = Path(__file__).resolve().parents[1]
@@ -153,7 +165,18 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("unittest discover", ci)
         self.assertIn("npm run build", ci)
         self.assertIn("PYTHONUTF8", ci)
-        self.assertIn("set_chrome_theme", (root / "desktop" / "native_bridge.py").read_text(encoding="utf-8"))
+        bridge = (root / "desktop" / "native_bridge.py").read_text(encoding="utf-8")
+        launch = (root / "desktop" / "launcher.py").read_text(encoding="utf-8")
+        self.assertIn("set_chrome_theme", bridge)
+        self.assertIn("NSAppearanceNameDarkAqua", bridge)
+        self.assertIn("setBackgroundColor_", bridge)
+        self.assertIn("NSThread.isMainThread", bridge)
+        self.assertIn("addOperationWithBlock_", bridge)
+        self.assertIn("apply_chrome_theme", launch)
+        self.assertIn("read_saved_dark", launch)
+        self.assertIn("NSRequiresAquaSystemAppearance", (root / "Dwglot_macos.spec").read_text(encoding="utf-8"))
+        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        self.assertIn("pywebviewready", ui)
         self.assertIn("windows-latest", ci)
         self.assertIn("macos-latest", ci)
         self.assertIn("requirements-macos.txt", ci)
@@ -212,6 +235,17 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_development_app_dir_is_repository_root(self):
         self.assertEqual(cad.get_app_dir(), Path(__file__).resolve().parents[1])
+
+    def test_chrome_theme_persists_without_gui(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "theme"
+            with patch.object(native_bridge_mod, "THEME_FILE", path), patch.object(native_bridge_mod.sys, "platform", "linux"):
+                self.assertFalse(native_bridge_mod.read_saved_dark())
+                self.assertTrue(native_bridge_mod.apply_chrome_theme(True)["ok"])
+                self.assertEqual(path.read_text(encoding="utf-8"), "dark")
+                self.assertTrue(native_bridge_mod.read_saved_dark())
+                native_bridge_mod.apply_chrome_theme("light")
+                self.assertFalse(native_bridge_mod.read_saved_dark())
 
     def test_cad_picker_is_dwg_dxf_and_multiple(self):
         root = Path(__file__).resolve().parents[1]

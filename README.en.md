@@ -16,10 +16,22 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="920" alt="Tuyi: add a drawing on the left, translate at the bottom">
+  <img src="docs/screenshots/home.png" width="860" alt="Tuyi: add a drawing on the left, translate at the bottom">
 </p>
 
 Open a DWG or DXF. Translate the text. Get a new file. The original stays put. No AutoCAD. Windows and Mac.
+
+## Features
+
+- **Strong:** titles, notes, attributes, dimensions, table text. Translate writes a new drawing
+- **Open:** MIT. Your keys stay yours. Tuyi has no accounts
+- **Simple:** drop files on the left, translate at the bottom. Engines live in 设置
+- **Steady:** glossary hits skip the API. Light / dark. Original files stay read-only
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" width="430" alt="Settings: cloud or your own endpoint">
+  <img src="docs/screenshots/appearance.png" width="430" alt="Appearance: light or dark">
+</p>
 
 ## Install
 
@@ -43,7 +55,7 @@ DXF works out of the box. DWG needs [ODA File Converter](https://www.opendesign.
 4. Keys and layout live in **设置**. Your word list is **词汇库**.
 
 <p align="center">
-  <img src="docs/screenshots/dark.png" width="920" alt="Tuyi in dark mode">
+  <img src="docs/screenshots/dark.png" width="860" alt="Tuyi in dark mode">
 </p>
 
 ## License

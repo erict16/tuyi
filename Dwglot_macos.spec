@@ -197,6 +197,7 @@ app = BUNDLE(
         "CFBundleShortVersionString": app_version,
         "CFBundleVersion": app_version,
         "NSHighResolutionCapable": True,
+        "NSRequiresAquaSystemAppearance": False,
         "LSMinimumSystemVersion": "11.0",
         # PyInstaller windowed bootloader writes LSBackgroundOnly=1.
         # That makes Launch Services treat 图译 as a faceless agent: Dock

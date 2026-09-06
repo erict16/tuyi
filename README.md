@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="920" alt="图译主界面：左边加图纸，底下点翻译">
+  <img src="docs/screenshots/home.png" width="860" alt="图译主界面：左边加图纸，底下点翻译">
 </p>
 
 打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
@@ -29,7 +29,8 @@
 - **稳**：词汇库对上的词不走接口。浅色 / 深色。原文件只读
 
 <p align="center">
-  <img src="docs/screenshots/settings.png" width="920" alt="设置：网上翻译或自己配接口">
+  <img src="docs/screenshots/settings.png" width="430" alt="设置：网上翻译或自己配接口">
+  <img src="docs/screenshots/appearance.png" width="430" alt="外观：浅色或深色">
 </p>
 
 ## 安装
@@ -54,7 +55,7 @@
 4. 密钥、「图上只留译文还是都留」在 **设置**。自己的词在 **词汇库**
 
 <p align="center">
-  <img src="docs/screenshots/dark.png" width="920" alt="图译深色模式">
+  <img src="docs/screenshots/dark.png" width="860" alt="图译深色模式">
 </p>
 
 ## 谁来译
