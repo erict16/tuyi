@@ -1137,10 +1137,6 @@ export default function App() {
           </>
         ) : (
           <>
-            <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
-              <i className="spin" aria-hidden="true" />
-              <span className="go-label">{translating ? "正在译…" : "翻译"}</span>
-            </button>
             {files.length > 1 && (
               <button
                 type="button"
@@ -1204,6 +1200,12 @@ export default function App() {
                 ))}
               </div>
             )}
+            <div className="rail-go">
+              <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
+                <i className="spin" aria-hidden="true" />
+                <span className="go-label">{translating ? "正在译…" : "翻译"}</span>
+              </button>
+            </div>
           </aside>
           <div
             className="split"
@@ -1240,7 +1242,9 @@ export default function App() {
                   </select>
                 </div>
               </div>
-              <div className="status" aria-live="polite">{status}</div>
+              {files.length > 0 && (
+                <div className="status" aria-live="polite">{status}</div>
+              )}
               {current ? (
                 <>
                   <div className="table">
@@ -1697,7 +1701,6 @@ export default function App() {
 
       <footer className={footBusy ? "foot checking" : "foot"}>
         <span className="live">{oda.installed ? "ODA 已装" : "没装 ODA · 先用 DXF"}</span>
-        <span className="msg" aria-live="polite">{status}</span>
         <span className="end">
           <span className="spin" aria-hidden="true" />
           {updateInfo?.available && view !== "update" && (

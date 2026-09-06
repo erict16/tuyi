@@ -138,18 +138,19 @@ button { appearance: none; border: 0; background: none; cursor: default; }
 .pair {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 select.mini, .pair select {
-  height: 26px;
+  height: 32px;
   border: 1px solid var(--border);
   background: var(--soft);
   color: var(--text);
-  border-radius: 6px;
-  padding: 0 6px;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -188,6 +189,18 @@ select.mini, .pair select {
   background: var(--elev);
   border-right: 1px solid var(--border);
 }
+.rail-go {
+  flex: none;
+  padding: 8px 12px 12px;
+}
+.rail-go .go {
+  width: 100%;
+  height: 36px;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
 .drop {
   display: flex;
   flex-direction: column;
@@ -195,7 +208,7 @@ select.mini, .pair select {
   justify-content: center;
   gap: 8px;
   flex: 1;
-  margin: 12px;
+  margin: 12px 12px 8px;
   min-height: 0;
   text-align: center;
   border: 1.5px dashed var(--drop);
@@ -305,8 +318,8 @@ select.mini, .pair select {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px 0;
+  gap: 10px;
+  padding: 14px 16px 0;
 }
 .go {
   height: 24px;
@@ -346,14 +359,14 @@ select.mini, .pair select {
 
 .status {
   flex: none;
-  margin: 8px 12px 0;
-  padding: 8px 10px;
+  margin: 10px 16px 0;
+  padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: color-mix(in srgb, var(--elev) 88%, transparent);
   color: var(--text);
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .chips {
