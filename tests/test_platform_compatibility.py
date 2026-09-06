@@ -212,6 +212,19 @@ class PlatformCompatibilityTests(unittest.TestCase):
     def test_development_app_dir_is_repository_root(self):
         self.assertEqual(cad.get_app_dir(), Path(__file__).resolve().parents[1])
 
+    def test_cad_picker_is_dwg_dxf_and_multiple(self):
+        root = Path(__file__).resolve().parents[1]
+        bridge = (root / "desktop" / "native_bridge.py").read_text(encoding="utf-8")
+        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        self.assertIn('file_types=("图纸 (*.dwg;*.dxf)",)', bridge)
+        self.assertIn("multiple=True", bridge)
+        self.assertIn('accept=".dwg,.dxf"', ui)
+        self.assertIn("multiple hidden", ui)
+        self.assertIn("onClick={openDrawings}", ui)
+        self.assertIn("自己配接口", ui)
+        self.assertNotIn(">这台电脑<", ui)
+        self.assertNotIn("自己的接口", ui)
+
     def test_frontend_ui_keeps_windows_lights_and_mac_native_bar(self):
         root = Path(__file__).resolve().parents[1]
         ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")

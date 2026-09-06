@@ -1,0 +1,48 @@
+/* Plus: Application UI two-column settings / stacked list / sidebar.
+   Recolor: F-light tokens. */
+@import "../glossary-2026-09-06/_win.css";
+
+.set-page { flex: 1; min-height: 0; overflow: auto; padding: 16px 22px 28px; }
+.set-h { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.set-h h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -0.03em; }
+.set-h p { margin: 0; color: var(--muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card {
+  background: var(--elev);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 14px 12px;
+}
+.card.wide { grid-column: 1 / -1; }
+.card h2 { margin: 10px 0 4px; font-size: 15px; font-weight: 650; color: var(--text); }
+.card .help { margin: 0 0 8px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.card label.row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; font-size: 13px;
+  border-bottom: 1px solid var(--border); color: var(--text);
+}
+.card label.row:last-of-type { border-bottom: 0; }
+.field { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+.field input, .field select {
+  flex: 1; min-width: 0; height: 28px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--soft); padding: 0 8px;
+}
+.col { display: flex; flex-direction: column; gap: 14px; max-width: 560px; }
+.q { margin: 0 0 6px; font-size: 16px; font-weight: 650; }
+.ask { background: var(--elev); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+details.block {
+  background: var(--elev); border: 1px solid var(--border); border-radius: 10px; padding: 0 14px 8px; margin-bottom: 8px;
+}
+details.block summary {
+  cursor: pointer; font-weight: 650; font-size: 15px; padding: 12px 0;
+}
+.split { display: grid; grid-template-columns: 168px 1fr; min-height: 0; flex: 1; }
+.side { padding: 10px 8px; border-right: 1px solid var(--border); background: var(--elev); }
+.side button {
+  display: block; width: 100%; text-align: left; height: 32px; padding: 0 10px;
+  border-radius: 6px; font-size: 13px; margin-bottom: 2px;
+}
+.side button.on { background: color-mix(in srgb, var(--accent) 16%, transparent); font-weight: 650; }
+.pane { overflow: auto; padding: 18px 22px; }
+.drop { cursor: pointer; }

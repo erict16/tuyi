@@ -18,8 +18,8 @@ const LAYOUTS = [
 
 const ENGINES = [
   ["cloud", "网上翻译"],
-  ["local", "这台电脑"],
-  ["custom", "自己的接口"],
+  ["local", "不联网"],
+  ["custom", "自己配接口"],
 ];
 
 const THEME_KEY = "tuyi-theme";
@@ -1104,7 +1104,7 @@ export default function App() {
         )}
       </header>
 
-      <input ref={cadInput} type="file" accept=".dxf,.dwg,application/dxf" multiple hidden onChange={onCadPicked} />
+      <input ref={cadInput} type="file" accept=".dwg,.dxf" multiple hidden onChange={onCadPicked} />
       <input ref={glossaryInput} type="file" accept=".json,.csv,.txt,.hcterms.json" hidden onChange={onGlossaryPicked} />
       <input ref={tableInput} type="file" accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden onChange={onTablePicked} />
 
@@ -1118,13 +1118,17 @@ export default function App() {
             onDragLeave={() => setDropOver(false)}
             onDrop={onRailDrop}
           >
-            <div className={`drop${dropOver ? " over" : ""}`}>
+            <button
+              type="button"
+              className={`drop${dropOver ? " over" : ""}`}
+              onClick={openDrawings}
+            >
               <div>
-                <h2>把图纸拖进来</h2>
-                <p className="long">DWG、DXF 都可以，一次多张</p>
-                <p>{oda.installed ? "ODA 已装 · DWG 和 DXF 都行" : "没装 ODA · 先用 DXF"}</p>
+                <h2>把图纸拖进来，或点这里选</h2>
+                <p className="long">只认 DWG、DXF，一次可以多张</p>
+                <p>{oda.installed ? "DWG 和 DXF 都行" : "没装 ODA，先用 DXF"}</p>
               </div>
-            </div>
+            </button>
             {files.length > 0 && (
               <div className="queue">
                 {files.map((file) => (
@@ -1358,7 +1362,7 @@ export default function App() {
             <div className="set-grid">
               <div className="card">
                 <h2>用哪里翻译</h2>
-                <p className="help">网上翻译走 DeepL 或 Azure。这台电脑走本机模型。自己的接口填兼容地址。</p>
+                <p className="help">网上翻译用 DeepL 或 Azure，要密钥。自己配接口就填网址。不联网要用本机 Ollama。</p>
                 {ENGINES.map(([value, label]) => (
                   <label className="row" key={value}>
                     <input type="radio" name="set-eng" checked={engine === value} onChange={() => setEngine(value)} /> {label}
@@ -1428,7 +1432,7 @@ export default function App() {
                 <h2>批量怎么放</h2>
                 <label className="row" title="输出目录按原来的文件夹一层层放"><input type="checkbox" checked={params.tree} onChange={(event) => setParams((prev) => ({ ...prev, tree: event.target.checked }))} /> 按原来的文件夹放</label>
                 <label className="row" title="没有 ODA 时，写不出 DWG 就改成 DXF"><input type="checkbox" checked={params.odaDxf} onChange={(event) => setParams((prev) => ({ ...prev, odaDxf: event.target.checked }))} /> 打不开 DWG 时改存成 DXF</label>
-                <p className="help">{oda.installed ? "这台电脑已装 ODA。" : "没装 ODA。DWG 请先另存成 DXF。"}</p>
+                <p className="help">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>
               </div>
               <div className="card">
                 <h2>界面</h2>
@@ -1437,7 +1441,7 @@ export default function App() {
                 <label className="row"><input type="radio" name="set-theme" checked={theme === "dark"} onChange={() => setTheme("dark")} /> 深色</label>
               </div>
               <div className="card">
-                <h2>这台电脑</h2>
+                <h2>版本和更新</h2>
                 <p className="help">图译 {appVersion || updateInfo?.current || "—"}。我定的译法在单独一页改。</p>
                 <div className="field">ODA <span>{oda.installed ? "已装" : "未装"}</span></div>
                 <div className="field">

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>现状</title>
+  <link rel="stylesheet" href="_set.css" />
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <section class="set-page">
+      <div class="set-h"><h1>设置</h1><p>改完点「返回」。这里不是弹窗。</p></div>
+      <div class="grid">
+        <div class="card">
+          <h2>用哪里翻译</h2>
+          <p class="help">网上翻译走 DeepL 或 Azure。这台电脑走本机模型。自己的接口填兼容地址。</p>
+          <label class="row"><input type="radio" name="e" checked /> 网上翻译</label>
+          <label class="row"><input type="radio" name="e" /> 这台电脑</label>
+          <label class="row"><input type="radio" name="e" /> 自己的接口</label>
+        </div>
+        <div class="card">
+          <h2>图纸上怎么写</h2>
+          <p class="help">写回 CAD 时，图面上留什么字。</p>
+          <label class="row"><input type="radio" name="l" checked /> 图纸上只留译文</label>
+          <label class="row"><input type="radio" name="l" /> 原文和译文都留</label>
+        </div>
+        <div class="card">
+          <h2>不译这些</h2>
+          <label class="row"><input type="checkbox" checked /> 数字、尺寸</label>
+          <label class="row"><input type="checkbox" checked /> 重复的句子</label>
+          <label class="row"><input type="checkbox" checked /> 不是原文那种语言</label>
+          <label class="row"><input type="checkbox" checked /> 这张图用术语表</label>
+        </div>
+        <div class="card">
+          <h2>从哪里取字</h2>
+          <label class="row"><input type="checkbox" checked /> 块属性</label>
+          <label class="row"><input type="checkbox" /> 块里的字</label>
+          <label class="row"><input type="checkbox" checked /> 标注、表格</label>
+          <label class="row"><input type="checkbox" checked /> 模型空间</label>
+          <label class="row"><input type="checkbox" checked /> 图纸空间</label>
+        </div>
+        <div class="card">
+          <h2>图层</h2>
+          <p class="help">图层关掉或冻住以后，图上看不见。</p>
+          <label class="row"><input type="checkbox" /> 冻住看不见的图层</label>
+          <label class="row"><input type="checkbox" /> 锁住改不了的图层</label>
+          <label class="row"><input type="checkbox" /> 关掉藏起来的图层</label>
+        </div>
+        <div class="card">
+          <h2>这台电脑</h2>
+          <p class="help">图译 0.1.6。</p>
+          <label class="row"><input type="radio" name="t" /> 浅色</label>
+          <label class="row"><input type="radio" name="t" checked /> 深色</label>
+          <div class="field"><button type="button" class="tbtn">检查更新</button></div>
+        </div>
+      </div>
+    </section>
+    <footer class="foot"><span class="live">ODA 已装</span><span>还没打开图纸，点「打开图纸」</span></footer>
+  </div>
+</body>
+</html>

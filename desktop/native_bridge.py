@@ -36,7 +36,7 @@ class NativeBridge:
         return self.pick_cad_file()
 
     def pick_cad_file(self) -> dict:
-        paths = self._open_dialog(file_types=("CAD files (*.dxf;*.dwg)", "All files (*.*)"))
+        paths = self._open_dialog(file_types=("图纸 (*.dwg;*.dxf)",))
         path = paths[0] if paths else ""
         if not path:
             return {"path": "", "dir": "", "base": "", "ext": ""}
@@ -49,7 +49,7 @@ class NativeBridge:
         }
 
     def pick_cad_files(self) -> dict:
-        return {"paths": self._open_dialog(multiple=True, file_types=("CAD files (*.dxf;*.dwg)",))}
+        return {"paths": self._open_dialog(multiple=True, file_types=("图纸 (*.dwg;*.dxf)",))}
 
     def pick_output_dir(self) -> dict:
         paths = self._window().create_file_dialog(webview.FOLDER_DIALOG)

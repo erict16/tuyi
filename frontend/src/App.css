@@ -182,10 +182,12 @@ select.mini, .pair select {
   margin: 10px 10px 8px;
   padding: 14px 10px;
   min-height: 88px;
+  width: calc(100% - 20px);
   text-align: center;
   border: 1.5px dashed var(--drop);
   border-radius: 10px;
   background: color-mix(in srgb, var(--bg) 70%, transparent);
+  cursor: pointer;
   transition: border-color 160ms var(--ease-out), background 160ms var(--ease-out);
 }
 .drop h2 { margin: 0 0 4px; font-size: 13px; font-weight: 650; color: var(--text); }

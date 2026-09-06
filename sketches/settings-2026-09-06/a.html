@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>A · 两列，说人话</title>
+  <link rel="stylesheet" href="_set.css" />
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <section class="set-page">
+      <div class="set-h"><h1>设置</h1><p>改完点返回就行。</p></div>
+      <div class="grid">
+        <div class="card">
+          <h2>字送到哪去译</h2>
+          <p class="help">网上翻译用 DeepL 或 Azure，要密钥。自己配接口就填网址和密钥。</p>
+          <label class="row"><input type="radio" name="e" checked /> 网上翻译</label>
+          <label class="row"><input type="radio" name="e" /> 自己配接口</label>
+          <label class="row"><input type="radio" name="e" /> 不联网（本机 Ollama）</label>
+          <div class="field">网上用哪家
+            <select><option>DeepL</option><option>Azure</option></select>
+          </div>
+          <div class="field">密钥 <input type="password" value="••••••••" /></div>
+        </div>
+        <div class="card">
+          <h2>写回图里留什么</h2>
+          <p class="help">译完写回 CAD 时，图上看见哪些字。</p>
+          <label class="row"><input type="radio" name="l" checked /> 只留译文</label>
+          <label class="row"><input type="radio" name="l" /> 原文和译文都留</label>
+        </div>
+        <div class="card">
+          <h2>这些先别译</h2>
+          <p class="help">勾上的不送去翻译，表里也不出现。</p>
+          <label class="row"><input type="checkbox" checked /> 数字、尺寸</label>
+          <label class="row"><input type="checkbox" checked /> 重复的句子</label>
+          <label class="row"><input type="checkbox" checked /> 已经是外文的</label>
+          <label class="row"><input type="checkbox" checked /> 按我定的译法</label>
+        </div>
+        <div class="card">
+          <h2>从图上哪拿字</h2>
+          <label class="row"><input type="checkbox" checked /> 块上的属性</label>
+          <label class="row"><input type="checkbox" /> 块里面的字</label>
+          <label class="row"><input type="checkbox" checked /> 标注和表格</label>
+          <label class="row"><input type="checkbox" checked /> 模型里的字</label>
+          <label class="row"><input type="checkbox" checked /> 图框里的字</label>
+          <label class="row"><input type="checkbox" /> 文件名也译</label>
+        </div>
+        <div class="card">
+          <h2>看不见的图层</h2>
+          <p class="help">关掉或冻住的图层，图上看不见。默认不译。要译再勾。</p>
+          <label class="row"><input type="checkbox" /> 冻住的（看不见）</label>
+          <label class="row"><input type="checkbox" /> 锁住的（改不了）</label>
+          <label class="row"><input type="checkbox" /> 关掉的（藏起来）</label>
+        </div>
+        <div class="card">
+          <h2>颜色和更新</h2>
+          <label class="row"><input type="radio" name="t" /> 浅色</label>
+          <label class="row"><input type="radio" name="t" checked /> 深色</label>
+          <div class="field"><button type="button" class="tbtn">检查更新</button></div>
+        </div>
+      </div>
+    </section>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+</body>
+</html>
