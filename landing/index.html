@@ -135,6 +135,7 @@
         <p class="mx-auto mt-3 max-w-2xl text-center text-slate-600">标题、注释、属性、标注、表格。中、英、日、韩、德、法。网上翻译、自己配接口、或不联网。</p>
         <div class="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="界面预览">
           <button type="button" data-tab="home" aria-selected="true" class="tab on rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">主界面</button>
+          <button type="button" data-tab="glossary" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">词汇库</button>
           <button type="button" data-tab="settings" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">设置</button>
           <button type="button" data-tab="dark" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">深色</button>
         </div>
@@ -244,8 +245,8 @@
   </footer>
 
   <script>
-    const shot = { home: "shots/home.png", settings: "shots/settings.png", dark: "shots/dark.png" };
-    const alts = { home: "图译主界面：左边添加图纸", settings: "设置：网上翻译或自己配接口", dark: "图译深色模式" };
+    const shot = { home: "shots/home.png", glossary: "shots/glossary.png", settings: "shots/settings.png", dark: "shots/dark.png" };
+    const alts = { home: "图译主界面：左边添加图纸", glossary: "词汇库：自己的词先命中", settings: "设置：网上翻译或自己配接口", dark: "图译深色模式" };
     const img = document.getElementById("feature-shot");
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -261,7 +262,7 @@
         img.alt = alts[btn.dataset.tab] || "图译界面";
       });
     });
-    document.querySelector('.tab[data-tab="regular"]').setAttribute("aria-selected", "true");
+    document.querySelector('.tab[data-tab="home"]').setAttribute("aria-selected", "true");
 
     const msg = document.getElementById("dl-msg");
     const btnMac = document.getElementById("btn-mac");

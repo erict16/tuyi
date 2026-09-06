@@ -15,11 +15,38 @@
   <img alt="MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/home.png" width="860" alt="图译主界面：左边加图纸，底下点翻译">
-</p>
-
 打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
+
+## 界面
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <h3>主界面</h3>
+      <img src="docs/screenshots/home.png" alt="左边加图纸，底下点翻译">
+    </td>
+    <td align="center" valign="top" width="50%">
+      <h3>词汇库</h3>
+      <img src="docs/screenshots/glossary.png" alt="自己的词先命中">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <h3>设置</h3>
+      <img src="docs/screenshots/settings.png" alt="网上翻译或自己配接口">
+    </td>
+    <td align="center" valign="top" width="50%">
+      <h3>图上怎么写</h3>
+      <img src="docs/screenshots/appearance.png" alt="图纸上只留译文，或原文译文都留">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <h3>深色</h3>
+      <img src="docs/screenshots/dark.png" width="860" alt="深色模式，系统标题栏一起变暗">
+    </td>
+  </tr>
+</table>
 
 ## 特点
 
@@ -27,11 +54,6 @@
 - **开**：MIT 开源。密钥用你自己的，图译不建账号、不回传
 - **简**：左边拖进去，底下点翻译。网上翻译、自己配接口，都在设置里
 - **稳**：词汇库对上的词不走接口。浅色 / 深色。原文件只读
-
-<p align="center">
-  <img src="docs/screenshots/settings.png" width="430" alt="设置：网上翻译或自己配接口">
-  <img src="docs/screenshots/appearance.png" width="430" alt="外观：浅色或深色">
-</p>
 
 ## 安装
 
@@ -53,10 +75,6 @@
 2. 上面选中 → 英（或别的方向）
 3. 点 **翻译**。会写出新文件。某一行不对，可以先改
 4. 密钥、「图上只留译文还是都留」在 **设置**。自己的词在 **词汇库**
-
-<p align="center">
-  <img src="docs/screenshots/dark.png" width="860" alt="图译深色模式">
-</p>
 
 ## 谁来译
 

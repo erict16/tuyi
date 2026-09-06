@@ -130,14 +130,16 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertEqual(data[25], 6)  # IHDR color type RGBA
         readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
         self.assertIn("docs/icons/app-rounded.png", readme)
-        self.assertIn('width="860"', readme)
-        self.assertIn('width="430"', readme)
+        self.assertIn("<table>", readme)
+        self.assertIn("<h3>主界面</h3>", readme)
+        self.assertIn("<h3>词汇库</h3>", readme)
+        self.assertIn("docs/screenshots/glossary.png", readme)
         self.assertIn("docs/screenshots/appearance.png", readme)
         self.assertIn("docs/screenshots/settings.png", readme)
         self.assertIn("docs/screenshots/dark.png", readme)
         from PIL import Image
 
-        for name in ("home.png", "settings.png", "appearance.png", "dark.png"):
+        for name in ("home.png", "settings.png", "appearance.png", "dark.png", "glossary.png"):
             shot = Path(__file__).resolve().parents[1] / "docs" / "screenshots" / name
             px = Image.open(shot).convert("RGB").getpixel((0, 0))
             self.assertGreater(sum(px), 80, name)
@@ -196,6 +198,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("ODA File Converter", html)
         self.assertIn("跳到下载", html)
         self.assertIn("拖进应用程序", html)
+        self.assertIn('data-tab="glossary"', html)
+        self.assertIn("shots/glossary.png", html)
         self.assertNotIn("FAQ", html)
 
     def test_safe_log_survives_cp1252_stdout(self):
