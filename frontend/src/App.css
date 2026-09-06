@@ -25,23 +25,23 @@
 }
 
 [data-theme="dark"] {
-  --bg: #0b0f14;
-  --elev: #121821;
-  --soft: #182131;
-  --border: #273246;
-  --text: #e8eef7;
-  --muted: #8b9bb3;
-  --accent: #3d9cf0;
-  --accent-2: #2dd4bf;
+  --bg: #0e141c;
+  --elev: #182230;
+  --soft: #223044;
+  --border: #3d4f66;
+  --text: #f3f7fd;
+  --muted: #b7c4d8;
+  --accent: #5eb0f7;
+  --accent-2: #3dd6c3;
   --on-accent: #041018;
-  --ok: #3dd68c;
+  --ok: #5ee0a0;
   --warn: #f5a524;
   --danger: #f07178;
   --red: #ff5f57;
   --yel: #febc2e;
   --grn: #28c840;
-  --drop: #3a4b66;
-  --row-sel: color-mix(in srgb, var(--accent) 16%, transparent);
+  --drop: #6a7f9a;
+  --row-sel: color-mix(in srgb, var(--accent) 18%, transparent);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   color-scheme: dark;
@@ -188,8 +188,9 @@ select.mini, .pair select {
   background: color-mix(in srgb, var(--bg) 70%, transparent);
   transition: border-color 160ms var(--ease-out), background 160ms var(--ease-out);
 }
-.drop h2 { margin: 0 0 4px; font-size: 13px; font-weight: 650; }
+.drop h2 { margin: 0 0 4px; font-size: 13px; font-weight: 650; color: var(--text); }
 .drop p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.rail .hint { color: var(--muted); font-size: 12px; line-height: 1.4; }
 .drop.over, .drop:hover {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
@@ -299,7 +300,7 @@ select.mini, .pair select {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: color-mix(in srgb, var(--elev) 88%, transparent);
-  color: var(--muted);
+  color: var(--text);
   font-size: 12px;
   line-height: 1.4;
 }
@@ -463,58 +464,79 @@ td input[type="text"]:focus {
   background: var(--soft); padding: 0 8px;
 }
 
-.set {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  background: var(--bg);
-}
-.set-nav {
-  width: 168px;
-  flex: none;
-  padding: 10px 8px;
-  border-right: 1px solid var(--border);
-  background: var(--elev);
-}
-.set-nav button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  margin-bottom: 1px;
-  transition: background 160ms var(--ease-out), color 160ms var(--ease-out);
-}
-.set-nav button.on {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--text);
-  font-weight: 650;
-}
-@media (hover: hover) and (pointer: fine) {
-  .set-nav button:hover:not(.on) { background: var(--soft); }
-}
-.set-pane {
+.set-page {
   flex: 1;
   min-width: 0;
   overflow: auto;
-  padding: 18px 22px 28px;
-  animation: enter 180ms var(--ease-out);
+  padding: 16px 22px 28px;
+  background: var(--bg);
 }
-.set-pane h3 {
-  margin: 0 0 6px;
+.set-h {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.set-h h1 {
+  margin: 0;
   font-size: 20px;
   font-weight: 650;
   letter-spacing: -0.03em;
-  text-wrap: pretty;
+  text-wrap: balance;
 }
-.set-pane .lead {
-  margin: 0 0 14px;
-  font-size: 13px;
+.set-h p { margin: 0; color: var(--muted); font-size: 12px; }
+.set-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.card {
+  background: var(--elev);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 14px 10px;
+}
+.card h2 {
+  margin: 10px 0 4px;
+  font-size: 11px;
+  font-weight: 650;
   color: var(--muted);
-  line-height: 1.45;
-  max-width: 52ch;
+}
+.card p.help {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.card label.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.card label.row:last-of-type { border-bottom: 0; }
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text);
+}
+.field input[type="text"],
+.field input[type="password"],
+.field input[type="url"] {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--text);
+  padding: 0 8px;
 }
 .group {
   background: var(--elev);

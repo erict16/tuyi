@@ -236,6 +236,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("以后再说", ui)
         self.assertIn("取消这次", ui)
         self.assertIn("/api/updates/cancel", ui)
+        self.assertIn("检查更新", ui)
+        self.assertNotIn(">全部文字", ui)
         self.assertIn(".go.busy .spin", css)
         self.assertIn("prefers-reduced-motion", css)
 
