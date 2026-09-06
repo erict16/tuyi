@@ -73,6 +73,17 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("dmg-background.png", script)
         self.assertNotIn('-srcfolder", str(OUTPUT_APP)', " ".join(script.split()))
 
+    def test_changelog_leads_with_app_version(self):
+        import json
+
+        from backend.app_meta import APP_VERSION
+
+        root = Path(__file__).resolve().parents[1]
+        data = json.loads((root / "changelog.json").read_text(encoding="utf-8"))
+        self.assertEqual(data["changelog"][0]["version"], APP_VERSION)
+        pkg = json.loads((root / "frontend" / "package.json").read_text(encoding="utf-8"))
+        self.assertEqual(pkg["version"], APP_VERSION)
+
     def test_pack_keeps_uvicorn_statreload(self):
         root = Path(__file__).resolve().parents[1]
         for name in ("Dwglot.spec", "Dwglot_macos.spec"):
