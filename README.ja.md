@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icons/app.png" width="128" alt="Tuyi">
+  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
 </p>
 
 <h1 align="center">图译 Tuyi - DWG / DXF 図面翻訳</h1>
@@ -34,7 +34,7 @@ AutoCAD は不要です。
 [Releases](https://github.com/erict16/tuyi/releases) からファイルを取ってください。
 
 - **Windows:** 10 または 11、64 ビット。Setup の exe を実行。32 ビットは不可。
-- **Mac:** Apple シリコン（M1 以降）が一つの DMG。Intel Mac は別ファイル。同じパッケージではない。Intel 版はまだない。
+- **Mac:** Apple シリコン（M1 以降）が一つの DMG。Intel Mac は別ファイル。同じパッケージではない。開いて 图译 を Applications にドラッグ。
 
 今のインストーラはコード署名していません。初回は OS に止められます。想定どおりです。
 

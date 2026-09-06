@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icons/app.png" width="128" alt="Tuyi">
+  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
 </p>
 
 <h1 align="center">图译 Tuyi - DWG / DXF 도면 번역</h1>
@@ -34,7 +34,7 @@ AutoCAD는 필요 없습니다.
 [Releases](https://github.com/erict16/tuyi/releases)에서 받습니다.
 
 - **Windows:** 10 또는 11, 64비트. Setup exe를 실행합니다. 32비트는 안 됩니다.
-- **Mac:** Apple 실리콘(M1 이후)이 하나의 DMG입니다. Intel Mac은 다른 파일입니다. 같은 설치 파일이 아닙니다. Intel 빌드는 아직 없습니다.
+- **Mac:** Apple 실리콘(M1 이후)이 하나의 DMG입니다. Intel Mac은 다른 파일입니다. 같은 설치 파일이 아닙니다. 열어서 图译을 Applications로 드래그하세요.
 
 지금 설치 파일은 코드 서명이 없습니다. 처음 열면 운영체제가 막습니다. 정상입니다.
 

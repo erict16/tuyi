@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icons/app.png" width="128" alt="Tuyi">
+  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
 </p>
 
 <h1 align="center">图译 Tuyi - DWG / DXF Translator</h1>
@@ -34,7 +34,7 @@ It is for people who send drawings overseas (or the other way): title blocks, no
 Get the file from [Releases](https://github.com/erict16/tuyi/releases).
 
 - **Windows:** 10 or 11, 64-bit. Run the Setup exe. 32-bit Windows is not supported.
-- **Mac:** Apple Silicon (M1 and later) is one DMG. Intel Macs need a different DMG. They are not the same file. The Intel build is not up yet.
+- **Mac:** Apple Silicon (M1 and later) is one DMG. Intel Macs need a different DMG. They are not the same file. Open the DMG and drag 图译 into Applications.
 
 The current build is not code-signed, so the OS will warn you the first time. That is expected.
 

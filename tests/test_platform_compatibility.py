@@ -66,6 +66,32 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn('add_argument("--oda-dmg"', script)
         self.assertIn("--deep", script)
         self.assertIn("--keepParent", script)
+        self.assertIn('symlink_to("/Applications")', script)
+        self.assertIn("create_drag_install_dmg", script)
+        self.assertIn("prepare_dmg_staging", script)
+        self.assertIn("UDRW", script)
+        self.assertIn("dmg-background.png", script)
+        self.assertNotIn('-srcfolder", str(OUTPUT_APP)', " ".join(script.split()))
+
+    def test_pack_keeps_uvicorn_statreload(self):
+        root = Path(__file__).resolve().parents[1]
+        for name in ("Dwglot.spec", "Dwglot_macos.spec"):
+            spec = (root / name).read_text(encoding="utf-8")
+            start = spec.index("excludes = [")
+            end = spec.index("]", start)
+            excludes = spec[start:end]
+            self.assertIn('"uvicorn.supervisors.statreload"', spec, name)
+            self.assertNotIn("statreload", excludes, name)
+            self.assertNotIn("watchfilesreload", excludes, name)
+
+    def test_readme_icon_is_macos_squircle(self):
+        path = Path(__file__).resolve().parents[1] / "docs" / "icons" / "app-rounded.png"
+        self.assertTrue(path.is_file())
+        data = path.read_bytes()
+        self.assertTrue(data.startswith(b"\x89PNG"))
+        self.assertEqual(data[25], 6)  # IHDR color type RGBA
+        readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+        self.assertIn("docs/icons/app-rounded.png", readme)
 
     def test_release_workflows_use_app_version_and_tag_only(self):
         root = Path(__file__).resolve().parents[1]
@@ -105,6 +131,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("仍要运行", html)
         self.assertIn("ODA File Converter", html)
         self.assertIn("跳到下载", html)
+        self.assertIn("拖进应用程序", html)
         self.assertNotIn("FAQ", html)
 
     def test_safe_log_survives_cp1252_stdout(self):

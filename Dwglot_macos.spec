@@ -83,6 +83,13 @@ hiddenimports = [
     "uvicorn.protocols.http.httptools_impl",
     "uvicorn.lifespan.on",
     "uvicorn.lifespan.off",
+    # uvicorn.supervisors imports watchfilesreload then falls back to statreload.
+    # The fallback is inside except ImportError, so analysis misses it. Excluding
+    # both modules makes `import uvicorn` crash and the app never opens.
+    "uvicorn.supervisors",
+    "uvicorn.supervisors.basereload",
+    "uvicorn.supervisors.statreload",
+    "uvicorn.supervisors.multiprocess",
 ]
 
 excludes = [
@@ -107,8 +114,6 @@ excludes = [
     "ezdxf.addons.drawing.pyqt",
     "ezdxf.addons.hpgl2",
     "uvicorn.workers",
-    "uvicorn.supervisors.watchfilesreload",
-    "uvicorn.supervisors.statreload",
     "watchfiles",
 ]
 

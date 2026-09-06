@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icons/app.png" width="128" alt="Tuyi">
+  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
 </p>
 
 <h1 align="center">图译 Tuyi - Traductor DWG / DXF</h1>
@@ -34,7 +34,7 @@ Sirve para mandar planos al extranjero, o al revés. Títulos, notas, atributos,
 El archivo está en [Releases](https://github.com/erict16/tuyi/releases).
 
 - **Windows:** 10 u 11, 64 bits. Ejecuta el Setup. No hay versión de 32 bits.
-- **Mac:** Apple Silicon (M1 en adelante) es un DMG. Los Mac Intel necesitan otro. No es el mismo archivo. El de Intel todavía no está.
+- **Mac:** Apple Silicon (M1 en adelante) es un DMG. Los Mac Intel necesitan otro. No es el mismo archivo. Ábrelo y arrastra 图译 a Applications.
 
 El instalador no está firmado. El sistema te va a parar la primera vez. Es normal.
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/icons/app.png" width="128" alt="图译">
+  <img src="docs/icons/app-rounded.png" width="128" alt="图译">
 </p>
 
 <h1 align="center">图译 Tuyi - DWG / DXF 图纸翻译</h1>
@@ -34,7 +34,7 @@
 去 [Releases](https://github.com/erict16/tuyi/releases) 下载。
 
 - **Windows：** 10 或 11，64 位。跑 Setup 安装包。32 位不行。
-- **Mac：** Apple 芯片（M1 及以后）一份 DMG。Intel Mac 要另打一份，不是同一个文件。Intel 那份现在还没有。
+- **Mac：** Apple 芯片（M1 及以后）一份 DMG。Intel Mac 要另打一份，不是同一个文件。打开后把 图译 拖进「应用程序」。
 
 安装包还没买代码签名，第一次打开系统会拦，这是正常的。
 
