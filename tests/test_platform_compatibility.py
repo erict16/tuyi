@@ -153,6 +153,9 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("unittest discover", ci)
         self.assertIn("npm run build", ci)
         self.assertIn("PYTHONUTF8", ci)
+        self.assertIn("windows-latest", ci)
+        self.assertIn("macos-latest", ci)
+        self.assertIn("requirements-macos.txt", ci)
 
     def test_landing_download_names_windows_and_mac_chips(self):
         html = (Path(__file__).resolve().parents[1] / "landing" / "index.html").read_text(encoding="utf-8")
@@ -208,6 +211,29 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_development_app_dir_is_repository_root(self):
         self.assertEqual(cad.get_app_dir(), Path(__file__).resolve().parents[1])
+
+    def test_frontend_ui_keeps_windows_lights_and_mac_native_bar(self):
+        root = Path(__file__).resolve().parents[1]
+        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        css = (root / "frontend" / "src" / "App.css").read_text(encoding="utf-8")
+        self.assertIn("className=\"lights\"", ui)
+        self.assertIn("pywebview-drag-region", ui)
+        self.assertIn("hasNativeTitlebar", ui)
+        self.assertIn('data-native-titlebar={nativeTitlebar ? "true" : "false"}', ui)
+        self.assertIn('[data-native-titlebar="true"] .lights', css)
+        self.assertIn("display: none !important", css)
+        self.assertIn("data-theme={theme}", ui)
+        self.assertIn("[data-theme=\"dark\"]", css)
+        self.assertIn("浅色", ui)
+        self.assertIn("深色", ui)
+        self.assertIn('view === "glossary"', ui)
+        self.assertIn("删掉选中的", ui)
+        self.assertIn("我定的译法", ui)
+        self.assertIn("冻住看不见的图层", ui)
+        self.assertIn("className={`go${translating", ui)
+        self.assertIn("正在译…", ui)
+        self.assertIn(".go.busy .spin", css)
+        self.assertIn("prefers-reduced-motion", css)
 
     def test_windows_keeps_edgechromium_and_exe_candidates(self):
         with patch("desktop.launcher.sys.platform", "win32"):

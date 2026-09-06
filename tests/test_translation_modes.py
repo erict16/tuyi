@@ -417,6 +417,15 @@ class EngineAndGlossaryTests(unittest.TestCase):
         sock.close()
         return port
 
+    def test_openai_probe_treats_4xx_as_up_and_5xx_as_down(self):
+        def fake_open(url, timeout=0):
+            code = 401 if "401" in url else 503
+            raise HTTPError(url, code, "err", None, BytesIO(b""))
+
+        with patch("backend.providers.openai_compat.urllib.request.urlopen", side_effect=fake_open):
+            self.assertTrue(openai_reachable("http://example.test/401/v1"))
+            self.assertFalse(openai_reachable("http://example.test/503/v1"))
+
     def test_dead_custom_url_fails_fast_without_success(self):
         closed = f"http://127.0.0.1:{self._closed_port()}/v1"
         start = time.monotonic()

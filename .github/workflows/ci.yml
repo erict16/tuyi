@@ -1,4 +1,4 @@
-# PR / push smoke: unittest + frontend production build.
+# PR / push smoke: unittest + frontend production build on Windows and macOS.
 name: ci
 
 on:
@@ -16,7 +16,11 @@ env:
 
 jobs:
   test:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,10 +34,17 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Python deps
+      - name: Python deps (Windows)
+        if: runner.os == 'Windows'
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt httpx
+
+      - name: Python deps (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-macos.txt httpx
 
       - name: Unit tests
         run: python -m unittest discover -s tests

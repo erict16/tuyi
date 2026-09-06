@@ -28,7 +28,8 @@ def openai_reachable(base_url: str = "", timeout: float = PROBE_TIMEOUT) -> bool
             exc.read()
         except Exception:
             pass
-        return True
+        # 4xx: host is up (bad key / missing route). 5xx: proxy or gateway, treat as down.
+        return 400 <= int(getattr(exc, "code", 0) or 0) < 500
     except Exception:
         return False
 
