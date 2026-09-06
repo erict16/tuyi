@@ -189,6 +189,7 @@ export default function App() {
   const [updateMsg, setUpdateMsg] = useState("");
   const [updateInfo, setUpdateInfo] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [updatePercent, setUpdatePercent] = useState(0);
   const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [translating, setTranslating] = useState(false);
@@ -390,7 +391,7 @@ export default function App() {
   }
 
   function rememberReturn() {
-    pageReturn.current = view === "settings" || view === "glossary" ? "work" : view;
+    if (view !== "update") pageReturn.current = view;
   }
 
   function openSettings() {
@@ -884,7 +885,11 @@ export default function App() {
       if (data.available) {
         const line = `有新版本 ${data.latest}（当前 ${data.current}）`;
         setUpdateMsg(line);
-        if (!silent) setStatus(line);
+        if (!silent) {
+          setStatus(line);
+          rememberReturn();
+          setView("update");
+        }
       } else if (!silent) {
         const line = data.message || `已是 ${data.current}`;
         setUpdateMsg(line);
@@ -901,10 +906,36 @@ export default function App() {
     }
   }
 
+  function openUpdatePage() {
+    rememberReturn();
+    setView("update");
+    if (!updateInfo?.available) checkUpdates();
+  }
+
+  async function cancelUpdate() {
+    try {
+      const data = await api("/api/updates/cancel", { method: "POST" });
+      setUpdating(false);
+      setChecking(false);
+      setUpdateMsg(data.message || "已取消");
+      setStatus(data.message || "已取消");
+      if (data.cancelled !== false) setView(pageReturn.current || "work");
+    } catch (error) {
+      setStatus(error.message || "取消不了");
+    }
+  }
+
+  function openReleasePage() {
+    const url = asText(updateInfo?.html_url) || "https://github.com/erict16/tuyi/releases";
+    py()?.open_url?.(url);
+  }
+
   async function applyUpdate() {
     if (updating) return;
     setUpdating(true);
     setChecking(true);
+    setUpdatePercent(0);
+    setView("update");
     setUpdateMsg("正在下载更新…");
     setStatus("正在下载更新…");
     try {
@@ -914,6 +945,7 @@ export default function App() {
         const status = await api("/api/updates/status");
         const percent = Math.round(Number(status.percent || 0) * 100);
         if (status.phase === "downloading") {
+          setUpdatePercent(percent);
           setUpdateMsg(`正在下载更新… ${percent}%`);
           setStatus(`正在下载更新… ${percent}%`);
         } else if (status.phase === "verifying") {
@@ -926,6 +958,12 @@ export default function App() {
           setUpdateMsg("正在重启…");
           setStatus("正在重启…");
           py()?.close_window?.();
+          return;
+        } else if (status.phase === "cancelling" || status.phase === "idle") {
+          setUpdateMsg(status.message || "已取消");
+          setStatus(status.message || "已取消");
+          setUpdating(false);
+          setChecking(false);
           return;
         } else if (status.phase === "error") {
           throw new Error(status.message || "更新失败");
@@ -1045,9 +1083,13 @@ export default function App() {
             <i className="g" onClick={() => onLights("max")} />
           </div>
         )}
-        {view === "settings" || view === "glossary" ? (
+        {view === "settings" || view === "glossary" || view === "update" ? (
           <>
-            <button type="button" className="tbtn" onClick={closePage}>返回</button>
+            {view === "update" && updating ? (
+              <button type="button" className="tbtn" onClick={cancelUpdate}>取消这次</button>
+            ) : (
+              <button type="button" className="tbtn" onClick={closePage}>{view === "update" ? "以后再说" : "返回"}</button>
+            )}
             <span className="grow" />
             {view === "glossary" && (
               <>
@@ -1497,18 +1539,10 @@ export default function App() {
                   </div>
                   <div className="group">
                     <div className="grow-row">
-                      <span>有新版本会写在底下那一行</span>
-                      <button type="button" className="tbtn" onClick={() => checkUpdates()} disabled={updating || checking}>检查更新</button>
+                      <span>有新版本会单独开一页，可以取消</span>
+                      <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
                     </div>
-                    {updateInfo?.available && updateInfo?.can_apply && (
-                      <div className="grow-row">
-                        <span>{updateMsg || `有新版本 ${updateInfo.latest}`}</span>
-                        <button type="button" className="tbtn pri" onClick={applyUpdate} disabled={updating}>更新并重启</button>
-                      </div>
-                    )}
-                    {updateMsg && !(updateInfo?.available && updateInfo?.can_apply) && (
-                      <p className="note">{updateMsg}</p>
-                    )}
+                    {updateMsg && <p className="note">{updateMsg}</p>}
                   </div>
                 </>
               )}
@@ -1649,6 +1683,56 @@ export default function App() {
         </div>
       )}
 
+      {view === "update" && (
+        <div className="body page-enter">
+          <section className="upd" aria-label="检查更新">
+            <div className="head">
+              <h1>{updating ? "正在更新" : (updateInfo?.available ? "有新版本" : "检查更新")}</h1>
+              <p>
+                {updating
+                  ? (updateMsg || "正在下载更新…")
+                  : (updateInfo?.available
+                    ? `现在是 ${updateInfo.current || appVersion}，可以换成 ${updateInfo.latest}。`
+                    : (updateMsg || "点下面检查。"))}
+              </p>
+            </div>
+            {updating && (
+              <div className="upd-bar" aria-label="下载进度">
+                <span className="bar"><i style={{ width: `${updatePercent}%` }} /></span>
+                <span>{updatePercent}%</span>
+              </div>
+            )}
+            {updateInfo?.available && !updating && (
+              <div className="upd-actions">
+                {updateInfo.can_apply ? (
+                  <button type="button" className="go" onClick={applyUpdate}>
+                    <span className="go-label">现在更新并重启</span>
+                  </button>
+                ) : (
+                  <p className="note">这个版本得下安装包。点下面会用系统浏览器打开 GitHub，不会新开图译窗口。</p>
+                )}
+                <button type="button" className="tbtn ghost" onClick={openReleasePage}>打开 GitHub 发布页</button>
+                <button type="button" className="tbtn" onClick={closePage}>以后再说</button>
+              </div>
+            )}
+            {!updateInfo?.available && !updating && (
+              <div className="upd-actions">
+                <button type="button" className="go" onClick={() => checkUpdates()} disabled={checking}>
+                  <i className="spin" aria-hidden="true" />
+                  <span className="go-label">{checking ? "正在查…" : "再检查一次"}</span>
+                </button>
+                <button type="button" className="tbtn" onClick={closePage}>返回</button>
+              </div>
+            )}
+            {updating && (
+              <div className="upd-actions">
+                <button type="button" className="tbtn danger" onClick={cancelUpdate}>取消这次</button>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
       <footer className={footBusy ? "foot checking" : "foot"}>
         <span className="live">{oda.installed ? "ODA 已装" : "ODA 未装 · DXF 仍可译"}</span>
         <span>软件自带 <b>{builtinTerms.length}</b></span>
@@ -1658,10 +1742,10 @@ export default function App() {
         <span className="msg" aria-live="polite">{status}</span>
         <span className="end">
           <span className="spin" aria-hidden="true" />
-          {updateInfo?.available && updateInfo?.can_apply && (
-            <button type="button" className="tbtn pri" onClick={applyUpdate} disabled={updating}>更新并重启</button>
+          {updateInfo?.available && (
+            <button type="button" className="tbtn pri" onClick={openUpdatePage} disabled={updating}>有新版本 {updateInfo.latest}</button>
           )}
-          <button type="button" className="tbtn" onClick={() => checkUpdates()} disabled={updating || checking}>检查更新</button>
+          <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
         </span>
       </footer>
     </div>

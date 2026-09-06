@@ -232,6 +232,10 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("冻住看不见的图层", ui)
         self.assertIn("className={`go${translating", ui)
         self.assertIn("正在译…", ui)
+        self.assertIn('view === "update"', ui)
+        self.assertIn("以后再说", ui)
+        self.assertIn("取消这次", ui)
+        self.assertIn("/api/updates/cancel", ui)
         self.assertIn(".go.busy .spin", css)
         self.assertIn("prefers-reduced-motion", css)
 

@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from backend.api import app
 from backend.updates import (
     ApplyError,
+    Cancelled,
     _set_state,
     check_github_release,
     copy_payload,
@@ -22,6 +23,7 @@ from backend.updates import (
     is_newer,
     macos_helper_text,
     pick_update_asset,
+    request_cancel,
     resolve_payload,
     start_apply,
     unavailable_payload,
@@ -160,6 +162,37 @@ class UpdateCheckTests(unittest.TestCase):
             service.batch.started = False
         self.assertEqual(response.status_code, 400, response.text)
         self.assertIn("停止翻译队列", response.json()["detail"])
+
+    def test_api_cancel_is_200(self):
+        _set_state(phase="idle", percent=0.0, message="", latest="", restarting=False)
+        response = TestClient(app).post("/api/updates/cancel")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertTrue(response.json()["cancelled"])
+
+    def test_cancel_during_apply_is_too_late(self):
+        _set_state(phase="applying", percent=1.0, message="准备重启…", latest="9.9.9", restarting=False)
+        payload = request_cancel()
+        self.assertFalse(payload["cancelled"])
+        self.assertIn("取消不了", payload["message"])
+        _set_state(phase="idle", percent=0.0, message="", latest="", restarting=False)
+
+    def test_cancel_stops_download(self):
+        from backend import updates as updates_mod
+
+        updates_mod._cancel.clear()
+        request_cancel()
+        payload = b"x" * (2 * 1024 * 1024)
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "Tuyi.zip"
+            with patch("backend.updates.urllib.request.urlopen", return_value=FakeResponse(payload)):
+                with self.assertRaises(Cancelled):
+                    download_file(
+                        "https://github.com/erict16/tuyi/releases/download/v0.2.0/Tuyi_v0.2.0_windows_x64.zip",
+                        dest,
+                    )
+            self.assertFalse(dest.exists())
+        updates_mod._cancel.clear()
+        _set_state(phase="idle", percent=0.0, message="", latest="", restarting=False)
 
 
 class UpdateAssetTests(unittest.TestCase):

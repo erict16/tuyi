@@ -28,7 +28,7 @@ from backend.cad import ODA_OUTPUT_VERSIONS, analyze_source, dwg_unavailable_sho
 from backend.translator import CADChineseTranslator, CONFIG_PATH, load_yaml_data, output_prefix, resource_path
 from backend.language_assets import LanguageAssets
 from backend.storage import atomic_write_json, quarantine_corrupt_file
-from backend.updates import ApplyError, check_github_release, start_apply, unavailable_payload, update_status
+from backend.updates import ApplyError, check_github_release, request_cancel, start_apply, unavailable_payload, update_status
 from backend.drawings import (
     build_output_name,
     ensure_output_dir,
@@ -728,6 +728,11 @@ def updates_apply():
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception:
         raise HTTPException(status_code=400, detail="更新失败")
+
+
+@app.post("/api/updates/cancel")
+def updates_cancel():
+    return request_cancel()
 
 
 @app.post("/api/drawings/open")

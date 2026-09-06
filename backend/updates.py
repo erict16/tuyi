@@ -35,10 +35,15 @@ _state = {
     "latest": "",
     "restarting": False,
 }
+_cancel = threading.Event()
 
 
 class ApplyError(Exception):
     """User-facing apply failure. Message is Chinese, no traceback."""
+
+
+class Cancelled(ApplyError):
+    """User stopped the download."""
 
 
 def _parse_version(value: str) -> tuple[int, ...]:
@@ -223,6 +228,24 @@ def _set_state(**kwargs) -> None:
         _state.update(kwargs)
 
 
+def _cancelled() -> bool:
+    return _cancel.is_set()
+
+
+def request_cancel() -> dict:
+    """Stop a download. Once files are being swapped, cancel is too late."""
+    with _state_lock:
+        phase = _state["phase"]
+        if phase in {"applying", "restarting"}:
+            return {"ok": False, "cancelled": False, "message": "已经在写文件，取消不了"}
+        if phase in {"idle", "error"}:
+            _cancel.set()
+            return {"ok": True, "cancelled": True, "message": "已取消"}
+        _cancel.set()
+        _state.update(phase="cancelling", message="正在取消…")
+    return {"ok": True, "cancelled": True, "message": "正在取消…"}
+
+
 def _safe_extract(archive: Path, dest: Path) -> None:
     dest = dest.resolve()
     dest.mkdir(parents=True, exist_ok=True)
@@ -345,6 +368,8 @@ def download_file(url: str, dest: Path, expected_sha: str = "", on_progress=None
                 raise ApplyError("更新包太大")
             with dest.open("wb") as handle:
                 while True:
+                    if _cancelled():
+                        raise Cancelled("已取消")
                     chunk = response.read(1024 * 1024)
                     if not chunk:
                         break
@@ -417,6 +442,7 @@ def start_apply() -> dict:
     with _state_lock:
         if _state["phase"] in {"checking", "downloading", "verifying", "applying"}:
             return {"ok": True, "started": True}
+        _cancel.clear()
         _state.update(phase="checking", percent=0.0, message="正在检查…", latest="", restarting=False)
     thread = threading.Thread(target=_apply_worker, daemon=True)
     thread.start()
@@ -465,6 +491,10 @@ def _apply_worker() -> None:
         )
         time.sleep(0.2)
         _set_state(phase="restarting", percent=1.0, message="正在重启…", restarting=True)
+    except Cancelled:
+        _set_state(phase="idle", percent=0.0, message="已取消", restarting=False)
+        if archive:
+            shutil.rmtree(archive.parent, ignore_errors=True)
     except ApplyError as exc:
         _set_state(phase="error", message=str(exc), restarting=False)
         if archive:
