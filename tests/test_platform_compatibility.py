@@ -133,18 +133,19 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("<table>", readme)
         self.assertIn("<h3>主界面</h3>", readme)
         self.assertIn("<h3>词汇库</h3>", readme)
-        self.assertIn("图译 Tuyi - 强大且开源的 DWG/DXF 翻译工具", readme)
-        self.assertNotIn("强大且开源的 DWG 翻译工具</p>", readme)
-        self.assertIn("docs/screenshots/ui-glossary.png", readme)
-        self.assertIn("docs/screenshots/ui-write.png", readme)
-        self.assertIn("docs/screenshots/ui-settings.png", readme)
-        self.assertIn("docs/screenshots/ui-dark.png", readme)
+        self.assertIn("<h1 align=\"center\">图译 Tuyi</h1>", readme)
+        self.assertIn("<h3 align=\"center\">强大且开源的 DWG/DXF 翻译工具</h3>", readme)
+        self.assertIn("docs/screenshots/app-glossary.png", readme)
+        self.assertIn("docs/screenshots/app-write.png", readme)
+        self.assertIn("docs/screenshots/app-settings.png", readme)
+        self.assertIn("docs/screenshots/app-home.png", readme)
+        self.assertNotIn("docs/screenshots/ui-", readme)
         from PIL import Image
 
-        for name in ("ui-home.png", "ui-settings.png", "ui-write.png", "ui-dark.png", "ui-glossary.png"):
+        for name in ("app-home.png", "app-settings.png", "app-write.png", "app-glossary.png"):
             shot = Path(__file__).resolve().parents[1] / "docs" / "screenshots" / name
             px = Image.open(shot).convert("RGB").getpixel((0, 0))
-            self.assertGreater(sum(px), 80, name)
+            self.assertGreater(sum(px), 400, name)
 
     def test_release_workflows_use_app_version_and_tag_only(self):
         root = Path(__file__).resolve().parents[1]
