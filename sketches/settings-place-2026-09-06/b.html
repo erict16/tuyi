@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>方案 B · 主界面右侧</title>
+  <link rel="stylesheet" href="_win.css" />
+  <style>
+    .body { flex: 1; display: flex; min-height: 0; }
+    .main { flex: 1; padding: 12px; color: var(--muted); }
+    .insp {
+      width: 300px; flex: none; border-left: 1px solid var(--border);
+      background: var(--elev); padding: 14px; overflow: auto;
+    }
+    .insp h1 { font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    .fake { opacity: .55; }
+  </style>
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb">
+      <button type="button" class="tbtn">打开图纸</button>
+      <span class="grow"></span>
+      <button type="button" class="tbtn">词汇库</button>
+      <button type="button" class="tbtn pri">设置</button>
+    </header>
+    <div class="body">
+      <div class="main">
+        <p class="help">设置不再换页，贴在右边。表还在。</p>
+        <table class="fake">
+          <thead><tr><th>原文</th><th>译文</th></tr></thead>
+          <tbody>
+            <tr><td>电气原理图</td><td>Electrical Schematic</td></tr>
+            <tr><td>接地</td><td>Earthing</td></tr>
+            <tr><td>进线柜</td><td>Incoming Cabinet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="insp">
+        <h1>设置</h1>
+        <p class="help">图上的字默认全译。</p>
+        <div class="seg"><button type="button" class="on">网上翻译</button><button type="button">自己配接口</button></div>
+        <div class="field"><input type="password" placeholder="密钥，没有就空着" /></div>
+        <div class="seg"><button type="button" class="on">只留译文</button><button type="button">都留</button></div>
+        <div class="seg"><button type="button">浅色</button><button type="button" class="on">深色</button></div>
+        <div class="field"><button type="button" class="tbtn">检查更新</button></div>
+      </aside>
+    </div>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+</body>
+</html>

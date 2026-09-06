@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>方案 E · 一页三件事</title>
+  <link rel="stylesheet" href="_win.css" />
+  <style>
+    .pane { flex: 1; overflow: auto; padding: 28px 32px; }
+    .block { max-width: 480px; margin-bottom: 22px; }
+    .block h2 { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 650; }
+    .links { display: flex; gap: 16px; margin-top: 28px; }
+    .links button { color: var(--accent); font-weight: 650; }
+  </style>
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <div class="pane">
+      <h1>设置</h1>
+      <p class="help">就这三件事。图上的字默认全译。</p>
+      <div class="block">
+        <h2>怎么译</h2>
+        <div class="seg"><button type="button" class="on">网上翻译</button><button type="button">自己配接口</button></div>
+        <div class="field"><input type="password" placeholder="密钥，没有就空着" /></div>
+      </div>
+      <div class="block">
+        <h2>写回图里</h2>
+        <div class="seg"><button type="button" class="on">只留译文</button><button type="button">原文和译文都留</button></div>
+      </div>
+      <div class="block">
+        <h2>窗口颜色</h2>
+        <div class="seg"><button type="button">浅色</button><button type="button" class="on">深色</button></div>
+      </div>
+      <div class="links">
+        <button type="button">词汇库</button>
+        <button type="button">检查更新</button>
+      </div>
+    </div>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+</body>
+</html>

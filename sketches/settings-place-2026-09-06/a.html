@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>方案 A · 顶部分页</title>
+  <link rel="stylesheet" href="_win.css" />
+  <style>
+    .tabs { display: flex; gap: 2px; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--elev); }
+    .tabs button { height: 34px; padding: 0 14px; font-weight: 650; color: var(--muted); border-bottom: 2px solid transparent; }
+    .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+    .pane { flex: 1; overflow: auto; padding: 20px 24px; }
+    .pane .card { max-width: 520px; }
+  </style>
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <div class="tabs" id="tabs">
+      <button type="button" class="on" data-id="tr">翻译</button>
+      <button type="button" data-id="wr">写回</button>
+      <button type="button" data-id="more">外观和更新</button>
+    </div>
+    <div class="pane" id="pane"></div>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+  <script>
+    const panes = {
+      tr: `<h1>翻译</h1><p class="help">图上的字默认全译。只要选送到哪。</p><div class="card"><div class="seg"><button type="button" class="on">网上翻译</button><button type="button">自己配接口</button></div><div class="field">密钥 <input type="password" placeholder="没有就空着" /></div></div>`,
+      wr: `<h1>写回</h1><p class="help">译完写回图里，留什么字。</p><div class="card"><div class="seg"><button type="button" class="on">只留译文</button><button type="button">原文和译文都留</button></div></div>`,
+      more: `<h1>外观和更新</h1><div class="card"><div class="seg"><button type="button">浅色</button><button type="button" class="on">深色</button></div><div class="field"><button type="button" class="tbtn">打开词汇库</button><button type="button" class="tbtn">检查更新</button></div></div>`
+    };
+    const pane = document.getElementById("pane");
+    pane.innerHTML = panes.tr;
+    document.getElementById("tabs").onclick = (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      document.querySelectorAll(".tabs button").forEach((x) => x.classList.toggle("on", x === b));
+      pane.innerHTML = panes[b.dataset.id];
+    };
+  </script>
+</body>
+</html>
