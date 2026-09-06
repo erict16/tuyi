@@ -59,12 +59,12 @@ class NativeBridge:
     def open_url(self, url: str) -> dict:
         if not url or not url.startswith(("https://", "http://")):
             return {"error": "无效链接"}
-        if sys.platform == "darwin":
-            subprocess.Popen(["open", url])
-        elif sys.platform == "win32":
-            os.startfile(url)  # type: ignore[attr-defined]
-        else:
-            subprocess.Popen(["xdg-open", url])
+        try:
+            import webbrowser
+
+            webbrowser.open(url)
+        except Exception:
+            return {"error": "打不开链接"}
         return {"ok": True}
 
     def toggle_maximize(self) -> None:
@@ -166,4 +166,3 @@ class NativeBridge:
         unmount_embedded_odafc()
         if webview.windows:
             webview.windows[0].destroy()
-        os._exit(0)

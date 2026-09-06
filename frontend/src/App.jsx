@@ -14,6 +14,10 @@ function py() {
   return window.pywebview?.api || null;
 }
 
+function isMacChrome() {
+  return /Mac/i.test(navigator.userAgent || "");
+}
+
 async function api(path, options = {}) {
   const response = await fetch(path, {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
@@ -772,11 +776,6 @@ export default function App() {
       setUpdateInfo(data);
       if (data.available) {
         setUpdateMsg(`有新版本 ${data.latest}（当前 ${data.current}）`);
-        if (!data.can_apply && !silent) {
-          const native = py();
-          if (native?.open_url && data.html_url) native.open_url(data.html_url);
-          else if (data.html_url) window.open(data.html_url, "_blank");
-        }
       } else if (!silent) {
         setUpdateMsg(data.message || `已是 ${data.current}`);
       }
@@ -873,12 +872,14 @@ export default function App() {
 
   return (
     <div className="win" data-theme="light">
-      <header className="tb pywebview-drag-region">
-        <div className="lights" aria-hidden="true">
-          <i className="r" onClick={() => onLights("close")} />
-          <i className="y" onClick={() => onLights("min")} />
-          <i className="g" onClick={() => onLights("max")} />
-        </div>
+      <header className={isMacChrome() ? "tb tb-mac" : "tb pywebview-drag-region"}>
+        {isMacChrome() ? null : (
+          <div className="lights" aria-hidden="true">
+            <i className="r" onClick={() => onLights("close")} />
+            <i className="y" onClick={() => onLights("min")} />
+            <i className="g" onClick={() => onLights("max")} />
+          </div>
+        )}
         <div className="brand">图译</div>
         <div className="seg" role="tablist">
           <button type="button" className={tab === "regular" ? "on" : ""} onClick={() => setTab("regular")}>常规处理</button>

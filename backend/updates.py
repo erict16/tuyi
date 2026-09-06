@@ -181,7 +181,7 @@ def check_github_release(timeout: float = 12.0) -> dict:
         if exc.code == 403:
             return unavailable_payload("GitHub API 暂不可用，打开 Releases 页查看")
         return unavailable_payload(f"检查更新失败（HTTP {exc.code}）")
-    except (OSError, json.JSONDecodeError, ValueError, TypeError, UnicodeDecodeError):
+    except (OSError, json.JSONDecodeError, ValueError, TypeError, UnicodeDecodeError, Exception):
         return unavailable_payload("GitHub API 暂不可用，打开 Releases 页查看")
 
     tag = str(payload.get("tag_name") or "").lstrip("v")

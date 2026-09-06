@@ -6,6 +6,7 @@ import os
 import sys
 import threading
 import time
+import traceback
 from pathlib import Path
 
 import uvicorn
@@ -17,6 +18,37 @@ from backend.cad import unmount_embedded_odafc
 
 TITLE = f"{APP_TITLE} v{APP_VERSION}"
 _INSTANCE_MUTEX = None
+_CRASH_LOG = Path.home() / "Library" / "Logs" / "Tuyi.log"
+
+
+def _log(message: str) -> None:
+    line = message.rstrip() + "\n"
+    try:
+        _CRASH_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with _CRASH_LOG.open("a", encoding="utf-8") as fh:
+            fh.write(line)
+    except OSError:
+        pass
+    try:
+        sys.stderr.write(line)
+    except Exception:
+        pass
+
+
+def _prepare_macos_gui() -> None:
+    """Become a real foreground app. Windowed PyInstaller sets LSBackgroundOnly."""
+    if sys.platform != "darwin":
+        return
+    try:
+        from AppKit import NSApp, NSApplication
+
+        NSApplication.sharedApplication()
+        # 0 = NSApplicationActivationPolicyRegular
+        NSApp.setActivationPolicy_(0)
+        NSApp.activateIgnoringOtherApps_(True)
+        _log("macos gui: activation policy regular")
+    except Exception:
+        _log("macos gui prepare failed:\n" + traceback.format_exc())
 
 
 def _webview_gui() -> str | None:
@@ -43,12 +75,17 @@ def _wait_server(url: str, timeout: float = 15.0) -> bool:
     import urllib.request
 
     deadline = time.time() + timeout
+    last = ""
     while time.time() < deadline:
         try:
-            urllib.request.urlopen(url, timeout=1)
-            return True
-        except Exception:
+            with urllib.request.urlopen(url, timeout=1) as response:
+                if 200 <= getattr(response, "status", 200) < 500:
+                    return True
+        except Exception as exc:
+            last = str(exc)
             time.sleep(0.15)
+    if last:
+        _log(f"wait_server last error: {last}")
     return False
 
 
@@ -79,33 +116,49 @@ def _enable_windows_acrylic():
 
 
 def run_web_app():
+    try:
+        _run_web_app()
+    except SystemExit:
+        raise
+    except Exception:
+        _log("launch crashed:\n" + traceback.format_exc())
+        raise
+
+
+def _run_web_app():
+    _prepare_macos_gui()
     if not _acquire_single_instance():
-        print("图译已在运行。")
+        _log("图译已在运行。")
         return
     if not FRONTEND_DIST.exists():
-        print("未找到 frontend/dist，请先构建 React 界面：")
-        print("  cd frontend")
-        print("  npm install")
-        print("  npm run build")
+        _log("未找到 frontend/dist，请先构建 React 界面")
         sys.exit(1)
 
+    _log(f"frontend dist: {FRONTEND_DIST}")
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=API_PORT, log_level="warning"))
 
     api_thread = threading.Thread(target=server.run, daemon=True)
     api_thread.start()
 
     url = f"http://127.0.0.1:{API_PORT}"
-    if not _wait_server(url) or not server.started:
-        print("API 服务启动失败")
+    health = f"{url}/api/health"
+    if not _wait_server(health):
+        _log("API 服务启动失败")
         server.should_exit = True
         sys.exit(1)
+    _log(f"api up {url}")
 
     import webview
 
-    webview.settings["DRAG_REGION_DIRECT_TARGET_ONLY"] = True
+    mac = sys.platform == "darwin"
+    webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = True
+    if not mac:
+        webview.settings["DRAG_REGION_DIRECT_TARGET_ONLY"] = True
 
     bridge = NativeBridge()
-
+    # Borderless NSWindow on recent macOS can never become key, so Finder
+    # "opens" the app and you get a Dock icon with zero windows. Use a
+    # normal titled window on Mac. Windows keeps the frameless shell.
     window = webview.create_window(
         TITLE,
         url,
@@ -116,14 +169,16 @@ def run_web_app():
         resizable=True,
         transparent=False,
         background_color="#e8e8ed",
-        frameless=True,
+        frameless=not mac,
         easy_drag=False,
         shadow=True,
     )
 
     window.events.loaded += lambda: threading.Timer(0.6, _enable_windows_acrylic).start()
     window.events.closing += lambda *_: service.shutdown()
-    webview.start(gui=_webview_gui())
+    _prepare_macos_gui()
+    _log("starting webview")
+    webview.start(gui="cocoa" if mac else _webview_gui())
     service.shutdown()
     unmount_embedded_odafc()
     os._exit(0)

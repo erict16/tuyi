@@ -198,5 +198,12 @@ app = BUNDLE(
         "CFBundleVersion": app_version,
         "NSHighResolutionCapable": True,
         "LSMinimumSystemVersion": "11.0",
+        # PyInstaller windowed bootloader writes LSBackgroundOnly=1.
+        # That makes Launch Services treat 图译 as a faceless agent: Dock
+        # click "opens" it, no window. Force a regular GUI app.
+        "LSBackgroundOnly": False,
+        "LSUIElement": False,
+        "NSPrincipalClass": "NSApplication",
+        "NSAppleScriptEnabled": False,
     },
 )

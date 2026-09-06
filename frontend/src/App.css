@@ -88,6 +88,9 @@ body,
 }
 
 /* unified titlebar + toolbar */
+.tb-mac {
+  padding-left: 12px;
+}
 .tb {
   display: flex;
   align-items: center;

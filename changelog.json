@@ -1,6 +1,17 @@
 {
   "changelog": [
     {
+      "version": "0.1.5",
+      "date": "2026年9月",
+      "title": "Mac 双击能看见窗口",
+      "content": [
+        "[修复] 打包不再把 图译 标成后台进程（LSBackgroundOnly），Dock 点了会出窗口",
+        "[修复] Mac 用系统标题栏窗口，不再用无边框窗（新系统上无边框窗建不出来）",
+        "[修复] 检查更新不再弹出网页把窗口弄没；Mac 去掉假红绿灯和拖拽条",
+        "[说明] 打不开时看 ~/Library/Logs/Tuyi.log"
+      ]
+    },
+    {
       "version": "0.1.4",
       "date": "2026年9月",
       "title": "Mac 打得开，DMG 能拖进应用程序",
