@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>A · 一张表</title>
+  <link rel="stylesheet" href="_win.css" />
+  <style>
+    .table-wrap {
+      flex: 1; min-height: 0; overflow: auto;
+      margin: 0 18px 12px; border: 1px solid var(--border);
+      border-radius: 10px; background: var(--elev);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { position: sticky; top: 0; background: var(--elev); color: var(--muted); font-size: 11px; font-weight: 650; }
+    td input { width: 100%; border: 0; background: transparent; padding: 2px 4px; border-radius: 3px; }
+    td input:focus { outline: 1.5px solid var(--accent); background: var(--bg); }
+    tr:hover td { background: var(--soft); }
+  </style>
+</head>
+<body>
+  <div class="win" role="application" aria-label="图译">
+    <div class="titlebar">
+      <div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+      <b>图译</b><span></span>
+    </div>
+    <header class="tb">
+      <button type="button" class="tbtn" id="back">返回</button>
+      <span class="grow"></span>
+      <button type="button" class="tbtn ghost">从表格导入</button>
+      <button type="button" class="tbtn ghost">导出成表格</button>
+    </header>
+    <div class="page">
+      <div class="head">
+        <h1>我定的译法</h1>
+        <p>图上碰到左边这句，就写成右边。软件自带的改不了。</p>
+      </div>
+      <div class="tools">
+        <input class="search" type="search" placeholder="搜一下…" aria-label="搜" id="q" />
+        <span class="grow"></span>
+        <div class="add">
+          <input placeholder="图上的中文" id="zh" aria-label="图上的中文" />
+          <input placeholder="要写成" id="en" aria-label="要写成" />
+          <button type="button" class="tbtn pri" id="add">加上</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>图上的中文</th><th>要写成</th><th style="width:90px">谁定的</th><th style="width:52px"></th></tr>
+          </thead>
+          <tbody id="rows">
+            <tr class="mine"><td><input value="电气原理图" /></td><td><input value="Electrical Schematic" /></td><td>我定的</td><td><button type="button" class="del">删掉</button></td></tr>
+            <tr class="mine"><td><input value="接地" /></td><td><input value="Earthing" /></td><td>我定的</td><td><button type="button" class="del">删掉</button></td></tr>
+            <tr class="mine"><td><input value="进线柜" /></td><td><input value="Incoming Cabinet" /></td><td>我定的</td><td><button type="button" class="del">删掉</button></td></tr>
+            <tr class="locked"><td><input value="变压器" readonly /></td><td><input value="Transformer" readonly /></td><td><span class="tag">软件自带</span></td><td></td></tr>
+            <tr class="locked"><td><input value="断路器" readonly /></td><td><input value="Circuit Breaker" readonly /></td><td><span class="tag">软件自带</span></td><td></td></tr>
+            <tr class="locked"><td><input value="母线" readonly /></td><td><input value="Busbar" readonly /></td><td><span class="tag">软件自带</span></td><td></td></tr>
+            <tr class="locked"><td><input value="电缆" readonly /></td><td><input value="Cable" readonly /></td><td><span class="tag">软件自带</span></td><td></td></tr>
+            <tr class="locked"><td><input value="接地极" readonly /></td><td><input value="Earth Electrode" readonly /></td><td><span class="tag">软件自带</span></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <footer class="foot">我定的 <b>3</b>　软件自带 <b>393</b>　碰上两边都有，用我定的</footer>
+  </div>
+  <script>
+    const rows = document.getElementById("rows");
+    document.getElementById("add").onclick = function () {
+      const zh = document.getElementById("zh");
+      const en = document.getElementById("en");
+      if (!zh.value.trim() || !en.value.trim()) return;
+      const tr = document.createElement("tr");
+      tr.className = "mine row-enter";
+      tr.innerHTML = "<td><input value=\"" + zh.value.replace(/"/g,"") + "\" /></td><td><input value=\"" + en.value.replace(/"/g,"") + "\" /></td><td>我定的</td><td><button type=\"button\" class=\"del\">删掉</button></td>";
+      rows.prepend(tr);
+      zh.value = ""; en.value = "";
+    };
+    rows.addEventListener("click", function (e) {
+      if (e.target.classList.contains("del")) e.target.closest("tr").remove();
+    });
+    document.getElementById("q").oninput = function () {
+      const q = this.value.trim();
+      [...rows.rows].forEach(function (tr) {
+        tr.style.display = !q || tr.innerText.indexOf(q) >= 0 ? "" : "none";
+      });
+    };
+  </script>
+</body>
+</html>
