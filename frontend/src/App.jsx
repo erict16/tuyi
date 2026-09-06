@@ -152,9 +152,10 @@ export default function App() {
   const [railW, setRailW] = useState(() => {
     try {
       const n = Number(localStorage.getItem("tuyi-rail"));
-      if (n >= 160 && n <= 420) return n;
+      if (n === 220) return 300;
+      if (n >= 200 && n <= 420) return n;
     } catch { /* ignore */ }
-    return 220;
+    return 300;
   });
 
   const [files, setFiles] = useState([]);
@@ -1217,7 +1218,7 @@ export default function App() {
               const startX = event.clientX;
               const startW = railW;
               const move = (ev) => {
-                const next = Math.min(420, Math.max(160, startW + ev.clientX - startX));
+                const next = Math.min(420, Math.max(200, startW + ev.clientX - startX));
                 setRailW(next);
               };
               const up = () => {

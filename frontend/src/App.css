@@ -142,6 +142,10 @@ button { appearance: none; border: 0; background: none; cursor: default; }
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
+  padding: 4px;
+  margin: -4px;
+  border-radius: 10px;
+  transition: background 160ms var(--ease-out);
 }
 select.mini, .pair select {
   height: 32px;
@@ -152,6 +156,15 @@ select.mini, .pair select {
   padding: 0 8px;
   font-size: 14px;
   font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms var(--ease-out), border-color 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pair:hover { background: var(--soft); }
+  .pair select:hover, select.mini:hover {
+    background: var(--elev);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  }
 }
 
 .body {
@@ -181,7 +194,7 @@ select.mini, .pair select {
 }
 
 .rail {
-  width: 220px;
+  width: 300px;
   flex: none;
   display: flex;
   flex-direction: column;
@@ -926,7 +939,7 @@ td input[type="text"]:focus {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .tbtn, .chip, .choice, .go, .drop, .file, .bar i { transition: none; }
+  .tbtn, .chip, .choice, .go, .drop, .file, .bar i, .pair, .pair select, select.mini { transition: none; }
   .tbtn:active, .chip:active, .choice:active, .go:active { transform: none; }
   .page-enter, .set-pane, .row-enter { animation: none; }
   .spin, .go .spin { animation: none; transform: none; transition: opacity 180ms var(--ease-out); }
