@@ -1700,7 +1700,7 @@ export default function App() {
       )}
 
       <footer className={footBusy ? "foot checking" : "foot"}>
-        <span className="live">{oda.installed ? "ODA 已装" : "没装 ODA · 先用 DXF"}</span>
+        <span className="live">{oda.installed ? "ODA 已安装" : "没装 ODA · 先用 DXF"}</span>
         <span className="end">
           <span className="spin" aria-hidden="true" />
           {updateInfo?.available && view !== "update" && (
