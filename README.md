@@ -1,15 +1,12 @@
-<p align="center">
-  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
-</p>
-
-<h1 align="center">图译 Tuyi</h1>
-
-<p align="center">Open a DWG or DXF. Translate the text. Get a new file. Original stays put.</p>
+<h4 align="right"><a href="README.en.md">English</a> · <b>中文</b></h4>
 
 <p align="center">
-  <b>English</b> ·
-  <a href="README.zh-CN.md">简体中文</a>
+  <img src="docs/icons/app-rounded.png" width="128" alt="图译">
 </p>
+
+<h1 align="center">图译</h1>
+
+<p align="center">强大且开源的 DWG 翻译工具</p>
 
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
@@ -19,61 +16,55 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="920" alt="Tuyi home: add a drawing on the left, translate at the bottom">
+  <img src="docs/screenshots/home.png" width="920" alt="图译主界面：左边加图纸，底下点翻译">
 </p>
 
-Tuyi is a desktop app for **Windows 10/11 (64-bit)** and **macOS** (Apple silicon and Intel). You drop in a CAD drawing, it lists the text, you hit **翻译**, and it writes a **new** drawing. The original file is not changed.
+打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
 
-You do not need AutoCAD.
+## 特点
 
-## Install
-
-Download from [Releases](https://github.com/erict16/tuyi/releases). Site: the landing page on this repo.
-
-- **Windows:** run `Tuyi_*_Setup.exe`. You can pick the folder. 32-bit is not supported.
-- **Mac:** Apple silicon and Intel are **different** DMGs. Open the DMG and drag 图译 into Applications.
-
-The build is not code-signed. First launch will warn you. That is expected.
-
-- **Windows:** More info → Run anyway.
-- **Mac:** right-click → Open. Or System Settings → Privacy & Security → Open Anyway.
-
-## How to use it
-
-1. Click **添加图纸** or drop a `.dwg` / `.dxf` on the left. Several files at once is fine.
-2. Pick Chinese → English (or another pair) at the top.
-3. Click **翻译**. Tuyi writes a new file. You can edit a row first if you want.
-4. Keys and “only translation vs both” live in **设置**. Your word list is **词汇库**.
+- **强**：标题、注释、属性、标注、表格里的字都能译。点翻译就写出新图
+- **开**：MIT 开源。密钥用你自己的，图译不建账号、不回传
+- **简**：左边拖进去，底下点翻译。网上翻译、自己配接口，都在设置里
+- **稳**：词汇库对上的词不走接口。浅色 / 深色。原文件只读
 
 <p align="center">
-  <img src="docs/screenshots/settings.png" width="920" alt="Settings: online translate or your own API">
+  <img src="docs/screenshots/settings.png" width="920" alt="设置：网上翻译或自己配接口">
 </p>
 
-## DWG
+## 安装
 
-**DXF** works out of the box.
+从 [GitHub Releases](https://github.com/erict16/tuyi/releases/latest) 下载最新安装包。
 
-**DWG** needs [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) on the same computer. Tuyi looks on PATH, or you set `CAD_ODA_EXEC`. We cannot ship ODA. Their licence does not allow it.
+1. **Windows 10 / 11（64 位）**：跑 `Tuyi_*_Setup.exe`，文件夹可以自己选。32 位不行。
+2. **Mac**：Apple 芯片和 Intel **不是**同一个 DMG。打开后把「图译」拖进应用程序。
 
-## Who translates
+安装包还没买代码签名，第一次打开系统会拦，这是正常的。
 
-Tuyi has no cloud account of its own. In **设置** you pick:
+- Windows：更多信息 → 仍要运行
+- Mac：右键 → 打开。或 系统设置 → 隐私与安全性 → 仍要打开
 
-- **网上翻译** — DeepL or Azure (your key)
-- **自己配接口** — an OpenAI-compatible URL
-- **不联网** — Ollama on this machine (under 少用的)
+只译 DXF，装上就能用。要译 DWG，本机自己装 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)。图译不把它打进安装包。
 
-Exact hits in **词汇库** skip the API. The key stays on disk. Tuyi does not phone home. MIT licence.
+## 怎么用
+
+1. 点左边 **添加图纸**，或把 `.dwg` / `.dxf` 拖进去。一次可以多张
+2. 上面选中 → 英（或别的方向）
+3. 点 **翻译**。会写出新文件。某一行不对，可以先改
+4. 密钥、「图上只留译文还是都留」在 **设置**。自己的词在 **词汇库**
 
 <p align="center">
-  <img src="docs/screenshots/dark.png" width="920" alt="Tuyi in dark mode">
+  <img src="docs/screenshots/dark.png" width="920" alt="图译深色模式">
 </p>
 
-## Command line
+## 谁来译
 
-```bash
-python -m tuyi translate drawing.dxf
-python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en
-```
+图译自己没有网号。在设置里选：
 
-A Windows install also has `tuyi-cli.exe` next to `Tuyi.exe`. `python -m dwglot` still works.
+- **网上翻译**：DeepL 或 Azure（用你的密钥）
+- **自己配接口**：兼容 OpenAI 的网址
+- **不联网**：本机 Ollama（在「少用的」里）
+
+## 协议
+
+MIT。请自由地使用和参与开源。
