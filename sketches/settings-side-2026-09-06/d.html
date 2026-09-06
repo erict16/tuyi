@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>方案 D · 少用的单独一栏</title>
+  <link rel="stylesheet" href="_set.css" />
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <div class="split">
+      <nav class="side">
+        <button type="button" class="on" data-id="tr">翻译</button>
+        <button type="button" data-id="wr">写回</button>
+        <button type="button" data-id="gl">词汇库</button>
+        <button type="button" data-id="th">颜色</button>
+        <button type="button" data-id="up">更新</button>
+        <button type="button" data-id="more">少用的</button>
+      </nav>
+      <div class="pane">
+        <div class="set-h"><h1>翻译</h1><p>常用的就这三项。图层在「少用的」。</p></div>
+        <div class="card" style="max-width:520px">
+          <div class="seg">
+            <button type="button" class="on">网上翻译</button>
+            <button type="button">自己配接口</button>
+          </div>
+          <div class="field">密钥 <input type="password" placeholder="没有就空着" /></div>
+        </div>
+      </div>
+    </div>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+  <script src="_nav.js"></script>
+  <script>
+    settingsNav({
+      tr: document.querySelector(".pane").innerHTML,
+      wr: `<div class="set-h"><h1>写回</h1></div><div class="card" style="max-width:520px"><div class="seg"><button type="button" class="on">只留译文</button><button type="button">原文和译文都留</button></div></div>`,
+      gl: `<div class="set-h"><h1>词汇库</h1><p>固定怎么译的词。</p></div><div class="card" style="max-width:520px"><button type="button" class="tbtn pri">打开词汇库</button></div>`,
+      th: `<div class="set-h"><h1>颜色</h1></div><div class="card" style="max-width:520px"><div class="seg"><button type="button">浅色</button><button type="button" class="on">深色</button></div></div>`,
+      up: `<div class="set-h"><h1>更新</h1><p>现在 0.1.6</p></div><div class="card" style="max-width:520px"><button type="button" class="tbtn">检查更新</button></div>`,
+      more: `<div class="set-h"><h1>少用的</h1><p>平时不用开。</p></div><div class="card" style="max-width:520px"><label class="row"><input type="checkbox" /> 不联网（本机 Ollama）</label><label class="row"><input type="checkbox" checked /> 数字、尺寸先别译</label><label class="row"><input type="checkbox" /> 冻住的图层也译</label><label class="row"><input type="checkbox" /> 文件名也译</label></div>`
+    });
+  </script>
+</body>
+</html>

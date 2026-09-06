@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>方案 A · 词汇库进栏</title>
+  <link rel="stylesheet" href="_set.css" />
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <div class="split">
+      <nav class="side">
+        <button type="button" class="on" data-id="tr">翻译</button>
+        <button type="button" data-id="wr">写回</button>
+        <button type="button" data-id="gl">词汇库</button>
+        <button type="button" data-id="th">颜色</button>
+        <button type="button" data-id="up">更新</button>
+      </nav>
+      <div class="pane">
+        <div class="set-h"><h1>翻译</h1><p>字送到哪去译。</p></div>
+        <div class="card" style="max-width:520px">
+          <div class="seg">
+            <button type="button" class="on">网上翻译</button>
+            <button type="button">自己配接口</button>
+          </div>
+          <p class="cap">网上翻译要密钥。自己配接口要填网址。</p>
+          <div class="field">密钥 <input type="password" placeholder="没有就空着" /></div>
+        </div>
+      </div>
+    </div>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+  <script src="_nav.js"></script>
+  <script>
+    settingsNav({
+      tr: document.querySelector(".pane").innerHTML,
+      wr: `<div class="set-h"><h1>写回</h1><p>译完写回图里，留什么字。</p></div><div class="card" style="max-width:520px"><div class="seg"><button type="button" class="on">只留译文</button><button type="button">原文和译文都留</button></div></div>`,
+      gl: `<div class="set-h"><h1>词汇库</h1><p>图上固定怎么译的词。软件自带的改不了。</p></div><div class="card" style="max-width:520px"><p class="help">电气原理图 → Electrical Schematic<br>接地 → Earthing</p><button type="button" class="tbtn pri">打开词汇库</button></div>`,
+      th: `<div class="set-h"><h1>颜色</h1><p>只改这个窗口。</p></div><div class="card" style="max-width:520px"><div class="seg"><button type="button">浅色</button><button type="button" class="on">深色</button></div></div>`,
+      up: `<div class="set-h"><h1>更新</h1><p>现在 0.1.6</p></div><div class="card" style="max-width:520px"><button type="button" class="tbtn">检查更新</button></div>`
+    });
+  </script>
+</body>
+</html>
