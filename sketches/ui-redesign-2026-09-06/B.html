@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1280, height=800" />
+  <title>图译 · Finder 式</title>
+  <!--
+    Plus kit: Application UI · Stacked layout (native titlebar + action toolbar)
+    + Sidebar file list (Finder list view) + Settings screen (grouped form).
+    Recolor: AppKit parchment / ink / #007aff. Not a second traffic-light row.
+  -->
+  <style>
+    :root {
+      --win: #e8e8ed;
+      --bar: rgba(246, 246, 248, 0.92);
+      --side: #ececf1;
+      --content: #ffffff;
+      --inset: #f2f2f7;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --hair: rgba(0, 0, 0, 0.08);
+      --hair-strong: rgba(0, 0, 0, 0.12);
+      --accent: #007aff;
+      --accent-fill: #007aff;
+      --on-accent: #ffffff;
+      --sel: #0a84ff;
+      --row-sel: #d6e8ff;
+      --ok: #30d158;
+      --warn: #ff9f0a;
+      --red: #ff5f57;
+      --yel: #febc2e;
+      --grn: #28c840;
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text);
+      background: var(--win);
+      letter-spacing: -0.01em;
+    }
+
+    button, select, input { font: inherit; color: inherit; }
+    button { appearance: none; border: 0; background: transparent; cursor: default; }
+    :focus { outline: none; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .skip {
+      position: absolute;
+      left: -9999px;
+    }
+    .skip:focus {
+      left: 12px;
+      top: 12px;
+      z-index: 40;
+      padding: 4px 8px;
+      background: var(--content);
+    }
+
+    .win {
+      width: 1280px;
+      height: 800px;
+      display: flex;
+      flex-direction: column;
+      background: var(--win);
+    }
+
+    /* Native titled window — lights live HERE only */
+    .titlebar {
+      height: 28px;
+      flex: none;
+      display: grid;
+      grid-template-columns: 78px 1fr 78px;
+      align-items: center;
+      background: linear-gradient(#f6f6f8, #ececf1);
+      border-bottom: 0.5px solid var(--hair-strong);
+    }
+    .lights {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 16px;
+    }
+    .lights i {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: block;
+      box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
+    }
+    .lights .r { background: var(--red); }
+    .lights .y { background: var(--yel); }
+    .lights .g { background: var(--grn); }
+    .wtitle {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Toolbar = actions only. No lights. */
+    .toolbar {
+      height: 44px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px 0 12px;
+      background: var(--bar);
+      backdrop-filter: blur(22px) saturate(160%);
+      border-bottom: 0.5px solid var(--hair);
+    }
+    .tbtn {
+      height: 28px;
+      padding: 0 11px;
+      border-radius: 6px;
+      font: 600 12px/28px -apple-system, system-ui, sans-serif;
+      color: var(--text);
+      transition: background-color 160ms ease, transform 160ms var(--ease-out);
+    }
+    .tbtn:hover { background: rgba(118, 118, 128, 0.12); }
+    .tbtn:active { transform: scale(0.97); }
+    .tbtn.pri {
+      background: var(--accent-fill);
+      color: var(--on-accent);
+    }
+    .tbtn.pri:hover { filter: brightness(1.05); }
+    .tbtn.on {
+      background: rgba(118, 118, 128, 0.18);
+    }
+    .tbtn:disabled { opacity: 0.4; pointer-events: none; }
+    .grow { flex: 1; }
+
+    .pathbar {
+      height: 22px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--inset);
+      border-bottom: 0.5px solid var(--hair);
+    }
+    .pathbar b { color: var(--text); font-weight: 600; }
+    .pathbar .sep { opacity: 0.45; }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      background: var(--content);
+    }
+
+    /* Finder list — primary */
+    .files {
+      width: 380px;
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      background: var(--content);
+      border-right: 0.5px solid var(--hair-strong);
+      min-width: 0;
+    }
+    .files thead th {
+      position: sticky;
+      top: 0;
+      background: var(--inset);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      border-bottom: 0.5px solid var(--hair-strong);
+      padding: 5px 10px;
+      text-align: left;
+    }
+    .files .list {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+    .files table { width: 100%; border-collapse: collapse; }
+    .files td {
+      padding: 6px 10px;
+      border-bottom: 0.5px solid var(--hair);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 0;
+    }
+    .files tr { cursor: default; }
+    .files tr:hover td { background: rgba(118, 118, 128, 0.08); }
+    .files tr.on td {
+      background: var(--sel);
+      color: #fff;
+    }
+    .files .name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      max-width: none;
+      overflow: hidden;
+    }
+    .files .name span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .kind-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--ok);
+      flex: none;
+    }
+    .kind-dot.dxf { background: var(--warn); }
+    .files .num {
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      text-align: right;
+      width: 64px;
+    }
+    .files tr.on .num { color: rgba(255, 255, 255, 0.82); }
+    .files .ext {
+      width: 52px;
+      color: var(--muted);
+    }
+    .files tr.on .ext { color: rgba(255, 255, 255, 0.82); }
+
+    .side-foot {
+      flex: none;
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      border-top: 0.5px solid var(--hair);
+      background: var(--side);
+    }
+    .side-foot button {
+      flex: 1;
+      height: 28px;
+      border-radius: 6px;
+      font: 600 12px/28px -apple-system, system-ui, sans-serif;
+      color: var(--muted);
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms var(--ease-out);
+    }
+    .side-foot button:hover { background: rgba(118, 118, 128, 0.12); color: var(--text); }
+    .side-foot button:active { transform: scale(0.97); }
+    .side-foot button.on {
+      background: var(--content);
+      color: var(--text);
+      box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12);
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--content);
+    }
+
+    .view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      flex-direction: column;
+    }
+    .view.on { display: flex; }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 36px;
+      padding: 0 14px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 0.5px solid var(--hair);
+      flex: none;
+    }
+    .filters label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: default;
+      color: var(--text);
+    }
+    .filters select {
+      height: 24px;
+      border: 0;
+      background: rgba(118, 118, 128, 0.12);
+      border-radius: 6px;
+      padding: 0 8px;
+      font: 600 12px -apple-system, system-ui, sans-serif;
+    }
+    .pair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .pair select {
+      height: 24px;
+      border: 0;
+      background: rgba(118, 118, 128, 0.12);
+      border-radius: 6px;
+      padding: 0 8px;
+      font: 600 12px -apple-system, system-ui, sans-serif;
+      color: var(--text);
+    }
+
+    .table { flex: 1; min-height: 0; overflow: auto; }
+    table.grid { width: 100%; border-collapse: collapse; }
+    .grid th, .grid td {
+      padding: 7px 14px;
+      text-align: left;
+      border-bottom: 0.5px solid var(--hair);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .grid th {
+      position: sticky;
+      top: 0;
+      background: var(--content);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .grid td.src { font-weight: 600; }
+    .grid td.kind { color: var(--muted); font-size: 12px; }
+    .grid tr.on { background: var(--row-sel); }
+    .grid input[type="text"] {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 2px 0;
+    }
+    .grid input[type="text"]:focus {
+      box-shadow: inset 0 -1.5px 0 var(--accent);
+    }
+    input[type="checkbox"],
+    input[type="radio"] { accent-color: var(--accent); }
+
+    [hidden] { display: none !important; }
+    .empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+      text-align: center;
+      padding: 40px;
+    }
+    .empty svg { opacity: 0.45; }
+    .empty p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      text-wrap: pretty;
+    }
+    .empty span { font-size: 12px; }
+
+    .jobs {
+      flex: 1;
+      overflow: auto;
+      padding: 14px 16px;
+    }
+    .job {
+      display: grid;
+      grid-template-columns: 1fr 120px 160px 64px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      background: var(--inset);
+      border-radius: 10px;
+    }
+    .bar {
+      height: 4px;
+      background: rgba(118, 118, 128, 0.18);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+
+    /* Settings = full view, not a sheet */
+    .settings {
+      flex: 1;
+      min-width: 0;
+      display: none;
+      background: var(--inset);
+    }
+    .win.is-settings .files,
+    .win.is-settings .main,
+    .win.is-settings .pathbar { display: none; }
+    .win.is-settings .settings { display: flex; }
+
+    .set-nav {
+      width: 200px;
+      flex: none;
+      padding: 12px 8px;
+      background: var(--side);
+      border-right: 0.5px solid var(--hair-strong);
+    }
+    .set-nav h2 {
+      margin: 4px 10px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .set-nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 1px;
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms var(--ease-out);
+    }
+    .set-nav button:hover { background: rgba(118, 118, 128, 0.12); }
+    .set-nav button:active { transform: scale(0.98); }
+    .set-nav button.on {
+      background: var(--sel);
+      color: #fff;
+    }
+    .set-body {
+      flex: 1;
+      min-width: 0;
+      overflow: auto;
+      padding: 22px 28px 32px;
+    }
+    .pane { display: none; max-width: 560px; }
+    .pane.on { display: block; }
+    .pane h3 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      text-wrap: pretty;
+    }
+    .pane .lead {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .group {
+      background: var(--content);
+      border-radius: 10px;
+      padding: 4px 14px 8px;
+      margin-bottom: 14px;
+      box-shadow: 0 0 0 0.5px var(--hair);
+    }
+    .group h4 {
+      margin: 10px 0 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 0.5px solid var(--hair);
+    }
+    .group label:last-of-type { border-bottom: 0; }
+    .group label.stack {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    .group input[type="text"],
+    .group input[type="password"],
+    .group input[type="url"] {
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--inset);
+      padding: 0 8px;
+      width: 100%;
+    }
+    .note {
+      margin: 8px 0 4px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .term-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 6px;
+      padding: 6px 0;
+      align-items: center;
+    }
+    .term-row input {
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--inset);
+      padding: 0 8px;
+      min-width: 0;
+    }
+
+    .foot {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 26px;
+      padding: 0 14px;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--bar);
+      border-top: 0.5px solid var(--hair);
+      flex: none;
+    }
+    .foot b {
+      color: var(--text);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .live { color: var(--ok); font-weight: 600; }
+    .upd {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font: 600 11px/22px -apple-system, system-ui, sans-serif;
+      color: var(--text);
+      transition: background-color 180ms var(--ease-out), transform 160ms var(--ease-out), opacity 180ms var(--ease-out);
+    }
+    .upd:hover { background: rgba(118, 118, 128, 0.12); }
+    .upd:active { transform: scale(0.97); }
+    .spin {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(118, 118, 128, 0.28);
+      border-top-color: var(--accent);
+      flex: none;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+    }
+    .upd.is-busy .spin {
+      opacity: 1;
+      transform: scale(1);
+      animation: spin 480ms linear infinite, pulse 180ms var(--ease-out) infinite alternate;
+    }
+    .upd.is-busy { color: var(--text); }
+    @keyframes spin { to { transform: rotate(360deg) scale(1); } }
+    @keyframes pulse {
+      from { opacity: 0.45; }
+      to { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tbtn, .upd, .set-nav button, .side-foot button, .spin {
+        transition: none;
+        animation: none;
+      }
+      .upd.is-busy .spin {
+        animation: none;
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#grid">跳到文字表</a>
+  <div class="win" id="win" role="application" aria-label="图译">
+    <header class="titlebar">
+      <div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+      <div class="wtitle" id="wtitle">图译</div>
+      <div></div>
+    </header>
+
+    <div class="toolbar">
+      <button type="button" class="tbtn" id="btnOpen">打开图纸</button>
+      <button type="button" class="tbtn pri" id="btnTranslate" disabled>翻译</button>
+      <button type="button" class="tbtn" id="btnWrite" disabled>写回</button>
+      <button type="button" class="tbtn" id="btnBatch">批量</button>
+      <span class="grow"></span>
+      <button type="button" class="tbtn" id="btnSettings">设置</button>
+    </div>
+
+    <nav class="pathbar" id="pathbar" aria-label="位置">
+      <span>图译</span><span class="sep">›</span><span>已打开</span><span class="sep">›</span><b id="pathName">电气原理图.dwg</b>
+    </nav>
+
+    <div class="body">
+      <aside class="files" aria-label="已打开的图纸">
+        <div class="list">
+          <table>
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>种类</th>
+                <th style="text-align:right">句子</th>
+              </tr>
+            </thead>
+            <tbody id="fileRows">
+              <tr class="on" data-file="电气原理图.dwg" data-n="86">
+                <td class="name"><i class="kind-dot" aria-hidden="true"></i><span>电气原理图.dwg</span></td>
+                <td class="ext">DWG</td>
+                <td class="num">86</td>
+              </tr>
+              <tr data-file="配电箱.dxf" data-n="41">
+                <td class="name"><i class="kind-dot dxf" aria-hidden="true"></i><span>配电箱.dxf</span></td>
+                <td class="ext">DXF</td>
+                <td class="num">41</td>
+              </tr>
+              <tr data-file="总图-A1.dwg" data-n="120">
+                <td class="name"><i class="kind-dot" aria-hidden="true"></i><span>总图-A1.dwg</span></td>
+                <td class="ext">DWG</td>
+                <td class="num">120</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="side-foot">
+          <button type="button" class="on" data-go="files" id="navFiles">图纸</button>
+          <button type="button" data-go="batch" id="navBatch">批量</button>
+          <button type="button" data-go="settings" id="navSettings">设置</button>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="view on" id="viewFiles">
+          <div class="filters">
+            不译这些
+            <label><input type="checkbox" checked /> 数字、尺寸</label>
+            <label><input type="checkbox" checked /> 重复的句子</label>
+            <label><input type="checkbox" checked /> 不是原文那种语言</label>
+            <span class="pair">
+              写回成
+              <select aria-label="写回成什么样">
+                <option selected>图纸上只留译文</option>
+                <option>原文和译文都留</option>
+                <option>译文在前，原文也留</option>
+              </select>
+              <select aria-label="原文语言"><option selected>中</option><option>英</option><option>日</option><option>韩</option><option>德</option><option>法</option></select>
+              →
+              <select aria-label="译文语言"><option>中</option><option selected>英</option><option>日</option><option>韩</option><option>德</option><option>法</option></select>
+            </span>
+          </div>
+          <div class="table" id="tableWrap">
+            <table class="grid" id="grid">
+              <thead>
+                <tr>
+                  <th style="width:36px"><input type="checkbox" checked aria-label="全选" /></th>
+                  <th>原文</th>
+                  <th>译文</th>
+                  <th>图层 / 类型</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="on"><td><input type="checkbox" checked /></td><td class="src">电气原理图</td><td><input type="text" value="Electrical Schematic" aria-label="译文 电气原理图" /></td><td class="kind">0 · MTEXT</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">平面布置图</td><td><input type="text" value="Floor Plan" aria-label="译文 平面布置图" /></td><td class="kind">0 · TEXT</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">隔墙定位图</td><td><input type="text" value="Partition Location Plan" aria-label="译文 隔墙定位图" /></td><td class="kind">A-WALL · TEXT</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">进线柜</td><td><input type="text" value="Incoming Cabinet" aria-label="译文 进线柜" /></td><td class="kind">E-POWR · ATTRIB</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">接地</td><td><input type="text" value="Earthing" aria-label="译文 接地" /></td><td class="kind">E-POWR · MTEXT</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">总图</td><td><input type="text" value="General Layout" aria-label="译文 总图" /></td><td class="kind">TITLE · TEXT</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">材料表</td><td><input type="text" value="Bill of Materials" aria-label="译文 材料表" /></td><td class="kind">0 · TABLE</td></tr>
+                <tr><td><input type="checkbox" checked /></td><td class="src">电缆桥架</td><td><input type="text" value="Cable Tray" aria-label="译文 电缆桥架" /></td><td class="kind">E-TRAY · MTEXT</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="empty" id="empty" hidden>
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <rect x="8" y="6" width="28" height="32" rx="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M14 16h16M14 22h12M14 28h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <p>还没打开图纸，点左上角打开</p>
+          </div>
+        </div>
+
+        <div class="view" id="viewBatch">
+          <div class="jobs" id="jobs">
+            <div class="job">
+              <span>电气原理图.dwg</span>
+              <span>图纸上只留译文</span>
+              <span class="bar"><i style="width:70%"></i></span>
+              <span>翻译中</span>
+            </div>
+            <div class="job">
+              <span>配电箱.dxf</span>
+              <span>图纸上只留译文</span>
+              <span class="bar"><i style="width:0"></i></span>
+              <span>排队</span>
+            </div>
+            <div class="job">
+              <span>总图-A1.dwg</span>
+              <span>图纸上只留译文</span>
+              <span class="bar"><i style="width:0"></i></span>
+              <span>排队</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings" id="settings" aria-label="设置">
+        <nav class="set-nav" aria-label="设置分类">
+          <h2>设置</h2>
+          <button type="button" class="on" data-pane="translate">翻译</button>
+          <button type="button" data-pane="skip">不译这些</button>
+          <button type="button" data-pane="write">写回图纸</button>
+          <button type="button" data-pane="take">从图纸里取字</button>
+          <button type="button" data-pane="terms">我的术语</button>
+          <button type="button" data-pane="machine">这台电脑</button>
+        </nav>
+        <div class="set-body">
+          <div class="pane on" id="pane-translate">
+            <h3>翻译</h3>
+            <p class="lead">用谁来译，原文是哪种语言。</p>
+            <div class="group">
+              <h4>用谁译</h4>
+              <label><input type="radio" name="eng" checked /> 网上翻译</label>
+              <label><input type="radio" name="eng" /> 这台电脑</label>
+              <label><input type="radio" name="eng" /> 自己的接口</label>
+            </div>
+            <div class="group">
+              <h4>网上翻译</h4>
+              <label class="stack">服务
+                <select aria-label="网上翻译服务" style="height:28px;border:0;background:var(--inset);border-radius:6px;padding:0 8px">
+                  <option selected>DeepL</option>
+                  <option>Azure</option>
+                </select>
+              </label>
+              <label class="stack">钥匙
+                <input type="password" name="deepl_key" autocomplete="off" placeholder="粘贴网上翻译的钥匙…" />
+              </label>
+            </div>
+            <p class="note">这台电脑走 Ollama。自己的接口填地址、钥匙和模型名，跟网上翻译是两回事。</p>
+          </div>
+          <div class="pane" id="pane-skip">
+            <h3>不译这些</h3>
+            <p class="lead">勾上的，翻译时会跳过。</p>
+            <div class="group">
+              <label><input type="checkbox" checked /> 数字、尺寸</label>
+              <label><input type="checkbox" checked /> 重复的句子</label>
+              <label><input type="checkbox" checked /> 不是原文那种语言</label>
+            </div>
+            <p class="note">「不是原文那种语言」：原文是中文时，英文句子不拿去译。</p>
+          </div>
+          <div class="pane" id="pane-write">
+            <h3>写回图纸</h3>
+            <p class="lead">新图里的字怎么摆。</p>
+            <div class="group">
+              <label><input type="radio" name="lay" checked /> 图纸上只留译文</label>
+              <label><input type="radio" name="lay" /> 原文和译文都留</label>
+              <label><input type="radio" name="lay" /> 译文在前，原文也留</label>
+              <label><input type="checkbox" /> 文件名一并翻译</label>
+            </div>
+          </div>
+          <div class="pane" id="pane-take">
+            <h3>从图纸里取字</h3>
+            <p class="lead">哪些位置的字要收进来。</p>
+            <div class="group">
+              <h4>范围</h4>
+              <label><input type="checkbox" checked /> 块上的说明</label>
+              <label><input type="checkbox" /> 块里面的字</label>
+              <label><input type="checkbox" checked /> 标注、表格</label>
+              <label><input type="checkbox" checked /> 模型里的字</label>
+              <label><input type="checkbox" checked /> 图框里的字</label>
+            </div>
+            <div class="group">
+              <h4>图层</h4>
+              <label><input type="checkbox" /> 冻结图层里的字</label>
+              <label><input type="checkbox" /> 锁定图层里的字</label>
+              <label><input type="checkbox" /> 关掉的图层里的字</label>
+            </div>
+          </div>
+          <div class="pane" id="pane-terms">
+            <h3>我的术语</h3>
+            <p class="lead">内置词表不能改。这里是你自己的对应。</p>
+            <div class="group">
+              <div class="term-row">
+                <input value="进线柜" aria-label="术语原文" />
+                <input value="Incoming Cabinet" aria-label="术语译文" />
+                <button type="button" class="tbtn">保存</button>
+              </div>
+              <div class="term-row">
+                <input value="接地" aria-label="术语原文" />
+                <input value="Earthing" aria-label="术语译文" />
+                <button type="button" class="tbtn">保存</button>
+              </div>
+              <div class="term-row">
+                <input placeholder="新原文…" aria-label="新术语原文" />
+                <input placeholder="新译文…" aria-label="新术语译文" />
+                <button type="button" class="tbtn">添加</button>
+              </div>
+            </div>
+            <p class="note">改完点保存。也可以导出成表格，以后再导回来。</p>
+          </div>
+          <div class="pane" id="pane-machine">
+            <h3>这台电脑</h3>
+            <p class="lead">DWG 要靠本机的 ODA。没装也能译 DXF。</p>
+            <div class="group">
+              <p class="note">ODA 已装在这台电脑。术语表 393 条。</p>
+              <p class="note">写回的新图默认放在原图旁边。</p>
+            </div>
+            <p class="note">检查有没有新版本，看窗口最底下那一行，不会另开窗口。</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="foot">
+      <span class="live">ODA 已安装</span>
+      <span>术语表 <b>393</b></span>
+      <span>全部文字 <b id="nAll">12,840</b></span>
+      <span>去掉重复 <b id="nUniq">3,921</b></span>
+      <span>3 个项目</span>
+      <span id="status">译完。可以改译文再写回。</span>
+      <button type="button" class="upd" id="btnUpdate" aria-live="polite">
+        <i class="spin" aria-hidden="true"></i>
+        <span id="updText">检查更新</span>
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const win = document.getElementById("win");
+      const wtitle = document.getElementById("wtitle");
+      const pathName = document.getElementById("pathName");
+      const viewFiles = document.getElementById("viewFiles");
+      const viewBatch = document.getElementById("viewBatch");
+      const empty = document.getElementById("empty");
+      const tableWrap = document.getElementById("tableWrap");
+      const fileRows = document.getElementById("fileRows");
+      const btnOpen = document.getElementById("btnOpen");
+      const btnTranslate = document.getElementById("btnTranslate");
+      const btnWrite = document.getElementById("btnWrite");
+      const btnBatch = document.getElementById("btnBatch");
+      const btnSettings = document.getElementById("btnSettings");
+      const navFiles = document.getElementById("navFiles");
+      const navBatch = document.getElementById("navBatch");
+      const navSettings = document.getElementById("navSettings");
+      const btnUpdate = document.getElementById("btnUpdate");
+      const updText = document.getElementById("updText");
+      const status = document.getElementById("status");
+      const seed = fileRows.innerHTML;
+      let view = "files";
+      let busy = false;
+
+      function hasFiles() {
+        return fileRows.querySelectorAll("tr").length > 0;
+      }
+
+      function setView(next) {
+        view = next;
+        win.classList.toggle("is-settings", next === "settings");
+        viewFiles.classList.toggle("on", next === "files");
+        viewBatch.classList.toggle("on", next === "batch");
+        navFiles.classList.toggle("on", next === "files");
+        navBatch.classList.toggle("on", next === "batch");
+        navSettings.classList.toggle("on", next === "settings");
+        btnBatch.classList.toggle("on", next === "batch");
+        btnSettings.classList.toggle("on", next === "settings");
+        wtitle.textContent = next === "settings" ? "设置" : "图译";
+        const canWork = hasFiles() && next === "files";
+        btnTranslate.disabled = !canWork;
+        btnWrite.disabled = !canWork;
+        if (next === "settings") status.textContent = "改完直接生效，不用再点保存。";
+        else if (next === "batch") status.textContent = hasFiles() ? "按列表顺序一张一张译、写回。" : "还没打开图纸，点左上角打开";
+        else status.textContent = hasFiles() ? "译完。可以改译文再写回。" : "还没打开图纸，点左上角打开";
+      }
+
+      function showEmpty(on) {
+        empty.hidden = !on;
+        tableWrap.hidden = on;
+        btnTranslate.disabled = on || view !== "files";
+        btnWrite.disabled = on || view !== "files";
+        pathName.textContent = on ? "（没有图纸）" : (fileRows.querySelector("tr.on span") || {}).textContent || "已打开";
+        if (on) status.textContent = "还没打开图纸，点左上角打开";
+      }
+
+      fileRows.addEventListener("click", function (event) {
+        const row = event.target.closest("tr");
+        if (!row) return;
+        fileRows.querySelectorAll("tr").forEach(function (el) { el.classList.remove("on"); });
+        row.classList.add("on");
+        pathName.textContent = row.getAttribute("data-file");
+        setView("files");
+      });
+
+      btnOpen.addEventListener("click", function () {
+        if (!hasFiles()) fileRows.innerHTML = seed;
+        showEmpty(false);
+        setView("files");
+        status.textContent = "已打开 3 张图。点左边那张，再译。";
+      });
+
+      btnTranslate.addEventListener("click", function () {
+        status.textContent = "正在翻译…";
+      });
+      btnWrite.addEventListener("click", function () {
+        status.textContent = "正在写回图纸…";
+      });
+
+      btnBatch.addEventListener("click", function () { setView("batch"); });
+      navBatch.addEventListener("click", function () { setView("batch"); });
+      navFiles.addEventListener("click", function () { setView("files"); });
+      btnSettings.addEventListener("click", function () { setView("settings"); });
+      navSettings.addEventListener("click", function () { setView("settings"); });
+
+      document.querySelectorAll(".set-nav button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".set-nav button").forEach(function (el) { el.classList.remove("on"); });
+          document.querySelectorAll(".pane").forEach(function (el) { el.classList.remove("on"); });
+          btn.classList.add("on");
+          document.getElementById("pane-" + btn.getAttribute("data-pane")).classList.add("on");
+        });
+      });
+
+      btnUpdate.addEventListener("click", function () {
+        if (busy) return;
+        busy = true;
+        btnUpdate.classList.add("is-busy");
+        btnUpdate.disabled = true;
+        updText.textContent = "正在检查…";
+        window.setTimeout(function () {
+          btnUpdate.classList.remove("is-busy");
+          btnUpdate.disabled = false;
+          updText.textContent = "已是 0.1.5";
+          busy = false;
+        }, 900);
+      });
+
+      if (location.hash === "#empty") {
+        fileRows.innerHTML = "";
+        showEmpty(true);
+        setView("files");
+      } else {
+        showEmpty(false);
+        btnTranslate.disabled = false;
+        btnWrite.disabled = false;
+      }
+    }());
+  </script>
+</body>
+</html>

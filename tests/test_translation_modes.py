@@ -538,12 +538,13 @@ class EngineAndGlossaryTests(unittest.TestCase):
         text = Path(__file__).resolve().parents[1].joinpath("frontend", "src", "App.jsx").read_text(encoding="utf-8")
         self.assertIn("请先启动 Ollama。", text)
         self.assertIn("无法连接自定义接口。", text)
-        self.assertIn("剩下的要填云引擎 Key，或手填译文。", text)
+        self.assertIn("剩下的要填网上翻译的密钥，或手填译文。", text)
         self.assertIn('setStatus("术语表是空的")', text)
         self.assertIn("术语表读不出来。", text)
-        self.assertIn('setEngine("cloud")', text)
-        self.assertIn('aria-label="源语言"', text)
-        self.assertIn('aria-label="目标语言"', text)
+        self.assertIn('useState("cloud")', text)
+        self.assertIn("网上翻译", text)
+        self.assertIn('aria-label="原文"', text)
+        self.assertIn('aria-label="译文"', text)
 
     def test_translate_api_failure_logs_stay_chinese(self):
         dxf = Path(self.tmp.name) / "ok.dxf"

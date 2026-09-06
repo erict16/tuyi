@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1280, height=800" />
+  <meta name="theme-color" content="#0f1011" />
+  <title>C · Linear 密排 · 图译</title>
+  <style>
+    /* Linear product density in a Mac window.
+       Plus skeleton: Application UI stacked “With bottom border”
+       + sidebar + checkbox table + two-column settings.
+       Recolor: Linear canvas #0f1011, lavender #5e6ad2. No pills. */
+    :root {
+      --canvas: #0f1011;
+      --surface: #141516;
+      --lift: #18191a;
+      --sidebar: #0c0c0d;
+      --ink: #f7f8f8;
+      --muted: #8a8f98;
+      --subtle: #62666d;
+      --hair: #23252a;
+      --hair-strong: #34343a;
+      --accent: #5e6ad2;
+      --accent-hover: #828fff;
+      --accent-focus: #5e69d1;
+      --on-accent: #ffffff;
+      --ok: #27a644;
+      --row: rgba(94, 106, 210, 0.16);
+      --red: #ff5f57;
+      --yel: #febc2e;
+      --grn: #28c840;
+      --ease: cubic-bezier(0.23, 1, 0.32, 1);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 13px/1.4 "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      letter-spacing: -0.01em;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, select, input { font: inherit; color: inherit; }
+    button { appearance: none; border: 0; background: none; cursor: default; }
+    .skip {
+      position: absolute;
+      left: -9999px;
+    }
+    .skip:focus {
+      left: 10px;
+      top: 8px;
+      z-index: 40;
+      padding: 4px 8px;
+      background: var(--lift);
+      color: var(--ink);
+      border-radius: 6px;
+    }
+
+    .win {
+      width: 1280px;
+      height: 800px;
+      display: flex;
+      flex-direction: column;
+      background: var(--canvas);
+    }
+
+    /* Native macOS titlebar — the only traffic lights */
+    .titlebar {
+      height: 28px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background: var(--canvas);
+      border-bottom: 1px solid var(--hair);
+    }
+    .lights {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 12px;
+      width: 78px;
+      flex: none;
+    }
+    .lights i {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: block;
+      box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.28);
+    }
+    .lights .r { background: var(--red); }
+    .lights .y { background: var(--yel); }
+    .lights .g { background: var(--grn); }
+    .win-title {
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 590;
+      letter-spacing: -0.02em;
+      pointer-events: none;
+      color: var(--muted);
+    }
+
+    /* One row of text actions. No pills, no second lights. */
+    .cmd {
+      height: 36px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 10px 0 8px;
+      border-bottom: 1px solid var(--hair);
+      background: var(--canvas);
+    }
+    .cmd .act {
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: background-color 160ms var(--ease), color 160ms var(--ease), transform 160ms var(--ease);
+    }
+    .cmd .act:hover { background: var(--lift); }
+    .cmd .act:active { transform: scale(0.97); }
+    .cmd .act.on { color: var(--accent-hover); }
+    .cmd .act.pri {
+      background: var(--accent);
+      color: var(--on-accent);
+      padding: 0 10px;
+      margin-left: 4px;
+    }
+    .cmd .act.pri:hover { background: var(--accent-hover); }
+    .cmd .act:focus-visible,
+    .cmd select:focus-visible,
+    .foot button:focus-visible,
+    .nav-item:focus-visible,
+    .file:focus-visible,
+    .link:focus-visible,
+    .back:focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--accent-focus) 50%, transparent);
+      outline-offset: 1px;
+    }
+    .cmd .rule {
+      width: 1px;
+      height: 14px;
+      background: var(--hair-strong);
+      margin: 0 8px;
+      flex: none;
+    }
+    .grow { flex: 1; }
+    .pair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--subtle);
+      font-weight: 500;
+      margin-right: 4px;
+    }
+    .pair select {
+      height: 26px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 500;
+      padding: 0 2px;
+      border-radius: 6px;
+    }
+    .pair select:hover { background: var(--lift); }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: background-color 160ms var(--ease), transform 160ms var(--ease);
+    }
+    .back:hover { background: var(--lift); }
+    .back:active { transform: scale(0.97); }
+    .back svg { display: block; }
+    .cmd-title {
+      font-weight: 590;
+      letter-spacing: -0.02em;
+      margin-left: 4px;
+    }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+    .side {
+      width: 200px;
+      flex: none;
+      background: var(--sidebar);
+      border-right: 1px solid var(--hair);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .side h2 {
+      margin: 0;
+      padding: 12px 14px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--subtle);
+    }
+    .file {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 1px 6px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      min-width: 0;
+      text-align: left;
+      width: calc(100% - 12px);
+      transition: background-color 160ms var(--ease);
+    }
+    .file:hover { background: var(--lift); }
+    .file.on { background: var(--lift); }
+    .file .name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file .meta {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--subtle);
+      font-variant-numeric: tabular-nums;
+    }
+    .file.on .meta { color: var(--muted); }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ok);
+      flex: none;
+    }
+    .dot.dxf { background: var(--muted); }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--canvas);
+    }
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 28px;
+      padding: 0 14px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--hair);
+      flex: none;
+    }
+    .filters label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: default;
+    }
+    .filters input { accent-color: var(--accent); }
+    .filters select {
+      height: 22px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 500;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+    .filters .quiet {
+      margin-left: auto;
+      display: flex;
+      gap: 12px;
+    }
+    .link {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 0;
+      background: none;
+      border-radius: 4px;
+    }
+    .link:hover { color: var(--ink); }
+
+    .table {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 7px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--hair);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--canvas);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--subtle);
+      letter-spacing: 0.02em;
+    }
+    td.src { font-weight: 500; }
+    td.kind { color: var(--subtle); font-size: 12px; }
+    td input[type="text"] {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 2px 4px;
+      margin: -2px -4px;
+      border-radius: 4px;
+    }
+    td input[type="text"]:focus {
+      outline: 1.5px solid var(--accent);
+      background: var(--surface);
+    }
+    tr:hover td { background: var(--surface); }
+    tr.on td { background: var(--row); }
+    tr.skip { color: var(--subtle); }
+    tr.skip td.src { text-decoration: line-through; }
+    input[type="checkbox"] { accent-color: var(--accent); }
+
+    .empty {
+      flex: 1;
+      display: none;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .empty p { margin: 0; }
+
+    /* Batch — Linear changelog-row list, not cards */
+    .jobs {
+      flex: 1;
+      overflow: auto;
+      padding: 6px 0;
+      min-height: 0;
+    }
+    .job {
+      display: grid;
+      grid-template-columns: 1fr 140px 160px 64px;
+      gap: 16px;
+      align-items: center;
+      padding: 9px 16px;
+      border-bottom: 1px solid var(--hair);
+      font-size: 13px;
+    }
+    .job:hover { background: var(--surface); }
+    .job .sub { color: var(--muted); font-size: 12px; }
+    .bar {
+      height: 3px;
+      background: var(--hair-strong);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+    .st-ok { color: var(--ok); font-variant-numeric: tabular-nums; }
+    .st-run { color: var(--accent-hover); }
+    .st-wait { color: var(--subtle); }
+
+    /* Settings: dedicated view, not a sheet */
+    .set {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+    }
+    .set-nav {
+      width: 200px;
+      flex: none;
+      border-right: 1px solid var(--hair);
+      background: var(--sidebar);
+      padding: 10px 8px;
+    }
+    .nav-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 1px;
+      transition: background-color 160ms var(--ease), color 160ms var(--ease);
+    }
+    .nav-item:hover { background: var(--lift); color: var(--ink); }
+    .nav-item.on {
+      background: var(--lift);
+      color: var(--ink);
+    }
+    .set-pane {
+      flex: 1;
+      min-width: 0;
+      overflow: auto;
+      padding: 22px 36px 40px;
+    }
+    .set-pane h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 590;
+      letter-spacing: -0.03em;
+    }
+    .lead {
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 52ch;
+    }
+    .group {
+      border: 1px solid var(--hair);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+      margin-bottom: 16px;
+      max-width: 640px;
+    }
+    .row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--hair);
+    }
+    .row:last-child { border-bottom: 0; }
+    .row > label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .row b {
+      display: block;
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .row b + span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--hair);
+    }
+    .field:last-child { border-bottom: 0; }
+    .field label {
+      width: 72px;
+      flex: none;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .field input, .field select {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      border: 1px solid var(--hair-strong);
+      background: var(--canvas);
+      border-radius: 6px;
+      padding: 0 8px;
+    }
+    .field input:focus, .field select:focus {
+      outline: 2px solid color-mix(in srgb, var(--accent-focus) 50%, transparent);
+      border-color: transparent;
+    }
+    .term-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 6px;
+      padding: 6px 14px;
+      align-items: center;
+      border-bottom: 1px solid var(--hair);
+    }
+    .term-row:last-child { border-bottom: 0; }
+    .term-row input {
+      min-width: 0;
+      height: 28px;
+      border: 1px solid var(--hair-strong);
+      background: var(--canvas);
+      border-radius: 6px;
+      padding: 0 8px;
+    }
+    .ghost {
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .ghost:hover { background: var(--lift); color: var(--ink); }
+
+    .foot {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 26px;
+      padding: 0 14px;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--canvas);
+      border-top: 1px solid var(--hair);
+      flex: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .foot b { color: var(--ink); font-weight: 590; }
+    .live { color: var(--ok); font-weight: 500; }
+    .upd {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .upd button {
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: background-color 180ms var(--ease), color 180ms var(--ease), opacity 180ms var(--ease), transform 160ms var(--ease);
+    }
+    .upd button:hover { background: var(--lift); color: var(--ink); }
+    .upd button:active { transform: scale(0.97); }
+    .spin {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid var(--hair-strong);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex: none;
+    }
+    .pulse { animation: pulse 180ms var(--ease); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse {
+      from { opacity: 0.4; }
+      to { opacity: 1; }
+    }
+    .upd-msg {
+      color: var(--ink);
+      transition: opacity 180ms var(--ease);
+    }
+
+    .cmd-work { display: contents; }
+    .cmd-set { display: none; }
+    .jobs { display: none; }
+    .set { display: none; }
+
+    [data-view="empty"] .side,
+    [data-view="empty"] .filters,
+    [data-view="empty"] .table,
+    [data-view="batch"] .filters,
+    [data-view="batch"] .table,
+    [data-view="batch"] .side,
+    [data-view="settings"] .side,
+    [data-view="settings"] .main,
+    [data-view="settings"] .cmd-work { display: none; }
+
+    [data-view="empty"] .empty { display: grid; }
+    [data-view="batch"] .jobs { display: block; }
+    [data-view="settings"] .set { display: flex; }
+    [data-view="settings"] .cmd-set { display: flex; align-items: center; width: 100%; gap: 2px; }
+    [data-view="empty"] .act-tx,
+    [data-view="empty"] .act-wb { opacity: 0.4; pointer-events: none; }
+
+    [data-pane] { display: none; }
+    [data-pane].on { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spin { animation: pulse 180ms var(--ease) infinite; border-top-color: var(--hair-strong); }
+      .cmd .act, .back, .upd button { transition: none; }
+      .cmd .act:active, .back:active, .upd button:active { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#grid">跳到文本表</a>
+  <div class="win" id="app" data-view="empty" role="application" aria-label="图译">
+    <header class="titlebar">
+      <div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+      <div class="win-title">图译</div>
+    </header>
+
+    <nav class="cmd" aria-label="操作">
+      <div class="cmd-work">
+        <button type="button" class="act" id="btn-open">打开图纸</button>
+        <button type="button" class="act pri act-tx" id="btn-tx">翻译</button>
+        <button type="button" class="act act-wb" id="btn-wb">写回</button>
+        <button type="button" class="act" id="btn-batch" data-viewbtn="batch">批量</button>
+        <span class="grow"></span>
+        <div class="pair">
+          <select aria-label="原文语言" id="src">
+            <option value="zh-Hans" selected>中</option>
+            <option value="en">英</option>
+            <option value="ja">日</option>
+            <option value="ko">韩</option>
+            <option value="de">德</option>
+            <option value="fr">法</option>
+          </select>
+          →
+          <select aria-label="译文语言" id="tgt">
+            <option value="en" selected>英</option>
+            <option value="zh-Hans">中</option>
+            <option value="ja">日</option>
+            <option value="ko">韩</option>
+            <option value="de">德</option>
+            <option value="fr">法</option>
+          </select>
+        </div>
+        <span class="rule" aria-hidden="true"></span>
+        <button type="button" class="act" id="btn-set">设置</button>
+      </div>
+      <div class="cmd-set">
+        <button type="button" class="back" id="btn-back" aria-label="返回图纸">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M7.5 2.5 3.5 6l4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          图纸
+        </button>
+        <span class="grow"></span>
+        <span class="cmd-title">设置</span>
+        <span class="grow"></span>
+      </div>
+    </nav>
+
+    <div class="body">
+      <aside class="side">
+        <h2>图纸 · 3</h2>
+        <button type="button" class="file on" data-file="0">
+          <span class="dot"></span>
+          <span class="name">电气原理图.dwg</span>
+          <span class="meta">当前</span>
+        </button>
+        <button type="button" class="file" data-file="1">
+          <span class="dot dxf"></span>
+          <span class="name">配电箱.dxf</span>
+          <span class="meta">DXF</span>
+        </button>
+        <button type="button" class="file" data-file="2">
+          <span class="dot"></span>
+          <span class="name">总图-A1.dwg</span>
+          <span class="meta">DWG</span>
+        </button>
+      </aside>
+
+      <section class="main">
+        <div class="filters">
+          不译
+          <label><input type="checkbox" checked /> 数字、尺寸</label>
+          <label><input type="checkbox" checked /> 重复的句子</label>
+          <label><input type="checkbox" checked /> 不是原文那种语言</label>
+          <span class="quiet">
+            写回
+            <select aria-label="写回时图纸上留什么" id="layout">
+              <option value="trans" selected>图纸上只留译文</option>
+              <option value="both">原文和译文都留</option>
+              <option value="rev">译文在前，原文也留</option>
+            </select>
+            <button type="button" class="link">导出 PDF</button>
+            <button type="button" class="link">打印</button>
+          </span>
+        </div>
+
+        <div class="table">
+          <table id="grid">
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" checked aria-label="全选" /></th>
+                <th>原文</th>
+                <th>译文</th>
+                <th>图层</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="on"><td><input type="checkbox" checked /></td><td class="src">电气原理图</td><td><input type="text" value="Electrical Schematic" aria-label="译文 电气原理图" /></td><td class="kind">0 · 多行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">平面布置图</td><td><input type="text" value="Floor Plan" aria-label="译文 平面布置图" /></td><td class="kind">0 · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">隔墙定位图</td><td><input type="text" value="Partition Location Plan" aria-label="译文 隔墙定位图" /></td><td class="kind">A-WALL · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">进线柜</td><td><input type="text" value="Incoming Cabinet" aria-label="译文 进线柜" /></td><td class="kind">E-POWR · 块属性</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">接地</td><td><input type="text" value="Earthing" aria-label="译文 接地" /></td><td class="kind">E-POWR · 多行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">总图</td><td><input type="text" value="General Layout" aria-label="译文 总图" /></td><td class="kind">TITLE · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">材料表</td><td><input type="text" value="Bill of Materials" aria-label="译文 材料表" /></td><td class="kind">0 · 表格</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">电缆桥架</td><td><input type="text" value="Cable Tray" aria-label="译文 电缆桥架" /></td><td class="kind">E-TRAY · 多行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">预留洞</td><td><input type="text" value="Reserved Opening" aria-label="译文 预留洞" /></td><td class="kind">A-WALL · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">供电</td><td><input type="text" value="Power Supply" aria-label="译文 供电" /></td><td class="kind">E-POWR · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">图纸会签</td><td><input type="text" value="Drawing Approval" aria-label="译文 图纸会签" /></td><td class="kind">TITLE · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">开洞</td><td><input type="text" value="Opening" aria-label="译文 开洞" /></td><td class="kind">A-WALL · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">配电箱</td><td><input type="text" value="Distribution Board" aria-label="译文 配电箱" /></td><td class="kind">E-POWR · 块属性</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">天花图</td><td><input type="text" value="Ceiling Plan" aria-label="译文 天花图" /></td><td class="kind">A-CLNG · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">剪力墙</td><td><input type="text" value="Shear Wall" aria-label="译文 剪力墙" /></td><td class="kind">S-WALL · 多行文字</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty">
+          <p>还没打开图纸，点左上角打开</p>
+        </div>
+
+        <div class="jobs">
+          <div class="job">
+            <div>电气原理图.dwg<div class="sub">中 → 英</div></div>
+            <div class="sub">图纸上只留译文</div>
+            <div class="bar"><i style="width:100%"></i></div>
+            <div class="st-ok">写回了</div>
+          </div>
+          <div class="job">
+            <div>配电箱.dxf<div class="sub">中 → 英</div></div>
+            <div class="sub">图纸上只留译文</div>
+            <div class="bar"><i style="width:62%"></i></div>
+            <div class="st-run">正在译</div>
+          </div>
+          <div class="job">
+            <div>总图-A1.dwg<div class="sub">中 → 英</div></div>
+            <div class="sub">图纸上只留译文</div>
+            <div class="bar"><i style="width:0"></i></div>
+            <div class="st-wait">排队</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="set">
+        <nav class="set-nav" aria-label="设置分类">
+          <button type="button" class="nav-item on" data-go="engine">翻译</button>
+          <button type="button" class="nav-item" data-go="scope">要译什么</button>
+          <button type="button" class="nav-item" data-go="filter">过滤</button>
+          <button type="button" class="nav-item" data-go="write">写回</button>
+          <button type="button" class="nav-item" data-go="terms">术语</button>
+          <button type="button" class="nav-item" data-go="machine">这台电脑</button>
+        </nav>
+        <div class="set-pane">
+          <div data-pane="engine" class="on">
+            <h3>翻译</h3>
+            <p class="lead">字送到哪里去译。密钥只存在这台电脑上。</p>
+            <div class="group" role="radiogroup" aria-label="用哪里译">
+              <div class="row">
+                <label>
+                  <input type="radio" name="eng" value="cloud" checked />
+                  <span><b>网上翻译</b><span>DeepL 或 Azure，要填密钥。</span></span>
+                </label>
+              </div>
+              <div class="row">
+                <label>
+                  <input type="radio" name="eng" value="local" />
+                  <span><b>这台电脑</b><span>用本机 Ollama，不经过网。</span></span>
+                </label>
+              </div>
+              <div class="row">
+                <label>
+                  <input type="radio" name="eng" value="custom" />
+                  <span><b>自己的接口</b><span>OpenAI 格式的地址，比如 DeepSeek。</span></span>
+                </label>
+              </div>
+            </div>
+            <div class="group" id="eng-cloud">
+              <div class="field">
+                <label for="prov">服务</label>
+                <select id="prov">
+                  <option>DeepL</option>
+                  <option>Azure</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="deepl">密钥</label>
+                <input id="deepl" type="password" autocomplete="off" placeholder="DeepL Key…" />
+              </div>
+            </div>
+            <div class="group" id="eng-local" hidden>
+              <div class="field">
+                <label for="ollama">地址</label>
+                <input id="ollama" value="http://127.0.0.1:11434" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="omodel">模型</label>
+                <input id="omodel" value="llama3.1" autocomplete="off" spellcheck="false" />
+              </div>
+            </div>
+            <div class="group" id="eng-custom" hidden>
+              <div class="field">
+                <label for="okey">密钥</label>
+                <input id="okey" type="password" autocomplete="off" placeholder="sk-…" />
+              </div>
+              <div class="field">
+                <label for="obase">地址</label>
+                <input id="obase" placeholder="https://api.deepseek.com/v1" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field">
+                <label for="om">模型</label>
+                <input id="om" placeholder="deepseek-chat" autocomplete="off" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div data-pane="scope">
+            <h3>要译什么</h3>
+            <p class="lead">打开图纸时扫哪些字。改完会重新扫当前这张图。</p>
+            <div class="group">
+              <div class="row"><label><input type="checkbox" checked /><span><b>块属性</b><span>标题栏、设备编号那种。</span></span></label></div>
+              <div class="row"><label><input type="checkbox" /><span><b>块里的字</b><span>块定义里的说明文字。</span></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>标注、表格</b><span>尺寸文字和材料表。</span></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>模型空间</b></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>图纸空间</b><span>图框、会签栏。</span></span></label></div>
+            </div>
+            <div class="group">
+              <div class="row"><label><input type="checkbox" /><span><b>冻结图层里的字</b></span></label></div>
+              <div class="row"><label><input type="checkbox" /><span><b>锁定图层里的字</b></span></label></div>
+              <div class="row"><label><input type="checkbox" /><span><b>关掉的图层里的字</b></span></label></div>
+              <div class="row"><label><input type="checkbox" /><span><b>连文件名一起译</b></span></label></div>
+            </div>
+          </div>
+
+          <div data-pane="filter">
+            <h3>过滤</h3>
+            <p class="lead">这些不送去译，表里也不列。</p>
+            <div class="group">
+              <div class="row"><label><input type="checkbox" checked /><span><b>数字、尺寸</b><span>像 1200、φ25 这种。</span></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>重复的句子</b><span>同一句只译一次。</span></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>不是原文那种语言</b><span>原文是中文时，已经是英文的就跳过。</span></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>用术语表</b><span>对得上的词按你的译法。</span></span></label></div>
+            </div>
+          </div>
+
+          <div data-pane="write">
+            <h3>写回</h3>
+            <p class="lead">新文件，不改你打开的那张原图。</p>
+            <div class="group" role="radiogroup" aria-label="图纸上留什么">
+              <div class="row"><label><input type="radio" name="lay" checked /><span><b>图纸上只留译文</b><span>原文字换掉。</span></span></label></div>
+              <div class="row"><label><input type="radio" name="lay" /><span><b>原文和译文都留</b><span>原文在前。</span></span></label></div>
+              <div class="row"><label><input type="radio" name="lay" /><span><b>译文在前，原文也留</b></span></label></div>
+            </div>
+            <div class="group">
+              <div class="field">
+                <label for="outdir">放到</label>
+                <input id="outdir" value="文稿/Tuyi output" readonly />
+                <button type="button" class="ghost">选取</button>
+              </div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>按原来的文件夹放下</b></span></label></div>
+              <div class="row"><label><input type="checkbox" checked /><span><b>没有 ODA 时改写成 DXF</b></span></label></div>
+            </div>
+          </div>
+
+          <div data-pane="terms">
+            <h3>术语</h3>
+            <p class="lead">内置词表只读。这里改的是你自己的词。</p>
+            <div class="group">
+              <div class="term-row">
+                <input value="进线柜" aria-label="术语原文" />
+                <input value="Incoming Cabinet" aria-label="术语译文" />
+                <button type="button" class="ghost">保存</button>
+                <button type="button" class="ghost">删除</button>
+              </div>
+              <div class="term-row">
+                <input value="接地" aria-label="术语原文" />
+                <input value="Earthing" aria-label="术语译文" />
+                <button type="button" class="ghost">保存</button>
+                <button type="button" class="ghost">删除</button>
+              </div>
+              <div class="term-row">
+                <input placeholder="新原文…" aria-label="新术语原文" />
+                <input placeholder="新译文…" aria-label="新术语译文" />
+                <button type="button" class="ghost">添加</button>
+                <span></span>
+              </div>
+            </div>
+            <button type="button" class="ghost">加载术语表</button>
+            <button type="button" class="ghost">导出术语</button>
+          </div>
+
+          <div data-pane="machine">
+            <h3>这台电脑</h3>
+            <p class="lead">DWG 要靠本机的 ODA 转成 DXF。更新在窗口底下检查，不另开窗口。</p>
+            <div class="group">
+              <div class="row"><span><b>ODA</b><span>已装。DWG 可以直接打开。</span></span></div>
+              <div class="row"><span><b>术语</b><span>393 条。</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span class="live">ODA 已装</span>
+      <span>术语 <b>393</b></span>
+      <span>全部文字 <b id="n-all">0</b></span>
+      <span>去掉重复 <b id="n-uniq">0</b></span>
+      <span id="status" aria-live="polite">还没打开图纸，点左上角打开</span>
+      <span class="upd">
+        <span class="spin" id="spin" hidden></span>
+        <span class="upd-msg" id="upd-msg"></span>
+        <button type="button" id="btn-upd">检查更新</button>
+      </span>
+    </footer>
+  </div>
+  <script>
+    (function () {
+      const app = document.getElementById("app");
+      const status = document.getElementById("status");
+      const nAll = document.getElementById("n-all");
+      const nUniq = document.getElementById("n-uniq");
+      const spin = document.getElementById("spin");
+      const updMsg = document.getElementById("upd-msg");
+      const btnUpd = document.getElementById("btn-upd");
+      const btnBatch = document.getElementById("btn-batch");
+      let view = "empty";
+      let prev = "empty";
+      let checking = false;
+
+      function setView(next) {
+        if (next === "settings" && view !== "settings") prev = view;
+        view = next;
+        app.dataset.view = next;
+        btnBatch.classList.toggle("on", next === "batch");
+        if (next === "empty") {
+          nAll.textContent = "0";
+          nUniq.textContent = "0";
+          status.textContent = "还没打开图纸，点左上角打开";
+        } else if (next === "work") {
+          nAll.textContent = "12,840";
+          nUniq.textContent = "3,921";
+          status.textContent = "译完。可以改译文再写回。";
+        } else if (next === "batch") {
+          nAll.textContent = "12,840";
+          nUniq.textContent = "3,921";
+          status.textContent = "3 张图，1 张写回了，1 张正在译。";
+        } else {
+          status.textContent = "改完设置，返回图纸继续。";
+        }
+      }
+
+      document.getElementById("btn-open").addEventListener("click", function () {
+        setView("work");
+      });
+      document.getElementById("btn-tx").addEventListener("click", function () {
+        if (view === "empty") return;
+        setView("work");
+        status.textContent = "译完。术语 8，引擎 7。可以改译文再写回。";
+      });
+      document.getElementById("btn-wb").addEventListener("click", function () {
+        if (view === "empty") return;
+        status.textContent = "已写回 15 条（图纸上只留译文）→ 文稿/Tuyi output/电气原理图_en.dwg";
+      });
+      btnBatch.addEventListener("click", function () {
+        setView(view === "batch" ? "work" : "batch");
+      });
+      document.getElementById("btn-set").addEventListener("click", function () {
+        setView("settings");
+      });
+      document.getElementById("btn-back").addEventListener("click", function () {
+        setView(prev === "settings" ? "work" : prev);
+      });
+
+      document.querySelectorAll(".file").forEach(function (el) {
+        el.addEventListener("click", function () {
+          document.querySelectorAll(".file").forEach(function (f) {
+            f.classList.toggle("on", f === el);
+            const meta = f.querySelector(".meta");
+            if (f === el) meta.textContent = "当前";
+            else meta.textContent = f.querySelector(".dot").classList.contains("dxf") ? "DXF" : "DWG";
+          });
+          setView("work");
+          status.textContent = "正在提取文字…";
+          window.setTimeout(function () {
+            status.textContent = "提取 12,840 条，去掉重复 3,921。";
+          }, 180);
+        });
+      });
+
+      document.querySelectorAll(".nav-item").forEach(function (el) {
+        el.addEventListener("click", function () {
+          document.querySelectorAll(".nav-item").forEach(function (n) { n.classList.toggle("on", n === el); });
+          document.querySelectorAll("[data-pane]").forEach(function (p) {
+            p.classList.toggle("on", p.getAttribute("data-pane") === el.getAttribute("data-go"));
+          });
+        });
+      });
+
+      document.querySelectorAll("input[name=eng]").forEach(function (el) {
+        el.addEventListener("change", function () {
+          document.getElementById("eng-cloud").hidden = el.value !== "cloud";
+          document.getElementById("eng-local").hidden = el.value !== "local";
+          document.getElementById("eng-custom").hidden = el.value !== "custom";
+        });
+      });
+
+      btnUpd.addEventListener("click", function () {
+        if (checking) return;
+        checking = true;
+        btnUpd.disabled = true;
+        spin.hidden = false;
+        updMsg.hidden = false;
+        updMsg.textContent = "正在检查…";
+        updMsg.classList.remove("pulse");
+        void updMsg.offsetWidth;
+        updMsg.classList.add("pulse");
+        window.setTimeout(function () {
+          spin.hidden = true;
+          updMsg.textContent = "已是 0.1.5";
+          updMsg.classList.remove("pulse");
+          void updMsg.offsetWidth;
+          updMsg.classList.add("pulse");
+          btnUpd.disabled = false;
+          checking = false;
+        }, 900);
+      });
+
+      const hash = (location.hash || "").replace("#", "");
+      if (hash === "work" || hash === "batch" || hash === "settings") setView(hash);
+      else setView("empty");
+    }());
+  </script>
+</body>
+</html>

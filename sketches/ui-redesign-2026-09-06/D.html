@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1280, height=800" />
+  <title>D · 奶油纸 · 图译</title>
+  <!-- Plus: Application UI stacked layout + checkbox table + settings screens. Recolor: paper cream. Serif on 图译 only. -->
+  <style>
+    :root {
+      --paper: #f3ead6;
+      --bar: #efe4cc;
+      --sheet: #fffaf0;
+      --side: #ebe1cb;
+      --inset: #f6eedc;
+      --ink: #1c1812;
+      --muted: #6d6556;
+      --rule: rgba(72, 52, 24, .14);
+      --rule-strong: rgba(72, 52, 24, .22);
+      --accent: #8c3b1a;
+      --on-accent: #fffaf0;
+      --row: #f3e6c4;
+      --ok: #3f5c28;
+      --red: #ff5f57;
+      --yel: #febc2e;
+      --grn: #28c840;
+      --ease-out: cubic-bezier(.23, 1, .32, 1);
+      --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif SC", Georgia, serif;
+      --sans: -apple-system, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Helvetica Neue", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font: 13px/1.4 var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, select, input { font: inherit; color: inherit; }
+    button { appearance: none; border: 0; background: none; cursor: default; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .skip {
+      position: absolute;
+      left: -9999px;
+    }
+    .skip:focus {
+      left: 12px;
+      top: 12px;
+      z-index: 40;
+      padding: 4px 8px;
+      background: var(--sheet);
+    }
+
+    .win {
+      width: 1280px;
+      height: 800px;
+      display: flex;
+      flex-direction: column;
+      background: var(--paper);
+      position: relative;
+    }
+    .win::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      opacity: .045;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.55'/></svg>");
+      z-index: 20;
+    }
+
+    /* Native macOS titlebar — the only traffic-light row */
+    .titlebar {
+      height: 28px;
+      flex: none;
+      display: grid;
+      grid-template-columns: 78px 1fr 78px;
+      align-items: center;
+      background: var(--bar);
+      border-bottom: 1px solid var(--rule);
+    }
+    .lights {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 16px;
+    }
+    .lights i {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 .5px rgba(0,0,0,.18);
+    }
+    .lights .r { background: var(--red); }
+    .lights .y { background: var(--yel); }
+    .lights .g { background: var(--grn); }
+    .wordmark {
+      justify-self: center;
+      font-family: var(--serif);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      line-height: 1;
+    }
+
+    .toolbar {
+      height: 44px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      background: var(--bar);
+      border-bottom: 1px solid var(--rule-strong);
+    }
+    .tbtn {
+      height: 28px;
+      padding: 0 11px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      transition: background 160ms var(--ease-out), transform 160ms var(--ease-out), color 160ms var(--ease-out);
+    }
+    .tbtn:hover { background: rgba(72, 52, 24, .08); }
+    .tbtn:active { transform: scale(.97); }
+    .tbtn.pri {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+    .tbtn.pri:hover { filter: brightness(1.06); }
+    .tbtn.on {
+      background: rgba(140, 59, 26, .12);
+      color: var(--accent);
+    }
+    .grow { flex: 1; }
+    .pair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pair select, .engine {
+      height: 28px;
+      border: 0;
+      background: rgba(72, 52, 24, .08);
+      border-radius: 6px;
+      padding: 0 8px;
+      font: 600 12px var(--sans);
+    }
+    .engine { color: var(--ink); }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+    /* Work: sidebar + CAD table */
+    .side {
+      width: 208px;
+      flex: none;
+      background: var(--side);
+      border-right: 1px solid var(--rule-strong);
+      display: flex;
+      flex-direction: column;
+    }
+    .side h2, .set-nav p, .set-pane h3 {
+      margin: 0;
+      padding: 14px 16px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      color: var(--muted);
+    }
+    .item {
+      margin: 1px 8px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 160ms var(--ease-out);
+    }
+    .item:hover { background: rgba(72, 52, 24, .06); }
+    .item.on { background: var(--row); }
+    .item .meta {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ok);
+      flex: none;
+    }
+    .dot.dxf { background: #b45309; }
+    .hint {
+      margin-top: auto;
+      padding: 12px 16px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .x {
+      margin-left: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 16px;
+      text-align: center;
+      opacity: 0;
+    }
+    .item:hover .x { opacity: 1; }
+    .x:hover { background: rgba(72, 52, 24, .1); color: var(--ink); }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--sheet);
+      position: relative;
+    }
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 36px;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--rule);
+      flex: none;
+    }
+    .filters label { display: flex; align-items: center; gap: 5px; }
+    .filters input { accent-color: var(--accent); }
+    .filters select {
+      height: 24px;
+      border: 0;
+      background: rgba(72, 52, 24, .08);
+      border-radius: 6px;
+      padding: 0 8px;
+      font: 600 12px var(--sans);
+      margin-left: 6px;
+    }
+
+    .table { flex: 1; min-height: 0; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 8px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--sheet);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    td.src { font-weight: 600; }
+    td.kind { color: var(--muted); font-size: 12px; }
+    tr.on { background: var(--row); }
+    .cell input {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .cell input:focus {
+      outline: 1.5px solid var(--accent);
+      background: #fff;
+    }
+    input[type="checkbox"] { accent-color: var(--accent); }
+
+    .empty {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      background: var(--sheet);
+    }
+    .empty p {
+      margin: 0;
+      max-width: 22em;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .empty span { color: var(--muted); }
+
+    /* Batch */
+    .jobs {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 18px;
+      background: var(--sheet);
+    }
+    .job {
+      display: grid;
+      grid-template-columns: 1fr 140px 160px 72px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      background: var(--inset);
+      border-radius: 8px;
+      border: 1px solid var(--rule);
+    }
+    .bar {
+      height: 4px;
+      background: rgba(72, 52, 24, .12);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+
+    /* Settings — full page, not a sheet */
+    .settings {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      background: var(--sheet);
+    }
+    .set-nav {
+      width: 200px;
+      flex: none;
+      background: var(--side);
+      border-right: 1px solid var(--rule-strong);
+      padding: 8px 0;
+    }
+    .set-nav button {
+      display: block;
+      width: calc(100% - 16px);
+      margin: 1px 8px;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .set-nav button.on { background: var(--row); font-weight: 600; }
+    .set-nav button:hover { background: rgba(72, 52, 24, .06); }
+    .set-body { flex: 1; min-width: 0; overflow: auto; padding: 8px 28px 28px; }
+    .set-pane { display: none; max-width: 640px; }
+    .set-pane.on { display: block; }
+    .set-pane h3 {
+      padding: 18px 0 10px;
+      font-size: 13px;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+    .group {
+      background: var(--inset);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 4px 16px 12px;
+      margin-bottom: 14px;
+    }
+    .group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .group label:last-of-type { border-bottom: 0; }
+    .group label.field { display: flex; }
+    .group label.field span { min-width: 72px; color: var(--muted); }
+    .group input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--sheet);
+      padding: 0 8px;
+    }
+    .note {
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .term-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 6px;
+      align-items: center;
+      padding: 4px 0;
+    }
+    .term-row input {
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--sheet);
+      padding: 0 8px;
+    }
+
+    .foot {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 28px;
+      padding: 0 16px;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--bar);
+      border-top: 1px solid var(--rule);
+      flex: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .foot b { color: var(--ink); font-weight: 600; }
+    .live { color: var(--ok); font-weight: 600; }
+    .upd {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      transition: background 180ms var(--ease-out);
+    }
+    .upd:hover { background: rgba(72, 52, 24, .08); }
+    .upd i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid var(--ink);
+      border-right-color: transparent;
+      opacity: 0;
+      transform: scale(.9);
+      transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+    }
+    .upd.busy i {
+      opacity: 1;
+      transform: scale(1);
+      animation: spin .55s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .tbtn, .upd, .upd i, .item { transition: none; }
+      .upd.busy i { animation: none; opacity: 1; }
+    }
+
+    [data-page="work"] .page-batch,
+    [data-page="work"] .page-settings,
+    [data-page="batch"] .page-work,
+    [data-page="batch"] .page-settings,
+    [data-page="settings"] .page-work,
+    [data-page="settings"] .page-batch { display: none; }
+
+    [data-page="batch"] .page-batch,
+    [data-page="settings"] .page-settings { display: flex; }
+
+    [data-empty="true"] .filters,
+    [data-empty="true"] .table { display: none; }
+    [data-empty="false"] .empty { display: none; }
+    [data-empty="true"] .side-list { display: none; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#grid">跳到文本表</a>
+  <div class="win" id="win" data-page="work" data-empty="false" role="application" aria-label="图译">
+    <header class="titlebar">
+      <div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+      <div class="wordmark">图译</div>
+      <span></span>
+    </header>
+
+    <div class="toolbar">
+      <button type="button" class="tbtn" id="btn-open">打开图纸</button>
+      <button type="button" class="tbtn pri" id="btn-tr">翻译</button>
+      <button type="button" class="tbtn" id="btn-write">写回</button>
+      <button type="button" class="tbtn" id="btn-batch" data-tab="batch">批量</button>
+      <span class="grow"></span>
+      <div class="pair">
+        <select aria-label="原文语言">
+          <option selected>中</option>
+          <option>英</option>
+          <option>日</option>
+          <option>韩</option>
+          <option>德</option>
+          <option>法</option>
+        </select>
+        →
+        <select aria-label="译文语言">
+          <option selected>英</option>
+          <option>中</option>
+          <option>日</option>
+          <option>韩</option>
+          <option>德</option>
+          <option>法</option>
+        </select>
+      </div>
+      <button type="button" class="engine" id="btn-engine" title="去设置里改">网上翻译</button>
+      <button type="button" class="tbtn" id="btn-set" data-tab="settings">设置</button>
+    </div>
+
+    <div class="body page-work">
+      <aside class="side">
+        <h2>已打开</h2>
+        <div class="side-list" id="file-list">
+          <div class="item on" data-file="1"><span class="dot"></span>电气原理图.dwg<span class="meta">当前</span><button type="button" class="x" aria-label="关掉这张">×</button></div>
+          <div class="item" data-file="2"><span class="dot dxf"></span>配电箱.dxf<span class="meta">DXF</span><button type="button" class="x" aria-label="关掉这张">×</button></div>
+          <div class="item" data-file="3"><span class="dot"></span>总图-A1.dwg<span class="meta">DWG</span><button type="button" class="x" aria-label="关掉这张">×</button></div>
+        </div>
+        <p class="hint" id="side-hint">打开图纸，字会进右边这张表。译完再写回，原图不动。</p>
+      </aside>
+      <section class="main">
+        <div class="empty" id="empty">
+          <p>还没打开图纸，点左上角打开<br /><span>DWG 或 DXF 都行。</span></p>
+        </div>
+        <div class="filters">
+          先不看
+          <label><input type="checkbox" checked /> 数字、尺寸</label>
+          <label><input type="checkbox" checked /> 重复的句子</label>
+          <label><input type="checkbox" checked /> 不是原文那种语言</label>
+          <span style="margin-left:auto">
+            写回时
+            <select aria-label="写回时图纸上留什么">
+              <option selected>图纸上只留译文</option>
+              <option>原文和译文都留</option>
+              <option>译文在前，原文也留</option>
+            </select>
+          </span>
+        </div>
+        <div class="table">
+          <table id="grid">
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" checked aria-label="全选" /></th>
+                <th>原文</th>
+                <th>译文</th>
+                <th>哪一层</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="on"><td><input type="checkbox" checked /></td><td class="src">电气原理图</td><td class="cell"><input value="Electrical Schematic" aria-label="译文" /></td><td class="kind">0 · 多行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">平面布置图</td><td class="cell"><input value="Floor Plan" aria-label="译文" /></td><td class="kind">0 · 单行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">隔墙定位图</td><td class="cell"><input value="Partition Location Plan" aria-label="译文" /></td><td class="kind">A-WALL · 单行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">进线柜</td><td class="cell"><input value="Incoming Cabinet" aria-label="译文" /></td><td class="kind">E-POWR · 属性</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">接地</td><td class="cell"><input value="Earthing" aria-label="译文" /></td><td class="kind">E-POWR · 多行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">总图</td><td class="cell"><input value="General Layout" aria-label="译文" /></td><td class="kind">TITLE · 单行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">材料表</td><td class="cell"><input value="Bill of Materials" aria-label="译文" /></td><td class="kind">0 · 表格</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">电缆桥架</td><td class="cell"><input value="Cable Tray" aria-label="译文" /></td><td class="kind">E-TRAY · 多行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">预留洞</td><td class="cell"><input value="Reserved Opening" aria-label="译文" /></td><td class="kind">A-WALL · 单行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">图纸会签</td><td class="cell"><input value="Drawing Approval" aria-label="译文" /></td><td class="kind">TITLE · 单行字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">配电箱</td><td class="cell"><input value="Distribution Board" aria-label="译文" /></td><td class="kind">E-POWR · 属性</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">开洞</td><td class="cell"><input value="Opening" aria-label="译文" /></td><td class="kind">A-WALL · 单行字</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="body page-batch">
+      <aside class="side">
+        <h2>这一批 · 3</h2>
+        <div class="item on"><span class="dot"></span>电气原理图.dwg<span class="meta">当前</span></div>
+        <div class="item"><span class="dot dxf"></span>配电箱.dxf<span class="meta">DXF</span></div>
+        <div class="item"><span class="dot"></span>总图-A1.dwg<span class="meta">DWG</span></div>
+        <p class="hint">一夹图纸一起译。写回时按原来的文件夹放。</p>
+      </aside>
+      <div class="jobs">
+        <div class="job">
+          <span>电气原理图.dwg</span>
+          <span>图纸上只留译文</span>
+          <span class="bar"><i style="width:72%"></i></span>
+          <span>正在写回</span>
+        </div>
+        <div class="job">
+          <span>配电箱.dxf</span>
+          <span>图纸上只留译文</span>
+          <span class="bar"><i style="width:0"></i></span>
+          <span>排队</span>
+        </div>
+        <div class="job">
+          <span>总图-A1.dwg</span>
+          <span>图纸上只留译文</span>
+          <span class="bar"><i style="width:0"></i></span>
+          <span>排队</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="body page-settings">
+      <nav class="set-nav" aria-label="设置">
+        <p>设置</p>
+        <button type="button" class="on" data-pane="tr">翻译</button>
+        <button type="button" data-pane="pull">抽出哪些字</button>
+        <button type="button" data-pane="write">写回</button>
+        <button type="button" data-pane="terms">我的词</button>
+        <button type="button" data-pane="machine">这台电脑</button>
+      </nav>
+      <div class="set-body">
+        <section class="set-pane on" id="pane-tr">
+          <h3>用哪种翻译</h3>
+          <div class="group" role="radiogroup" aria-label="用哪种翻译">
+            <label><input type="radio" name="eng" checked /> 网上翻译</label>
+            <label><input type="radio" name="eng" /> 这台电脑</label>
+            <label><input type="radio" name="eng" /> 自己的接口</label>
+            <p class="note">网上翻译走 DeepL 或 Azure，要填密钥。这台电脑走 Ollama。自己的接口填兼容地址就行。</p>
+            <label class="field"><span>DeepL</span><input type="text" value="" placeholder="密钥" autocomplete="off" /></label>
+            <label class="field"><span>Azure</span><input type="text" value="" placeholder="密钥" autocomplete="off" /></label>
+            <label class="field"><span>地区</span><input type="text" value="" placeholder="eastasia" /></label>
+          </div>
+        </section>
+        <section class="set-pane" id="pane-pull">
+          <h3>抽出哪些字</h3>
+          <div class="group">
+            <label><input type="checkbox" checked /> 图里块上的属性字</label>
+            <label><input type="checkbox" /> 图块里面的字</label>
+            <label><input type="checkbox" checked /> 尺寸标注和表格</label>
+            <label><input type="checkbox" checked /> 模型空间</label>
+            <label><input type="checkbox" checked /> 图纸空间</label>
+            <label><input type="checkbox" /> 文件名一起译</label>
+          </div>
+          <div class="group">
+            <label><input type="checkbox" /> 冻结图层里的字</label>
+            <label><input type="checkbox" /> 锁定图层里的字</label>
+            <label><input type="checkbox" /> 关掉的图层里的字</label>
+          </div>
+          <h3>先不看</h3>
+          <div class="group">
+            <label><input type="checkbox" checked /> 数字、尺寸</label>
+            <label><input type="checkbox" checked /> 重复的句子</label>
+            <label><input type="checkbox" checked /> 不是原文那种语言</label>
+            <label><input type="checkbox" checked /> 这次用我的词</label>
+          </div>
+        </section>
+        <section class="set-pane" id="pane-write">
+          <h3>写回时图纸上留什么</h3>
+          <div class="group" role="radiogroup">
+            <label><input type="radio" name="lay" checked /> 图纸上只留译文</label>
+            <label><input type="radio" name="lay" /> 原文和译文都留</label>
+            <label><input type="radio" name="lay" /> 译文在前，原文也留</label>
+          </div>
+          <div class="group">
+            <label><input type="checkbox" checked /> 按原来的文件夹放</label>
+            <label><input type="checkbox" checked /> 打不开 DWG 时改存 DXF</label>
+            <label class="field"><span>放到</span><input type="text" value="~/文稿/图译" readonly /></label>
+          </div>
+        </section>
+        <section class="set-pane" id="pane-terms">
+          <h3>我的词</h3>
+          <p class="note">内置的词不能改。这里是你自己的，导出后再用「加载术语表」导回来。</p>
+          <div class="group">
+            <div class="term-row">
+              <input value="进线柜" aria-label="原文" />
+              <input value="Incoming Cabinet" aria-label="译文" />
+              <button type="button" class="tbtn">保存</button>
+              <button type="button" class="tbtn">删除</button>
+            </div>
+            <div class="term-row">
+              <input value="接地" aria-label="原文" />
+              <input value="Earthing" aria-label="译文" />
+              <button type="button" class="tbtn">保存</button>
+              <button type="button" class="tbtn">删除</button>
+            </div>
+            <div class="term-row">
+              <input placeholder="新原文" aria-label="新原文" />
+              <input placeholder="新译文" aria-label="新译文" />
+              <button type="button" class="tbtn">添加</button>
+              <span></span>
+            </div>
+            <p class="note"><button type="button" class="tbtn">加载术语表</button> <button type="button" class="tbtn">导出术语</button></p>
+          </div>
+        </section>
+        <section class="set-pane" id="pane-machine">
+          <h3>这台电脑</h3>
+          <div class="group">
+            <p class="note">DWG 能直接开。ODA 在 /Applications/ODAFileConverter.app。没装的话，把图另存成 DXF 再打开。</p>
+            <p class="note">我的词 393 条。</p>
+            <p class="note">检查更新在窗口底下那一行，不会另开页面。</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span class="live">DWG 能直接开</span>
+      <span>我的词 <b>393</b></span>
+      <span>全部文字 <b>12,840</b></span>
+      <span>去掉重复 <b>3,921</b></span>
+      <span id="status">译完。可以改译文再写回。</span>
+      <button type="button" class="upd" id="btn-upd"><i></i>检查更新</button>
+    </footer>
+  </div>
+  <script>
+    (function () {
+      var win = document.getElementById("win");
+      var statusEl = document.getElementById("status");
+      var upd = document.getElementById("btn-upd");
+      var fileList = document.getElementById("file-list");
+      var btnSet = document.getElementById("btn-set");
+      var btnBatch = document.getElementById("btn-batch");
+
+      function setPage(page) {
+        win.setAttribute("data-page", page);
+        btnSet.classList.toggle("on", page === "settings");
+        btnBatch.classList.toggle("on", page === "batch");
+      }
+
+      function filesLeft() {
+        return fileList.querySelectorAll(".item").length;
+      }
+
+      function refreshEmpty() {
+        var n = filesLeft();
+        win.setAttribute("data-empty", n ? "false" : "true");
+        document.getElementById("side-hint").textContent = n
+          ? "打开图纸，字会进右边这张表。译完再写回，原图不动。"
+          : "还没打开图纸，点左上角打开";
+      }
+
+      document.getElementById("btn-open").addEventListener("click", function () {
+        if (!filesLeft()) {
+          fileList.innerHTML =
+            '<div class="item on" data-file="1"><span class="dot"></span>电气原理图.dwg<span class="meta">当前</span><button type="button" class="x" aria-label="关掉这张">×</button></div>' +
+            '<div class="item" data-file="2"><span class="dot dxf"></span>配电箱.dxf<span class="meta">DXF</span><button type="button" class="x" aria-label="关掉这张">×</button></div>' +
+            '<div class="item" data-file="3"><span class="dot"></span>总图-A1.dwg<span class="meta">DWG</span><button type="button" class="x" aria-label="关掉这张">×</button></div>';
+          refreshEmpty();
+        }
+        setPage("work");
+        statusEl.textContent = "已打开 3 张。可以改译文再写回。";
+      });
+
+      document.getElementById("btn-tr").addEventListener("click", function () {
+        setPage("work");
+        if (!filesLeft()) {
+          statusEl.textContent = "还没打开图纸，点左上角打开";
+          return;
+        }
+        statusEl.textContent = "译完。可以改译文再写回。";
+      });
+
+      document.getElementById("btn-write").addEventListener("click", function () {
+        setPage("work");
+        if (!filesLeft()) {
+          statusEl.textContent = "还没打开图纸，点左上角打开";
+          return;
+        }
+        statusEl.textContent = "已写回 8 条（图纸上只留译文）→ ~/文稿/图译/en_电气原理图.dwg";
+      });
+
+      btnBatch.addEventListener("click", function () { setPage("batch"); });
+      btnSet.addEventListener("click", function () { setPage("settings"); });
+      document.getElementById("btn-engine").addEventListener("click", function () { setPage("settings"); });
+
+      fileList.addEventListener("click", function (event) {
+        var x = event.target.closest(".x");
+        var item = event.target.closest(".item");
+        if (x && item) {
+          item.remove();
+          var first = fileList.querySelector(".item");
+          if (first) first.classList.add("on");
+          refreshEmpty();
+          if (!filesLeft()) statusEl.textContent = "还没打开图纸，点左上角打开";
+          return;
+        }
+        if (!item) return;
+        fileList.querySelectorAll(".item").forEach(function (el) { el.classList.remove("on"); });
+        item.classList.add("on");
+      });
+
+      document.querySelectorAll(".set-nav button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".set-nav button").forEach(function (b) { b.classList.remove("on"); });
+          document.querySelectorAll(".set-pane").forEach(function (p) { p.classList.remove("on"); });
+          btn.classList.add("on");
+          document.getElementById("pane-" + btn.getAttribute("data-pane")).classList.add("on");
+        });
+      });
+
+      var updTimer;
+      upd.addEventListener("click", function () {
+        if (upd.classList.contains("busy")) return;
+        upd.classList.add("busy");
+        upd.lastChild.nodeValue = "正在检查";
+        statusEl.textContent = "正在检查更新…";
+        clearTimeout(updTimer);
+        updTimer = setTimeout(function () {
+          upd.classList.remove("busy");
+          upd.lastChild.nodeValue = "检查更新";
+          statusEl.textContent = "已是 0.1.5，不用更。";
+        }, 1100);
+      });
+    })();
+  </script>
+</body>
+</html>

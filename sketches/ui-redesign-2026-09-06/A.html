@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1280, height=800" />
+  <title>图译 · Quiet macOS</title>
+  <style>
+    :root {
+      --win: #e8e8ed;
+      --title: #e3e3e8;
+      --bar: #f4f4f7;
+      --side: #ececf1;
+      --content: #ffffff;
+      --inset: #f2f2f7;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --hair: rgba(0, 0, 0, 0.08);
+      --hair-strong: rgba(0, 0, 0, 0.12);
+      --accent: #007aff;
+      --on-accent: #ffffff;
+      --sel: #0a84ff;
+      --row-sel: #d6e8ff;
+      --ok: #30d158;
+      --warn: #ff9f0a;
+      --red: #ff5f57;
+      --yel: #febc2e;
+      --grn: #28c840;
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+      font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text);
+      background: var(--win);
+      letter-spacing: -0.01em;
+    }
+
+    button, select, input { font: inherit; color: inherit; }
+    button { cursor: default; }
+    button:disabled { opacity: 0.4; pointer-events: none; }
+
+    .skip {
+      position: absolute;
+      left: -9999px;
+    }
+    .skip:focus {
+      left: 12px;
+      top: 12px;
+      z-index: 40;
+      padding: 4px 8px;
+      background: var(--content);
+      color: var(--text);
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .win {
+      width: 1280px;
+      height: 800px;
+      display: flex;
+      flex-direction: column;
+      background: var(--content);
+    }
+
+    /* Native-looking titlebar — the only traffic lights */
+    .titlebar {
+      height: 28px;
+      flex: none;
+      display: grid;
+      grid-template-columns: 78px 1fr 78px;
+      align-items: center;
+      background: var(--title);
+      border-bottom: 0.5px solid var(--hair-strong);
+    }
+    .lights {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 12px;
+    }
+    .lights i {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: block;
+      box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
+    }
+    .lights .r { background: var(--red); }
+    .lights .y { background: var(--yel); }
+    .lights .g { background: var(--grn); }
+    .wintitle {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    /* Slim toolbar — no lights */
+    .tb {
+      height: 36px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      background: var(--bar);
+      border-bottom: 0.5px solid var(--hair-strong);
+    }
+    .tb .grow { flex: 1; min-width: 8px; }
+    .rule {
+      width: 1px;
+      height: 16px;
+      background: var(--hair-strong);
+      margin: 0 4px;
+      flex: none;
+    }
+
+    .tbtn {
+      appearance: none;
+      border: 0;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 12px;
+      transition: background-color 180ms var(--ease-out), transform 160ms var(--ease-out);
+    }
+    .tbtn:hover { background: rgba(118, 118, 128, 0.12); }
+    .tbtn:active { transform: scale(0.97); }
+    .tbtn.pri {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+    .tbtn.pri:hover { background: #0070ed; }
+    .tbtn.on {
+      background: rgba(118, 118, 128, 0.18);
+    }
+
+    .pair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    select.mini {
+      height: 24px;
+      border: 0;
+      background: rgba(118, 118, 128, 0.12);
+      border-radius: 6px;
+      padding: 0 8px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+    .side {
+      width: 200px;
+      flex: none;
+      background: var(--side);
+      border-right: 0.5px solid var(--hair-strong);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .side h2 {
+      margin: 0;
+      padding: 12px 14px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+    }
+    .item {
+      margin: 1px 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      min-width: 0;
+    }
+    .item .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .item.on {
+      background: var(--sel);
+      color: #fff;
+    }
+    .item .meta {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+      flex: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .item.on .meta { color: rgba(255, 255, 255, 0.8); }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ok);
+      flex: none;
+    }
+    .dot.dxf { background: var(--warn); }
+    .hint {
+      margin-top: auto;
+      padding: 12px 14px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--content);
+    }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 32px;
+      padding: 0 14px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 0.5px solid var(--hair);
+      flex: none;
+    }
+    .filters label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text);
+    }
+    .filters input { accent-color: var(--accent); }
+    .filters .grow { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+
+    .table {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 7px 14px;
+      text-align: left;
+      border-bottom: 0.5px solid var(--hair);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--content);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    td.src { font-weight: 600; }
+    td.kind { color: var(--muted); font-size: 12px; }
+    tr.on { background: var(--row-sel); }
+    tr.skip { color: var(--muted); }
+    tr.skip td.src { text-decoration: line-through; opacity: 0.65; }
+    .cell-edit {
+      box-shadow: inset 0 0 0 1.5px var(--accent);
+      border-radius: 4px;
+      background: var(--content);
+    }
+    input[type="checkbox"] { accent-color: var(--accent); }
+    td input[type="text"] {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    .empty {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      padding: 24px;
+    }
+    .empty p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      text-wrap: pretty;
+    }
+    .empty span {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* Batch */
+    .jobs {
+      flex: 1;
+      overflow: auto;
+      padding: 14px 16px;
+      background: var(--content);
+    }
+    .job {
+      display: grid;
+      grid-template-columns: 1fr 140px 120px 64px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      background: var(--inset);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .bar {
+      height: 4px;
+      background: rgba(118, 118, 128, 0.18);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+    .insp {
+      width: 260px;
+      flex: none;
+      background: var(--side);
+      border-left: 0.5px solid var(--hair-strong);
+      padding: 14px 16px;
+      overflow: auto;
+    }
+    .insp h3 {
+      margin: 16px 0 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .insp h3:first-child { margin-top: 0; }
+    .insp label.row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      font-size: 13px;
+    }
+    .path {
+      display: flex;
+      gap: 6px;
+    }
+    .path input {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--inset);
+      padding: 0 8px;
+      font-size: 12px;
+    }
+    .path button {
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 10px;
+      background: rgba(118, 118, 128, 0.16);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* Settings — full page, grouped lists */
+    .set {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      background: var(--inset);
+    }
+    .set-nav {
+      width: 188px;
+      flex: none;
+      padding: 10px 8px;
+      border-right: 0.5px solid var(--hair);
+    }
+    .set-nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 1px;
+    }
+    .set-nav button.on {
+      background: var(--sel);
+      color: #fff;
+      font-weight: 600;
+    }
+    .set-nav button:hover:not(.on) { background: rgba(118, 118, 128, 0.12); }
+    .set-pane {
+      flex: 1;
+      min-width: 0;
+      overflow: auto;
+      padding: 18px 28px 28px;
+    }
+    .set-pane h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      text-wrap: pretty;
+    }
+    .set-pane .lead {
+      margin: 0 0 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 52ch;
+    }
+    .group {
+      background: var(--content);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      max-width: 640px;
+      box-shadow: 0 0 0 0.5px var(--hair);
+    }
+    .group h4 {
+      margin: 0;
+      padding: 10px 14px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .grow-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 36px;
+      padding: 0 14px;
+      border-top: 0.5px solid var(--hair);
+      font-size: 13px;
+    }
+    .group > .grow-row:first-child,
+    .group h4 + .grow-row { border-top: 0; }
+    .grow-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      padding: 8px 0;
+    }
+    .grow-row .ctl {
+      flex: none;
+    }
+    .grow-row input[type="text"],
+    .grow-row input[type="password"],
+    .grow-row input[type="url"] {
+      width: 220px;
+      height: 26px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--inset);
+      padding: 0 8px;
+      font-size: 12px;
+    }
+    .note {
+      margin: 0;
+      padding: 8px 14px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .term-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 14px;
+      border-top: 0.5px solid var(--hair);
+    }
+    .term-row input {
+      min-width: 0;
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--inset);
+      padding: 0 8px;
+    }
+
+    /* Footer */
+    .foot {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 28px;
+      padding: 0 14px;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--bar);
+      border-top: 0.5px solid var(--hair);
+      flex: none;
+    }
+    .foot b {
+      color: var(--text);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .live { color: var(--ok); font-weight: 600; }
+    .foot .msg { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .foot .end {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spin {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid var(--accent);
+      border-right-color: transparent;
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+      transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+    }
+    .checking .spin {
+      opacity: 1;
+      transform: scale(1);
+      animation: spin 0.7s linear infinite, pulse 900ms var(--ease-out) infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg) scale(1); } }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* View switching */
+    [data-view="work"] .view-batch,
+    [data-view="work"] .view-settings,
+    [data-view="work"] .tb-settings { display: none; }
+    [data-view="batch"] .view-work,
+    [data-view="batch"] .view-settings,
+    [data-view="batch"] .tb-settings { display: none; }
+    [data-view="settings"] .view-work,
+    [data-view="settings"] .view-batch,
+    [data-view="settings"] .tb-work { display: none; }
+
+    [data-open="false"] .has-files { display: none; }
+    [data-open="true"] .no-files { display: none; }
+    [data-open="false"] .need-file { opacity: 0.4; pointer-events: none; }
+
+    .pane { display: none; }
+    .pane.on { display: block; }
+
+    .eng-cloud, .eng-local, .eng-custom { display: none; }
+    [data-engine="cloud"] .eng-cloud,
+    [data-engine="local"] .eng-local,
+    [data-engine="custom"] .eng-custom { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tbtn, .spin { transition: none; }
+      .checking .spin { animation: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到图纸文字</a>
+  <div class="win" id="win" role="application" aria-label="图译" data-view="work" data-open="false" data-engine="cloud">
+    <div class="titlebar">
+      <div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+      <div class="wintitle" id="winTitle">图译</div>
+      <div></div>
+    </div>
+
+    <header class="tb tb-work">
+      <button type="button" class="tbtn" id="btnOpen">打开图纸</button>
+      <button type="button" class="tbtn pri need-file" id="btnTrans">翻译</button>
+      <button type="button" class="tbtn need-file" id="btnWrite">写回</button>
+      <span class="rule" aria-hidden="true"></span>
+      <button type="button" class="tbtn" id="btnBatch">批量</button>
+      <span class="grow"></span>
+      <div class="pair">
+        <select class="mini" aria-label="原文" id="srcLang">
+          <option selected>中</option>
+          <option>英</option>
+          <option>日</option>
+          <option>韩</option>
+          <option>德</option>
+          <option>法</option>
+        </select>
+        →
+        <select class="mini" aria-label="译文" id="tgtLang">
+          <option selected>英</option>
+          <option>中</option>
+          <option>日</option>
+          <option>韩</option>
+          <option>德</option>
+          <option>法</option>
+        </select>
+      </div>
+      <select class="mini" aria-label="用哪个翻译" id="engine">
+        <option value="cloud" selected>网上翻译</option>
+        <option value="local">这台电脑</option>
+        <option value="custom">自己的接口</option>
+      </select>
+      <button type="button" class="tbtn" id="btnSet">设置</button>
+    </header>
+
+    <header class="tb tb-settings">
+      <button type="button" class="tbtn" id="btnDone">完成</button>
+      <span class="grow"></span>
+    </header>
+
+    <div class="body view-work">
+      <aside class="side">
+        <h2>已打开</h2>
+        <div class="has-files">
+          <div class="item on"><span class="dot"></span><span class="name">电气原理图.dwg</span><span class="meta">当前</span></div>
+          <div class="item"><span class="dot dxf"></span><span class="name">配电箱.dxf</span><span class="meta">DXF</span></div>
+          <div class="item"><span class="dot"></span><span class="name">总图-A1.dwg</span><span class="meta">DWG</span></div>
+        </div>
+        <p class="hint no-files">打开 DWG 或 DXF。字会进右边这张表。</p>
+        <p class="hint has-files">点一张图看它的字。译完再写回。</p>
+      </aside>
+      <section class="main" id="main">
+        <div class="filters has-files">
+          先别译
+          <label><input type="checkbox" checked /> 数字、尺寸</label>
+          <label><input type="checkbox" checked /> 重复的句子</label>
+          <label><input type="checkbox" checked /> 不是原文那种语言</label>
+          <span class="grow">
+            写回时
+            <select class="mini" aria-label="图纸上怎么写" id="layout">
+              <option selected>图纸上只留译文</option>
+              <option>原文和译文都留</option>
+              <option>译文在上、原文在下</option>
+            </select>
+          </span>
+        </div>
+        <div class="empty no-files">
+          <p>还没打开图纸，点左上角打开<span>DWG、DXF 都可以</span></p>
+        </div>
+        <div class="table has-files">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" checked aria-label="全选" /></th>
+                <th>原文</th>
+                <th>译文</th>
+                <th>图层</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="on"><td><input type="checkbox" checked /></td><td class="src">电气原理图</td><td>Electrical Schematic</td><td class="kind">0 · 多行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">平面布置图</td><td>Floor Plan</td><td class="kind">0 · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">隔墙定位图</td><td class="cell-edit"><input type="text" value="Partition Location Plan" aria-label="译文" /></td><td class="kind">A-WALL · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">进线柜</td><td>Incoming Cabinet</td><td class="kind">E-POWR · 块属性</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">接地</td><td>Earthing</td><td class="kind">E-POWR · 多行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">总图</td><td>General Layout</td><td class="kind">TITLE · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">材料表</td><td>Bill of Materials</td><td class="kind">0 · 表格</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">电缆桥架</td><td>Cable Tray</td><td class="kind">E-TRAY · 多行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">预留洞</td><td>Reserved Opening</td><td class="kind">A-WALL · 单行文字</td></tr>
+              <tr><td><input type="checkbox" checked /></td><td class="src">图纸会签</td><td>Drawing Approval</td><td class="kind">TITLE · 单行文字</td></tr>
+              <tr class="skip"><td><input type="checkbox" /></td><td class="src">1200</td><td>—</td><td class="kind">数字、尺寸 · 已跳过</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="body view-batch">
+      <aside class="side">
+        <h2>待导出 · <span class="has-files">3</span><span class="no-files">0</span></h2>
+        <div class="has-files">
+          <div class="item on"><span class="dot"></span><span class="name">电气原理图.dwg</span></div>
+          <div class="item"><span class="dot dxf"></span><span class="name">配电箱.dxf</span></div>
+          <div class="item"><span class="dot"></span><span class="name">总图-A1.dwg</span></div>
+        </div>
+        <p class="hint">一批一起译、一起写回。目录按原来的放。</p>
+      </aside>
+      <div class="jobs">
+        <div class="empty no-files">
+          <p>还没打开图纸，点左上角打开<span>打开后再点批量</span></p>
+        </div>
+        <div class="has-files">
+          <div class="job">
+            <span>电气原理图.dwg</span>
+            <span>图纸上只留译文</span>
+            <span class="bar"><i style="width:72%"></i></span>
+            <span>正在写回</span>
+          </div>
+          <div class="job">
+            <span>配电箱.dxf</span>
+            <span>图纸上只留译文</span>
+            <span class="bar"><i style="width:0"></i></span>
+            <span>排队</span>
+          </div>
+          <div class="job">
+            <span>总图-A1.dwg</span>
+            <span>图纸上只留译文</span>
+            <span class="bar"><i style="width:0"></i></span>
+            <span>排队</span>
+          </div>
+        </div>
+      </div>
+      <aside class="insp">
+        <h3>图纸上怎么写</h3>
+        <label class="row"><input type="radio" name="blay" checked /> 图纸上只留译文</label>
+        <label class="row"><input type="radio" name="blay" /> 原文和译文都留</label>
+        <label class="row"><input type="radio" name="blay" /> 译文在上、原文在下</label>
+        <h3>放到哪里</h3>
+        <div class="path">
+          <input value="~/译好的图" readonly aria-label="输出文件夹" />
+          <button type="button">选取</button>
+        </div>
+        <label class="row"><input type="checkbox" checked /> 按原来的文件夹放</label>
+        <h3>先别译</h3>
+        <label class="row"><input type="checkbox" checked /> 数字、尺寸</label>
+        <label class="row"><input type="checkbox" checked /> 重复的句子</label>
+        <label class="row"><input type="checkbox" checked /> 不是原文那种语言</label>
+        <h3>队列</h3>
+        <button type="button" class="tbtn pri need-file" id="btnStart">开始导出</button>
+        <p class="note" style="padding-left:0">有填好的表格也可以导进来写回。</p>
+        <button type="button" class="tbtn need-file">导出表格</button>
+        <button type="button" class="tbtn need-file">导入表格</button>
+      </aside>
+    </div>
+
+    <div class="body view-settings">
+      <div class="set">
+        <nav class="set-nav" aria-label="设置分组">
+          <button type="button" class="on" data-pane="trans">翻译</button>
+          <button type="button" data-pane="open">打开范围</button>
+          <button type="button" data-pane="write">写回</button>
+          <button type="button" data-pane="terms">术语</button>
+          <button type="button" data-pane="about">这台电脑</button>
+        </nav>
+        <div class="set-pane">
+          <div class="pane on" id="pane-trans">
+            <h3>翻译</h3>
+            <p class="lead">选一个干活的地方。网上要密钥，这台电脑要先开 Ollama。</p>
+            <div class="group">
+              <div class="grow-row">
+                <span>用哪个</span>
+                <select class="mini ctl" id="engineSet" aria-label="用哪个翻译">
+                  <option value="cloud" selected>网上翻译</option>
+                  <option value="local">这台电脑</option>
+                  <option value="custom">自己的接口</option>
+                </select>
+              </div>
+              <div class="grow-row">
+                <span>原文</span>
+                <select class="mini ctl" aria-label="原文"><option selected>中</option><option>英</option><option>日</option></select>
+              </div>
+              <div class="grow-row">
+                <span>译文</span>
+                <select class="mini ctl" aria-label="译文"><option selected>英</option><option>中</option><option>日</option></select>
+              </div>
+            </div>
+            <div class="group eng-cloud">
+              <h4>网上翻译</h4>
+              <div class="grow-row">
+                <span>服务</span>
+                <select class="mini ctl" aria-label="网上翻译服务"><option selected>DeepL</option><option>Azure</option></select>
+              </div>
+              <div class="grow-row">
+                <span>DeepL 密钥</span>
+                <input class="ctl" type="password" name="deepl" autocomplete="off" spellcheck="false" placeholder="填密钥…" aria-label="DeepL 密钥" />
+              </div>
+              <p class="note">密钥只存在这台电脑。Azure 要另填区域。</p>
+            </div>
+            <div class="group eng-local">
+              <h4>这台电脑</h4>
+              <div class="grow-row">
+                <span>Ollama 地址</span>
+                <input class="ctl" type="url" name="ollama" autocomplete="off" spellcheck="false" value="http://127.0.0.1:11434" aria-label="Ollama 地址" />
+              </div>
+              <div class="grow-row">
+                <span>模型</span>
+                <input class="ctl" type="text" name="ollama-model" autocomplete="off" spellcheck="false" placeholder="llama3.1" aria-label="Ollama 模型" />
+              </div>
+              <p class="note">先在本机打开 Ollama，再点翻译。</p>
+            </div>
+            <div class="group eng-custom">
+              <h4>自己的接口</h4>
+              <div class="grow-row">
+                <span>网址</span>
+                <input class="ctl" type="url" name="openai-base" autocomplete="off" spellcheck="false" placeholder="https://api.deepseek.com/v1" aria-label="接口网址" />
+              </div>
+              <div class="grow-row">
+                <span>密钥</span>
+                <input class="ctl" type="password" name="openai-key" autocomplete="off" spellcheck="false" placeholder="填密钥…" aria-label="接口密钥" />
+              </div>
+              <div class="grow-row">
+                <span>模型</span>
+                <input class="ctl" type="text" name="openai-model" autocomplete="off" spellcheck="false" placeholder="deepseek-chat" aria-label="模型名" />
+              </div>
+            </div>
+            <div class="group">
+              <h4>先别译这些</h4>
+              <div class="grow-row"><label><input type="checkbox" checked /> 数字、尺寸</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 重复的句子</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 不是原文那种语言</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 这张图用术语表</label></div>
+            </div>
+          </div>
+
+          <div class="pane" id="pane-open">
+            <h3>打开范围</h3>
+            <p class="lead">打开图纸时，哪些字进表。改完会重新抽一次。</p>
+            <div class="group">
+              <h4>看哪些字</h4>
+              <div class="grow-row"><label><input type="checkbox" checked /> 块属性</label></div>
+              <div class="grow-row"><label><input type="checkbox" /> 块里面的字</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 标注、表格</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 模型空间</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 图纸空间</label></div>
+              <div class="grow-row"><label><input type="checkbox" /> 文件名也一起译</label></div>
+            </div>
+            <div class="group">
+              <h4>图层</h4>
+              <div class="grow-row"><label><input type="checkbox" /> 冻结图层里的字</label></div>
+              <div class="grow-row"><label><input type="checkbox" /> 锁住图层里的字</label></div>
+              <div class="grow-row"><label><input type="checkbox" /> 关掉的图层里的字</label></div>
+            </div>
+          </div>
+
+          <div class="pane" id="pane-write">
+            <h3>写回</h3>
+            <p class="lead">译文怎么落回图纸。只动你勾上的那些行。</p>
+            <div class="group">
+              <h4>图纸上怎么写</h4>
+              <div class="grow-row"><label><input type="radio" name="slay" checked /> 图纸上只留译文</label></div>
+              <div class="grow-row"><label><input type="radio" name="slay" /> 原文和译文都留</label></div>
+              <div class="grow-row"><label><input type="radio" name="slay" /> 译文在上、原文在下</label></div>
+            </div>
+            <div class="group">
+              <h4>批量</h4>
+              <div class="grow-row"><label><input type="checkbox" checked /> 按原来的文件夹放</label></div>
+              <div class="grow-row"><label><input type="checkbox" checked /> 打不开 DWG 时改写成 DXF</label></div>
+            </div>
+          </div>
+
+          <div class="pane" id="pane-terms">
+            <h3>术语</h3>
+            <p class="lead">内置词不能改。这里是你自己的词，导出成表格还能再导回来。</p>
+            <div class="group">
+              <div class="term-row">
+                <input value="电气原理图" aria-label="术语原文" />
+                <input value="Electrical Schematic" aria-label="术语译文" />
+                <button type="button" class="tbtn">保存</button>
+                <button type="button" class="tbtn">删除</button>
+              </div>
+              <div class="term-row">
+                <input value="进线柜" aria-label="术语原文" />
+                <input value="Incoming Cabinet" aria-label="术语译文" />
+                <button type="button" class="tbtn">保存</button>
+                <button type="button" class="tbtn">删除</button>
+              </div>
+              <div class="term-row">
+                <input placeholder="新原文…" aria-label="新术语原文" />
+                <input placeholder="新译文…" aria-label="新术语译文" />
+                <button type="button" class="tbtn">添加</button>
+                <span></span>
+              </div>
+              <div class="grow-row">
+                <span>术语表 <b>393</b> 条</span>
+                <span>
+                  <button type="button" class="tbtn">加载术语表</button>
+                  <button type="button" class="tbtn">导出术语</button>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane" id="pane-about">
+            <h3>这台电脑</h3>
+            <p class="lead">打开 DWG 需要 ODA。没装的话，把图另存成 DXF 也能译。</p>
+            <div class="group">
+              <div class="grow-row"><span>ODA</span><span>已装 · /Applications/ODAFileConverter.app</span></div>
+              <div class="grow-row"><span>图译</span><span>0.1.5</span></div>
+              <div class="grow-row"><span>术语表</span><span>393 条</span></div>
+            </div>
+            <div class="group">
+              <div class="grow-row">
+                <span>有新版本会写在底下那一行</span>
+                <button type="button" class="tbtn" id="btnCheckSet">检查更新</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot" id="foot">
+      <span class="live">ODA 已安装</span>
+      <span>术语表 <b>393</b></span>
+      <span class="no-files">全部文字 <b>0</b></span>
+      <span class="no-files">去掉重复 <b>0</b></span>
+      <span class="has-files">全部文字 <b>12,840</b></span>
+      <span class="has-files">去掉重复 <b>3,921</b></span>
+      <span class="msg" id="status" aria-live="polite">还没打开图纸，点左上角打开</span>
+      <span class="end">
+        <span class="spin" id="spin" aria-hidden="true"></span>
+        <button type="button" class="tbtn" id="btnCheck">检查更新</button>
+      </span>
+    </footer>
+  </div>
+  <script>
+    const win = document.getElementById("win");
+    const title = document.getElementById("winTitle");
+    const foot = document.getElementById("foot");
+    const statusEl = document.getElementById("status");
+    const engine = document.getElementById("engine");
+    const engineSet = document.getElementById("engineSet");
+    let checkTimer = 0;
+
+    function setView(view) {
+      win.dataset.view = view;
+      title.textContent = view === "settings" ? "设置" : "图译";
+      document.getElementById("btnBatch").classList.toggle("on", view === "batch");
+      document.getElementById("btnSet").classList.toggle("on", view === "settings");
+    }
+
+    function setOpen() {
+      win.dataset.open = "true";
+      statusEl.textContent = "提取 12840 条，去掉重复后 3921。可以改译文再写回。";
+      if (win.dataset.view === "settings") setView("work");
+    }
+
+    function setEngine(value) {
+      win.dataset.engine = value;
+      engine.value = value;
+      engineSet.value = value;
+    }
+
+    function checkUpdates() {
+      if (checkTimer) window.clearTimeout(checkTimer);
+      foot.classList.add("checking");
+      document.getElementById("btnCheck").disabled = true;
+      document.getElementById("btnCheckSet").disabled = true;
+      statusEl.textContent = "正在检查…";
+      checkTimer = window.setTimeout(function () {
+        foot.classList.remove("checking");
+        document.getElementById("btnCheck").disabled = false;
+        document.getElementById("btnCheckSet").disabled = false;
+        statusEl.textContent = "已是 0.1.5";
+      }, 1200);
+    }
+
+    document.getElementById("btnOpen").addEventListener("click", setOpen);
+    document.getElementById("btnTrans").addEventListener("click", function () {
+      statusEl.textContent = "译完。术语对上 12 条，网上译了 86 条。可以改译文再写回。";
+    });
+    document.getElementById("btnWrite").addEventListener("click", function () {
+      statusEl.textContent = "已写回 86 条（图纸上只留译文）→ ~/译好的图/电气原理图-en.dwg";
+    });
+    document.getElementById("btnBatch").addEventListener("click", function () {
+      setView("batch");
+      statusEl.textContent = win.dataset.open === "true" ? "这三张会按现在的设置一起导出。" : "还没打开图纸，点左上角打开";
+    });
+    document.getElementById("btnSet").addEventListener("click", function () { setView("settings"); });
+    document.getElementById("btnDone").addEventListener("click", function () { setView("work"); });
+    document.getElementById("btnStart").addEventListener("click", function () {
+      statusEl.textContent = "批量导出已开始。";
+    });
+    document.getElementById("btnCheck").addEventListener("click", checkUpdates);
+    document.getElementById("btnCheckSet").addEventListener("click", checkUpdates);
+    engine.addEventListener("change", function () { setEngine(engine.value); });
+    engineSet.addEventListener("change", function () { setEngine(engineSet.value); });
+
+    document.querySelectorAll(".set-nav button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".set-nav button").forEach(function (b) { b.classList.remove("on"); });
+        btn.classList.add("on");
+        document.querySelectorAll(".pane").forEach(function (p) { p.classList.remove("on"); });
+        document.getElementById("pane-" + btn.dataset.pane).classList.add("on");
+      });
+    });
+  </script>
+</body>
+</html>
