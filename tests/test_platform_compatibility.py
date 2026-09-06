@@ -241,7 +241,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("深色", ui)
         self.assertIn('view === "glossary"', ui)
         self.assertIn("删掉选中的", ui)
-        self.assertIn("我定的译法", ui)
+        self.assertIn("词汇库", ui)
         self.assertIn("冻住看不见的图层", ui)
         self.assertIn("className={`go${translating", ui)
         self.assertIn("正在译…", ui)

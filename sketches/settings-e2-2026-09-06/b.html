@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <title>B · 密钥跟着选</title>
+  <link rel="stylesheet" href="_set.css" />
+</head>
+<body>
+  <div class="win">
+    <div class="titlebar"><div class="lights" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></div><b>图译</b><span></span></div>
+    <header class="tb"><button type="button" class="tbtn">返回</button><span class="grow"></span></header>
+    <section class="set-page">
+      <div class="set-h"><h1>设置</h1><p>选网上才出密钥。选自己配才出网址。</p></div>
+      <div class="card wide">
+        <h2>怎么译</h2>
+        <div class="seg" id="eng">
+          <button type="button" class="on" data-e="net">网上翻译</button>
+          <button type="button" data-e="own">自己配接口</button>
+        </div>
+        <div id="net">
+          <p class="cap">DeepL 或 Azure，把密钥贴进来。</p>
+          <div class="seg" style="max-width:240px">
+            <button type="button" class="on">DeepL</button>
+            <button type="button">Azure</button>
+          </div>
+          <div class="field">密钥 <input type="password" placeholder="没有就空着" /></div>
+        </div>
+        <div id="own" hidden>
+          <p class="cap">填网址和密钥，比如 DeepSeek。</p>
+          <div class="field">网址 <input type="url" placeholder="https://" /></div>
+          <div class="field">密钥 <input type="password" placeholder="没有就空着" /></div>
+        </div>
+      </div>
+      <div class="card wide">
+        <h2>写回图里</h2>
+        <div class="seg">
+          <button type="button" class="on">只留译文</button>
+          <button type="button">原文和译文都留</button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h2>颜色</h2>
+          <div class="seg">
+            <button type="button">浅色</button>
+            <button type="button" class="on">深色</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>词汇库 · 更新</h2>
+          <div class="field">
+            <button type="button" class="tbtn">打开词汇库</button>
+            <button type="button" class="tbtn">检查更新</button>
+          </div>
+        </div>
+        <div class="card wide">
+          <details>
+            <summary style="cursor:pointer;font-weight:650;padding:8px 0">少用的</summary>
+            <label class="row"><input type="checkbox" /> 不联网（本机 Ollama）</label>
+            <label class="row"><input type="checkbox" checked /> 数字、尺寸先别译</label>
+            <label class="row"><input type="checkbox" /> 冻住的图层也译</label>
+          </details>
+        </div>
+      </div>
+    </section>
+    <footer class="foot"><span class="live">ODA 已装</span></footer>
+  </div>
+  <script>
+    const net = document.getElementById("net");
+    const own = document.getElementById("own");
+    document.getElementById("eng").onclick = function (e) {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      [...this.querySelectorAll("button")].forEach((b) => b.classList.toggle("on", b === btn));
+      net.hidden = btn.dataset.e !== "net";
+      own.hidden = btn.dataset.e !== "own";
+    };
+  </script>
+</body>
+</html>

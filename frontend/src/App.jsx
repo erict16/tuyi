@@ -1098,7 +1098,7 @@ export default function App() {
               onClick={() => setView(view === "batch" ? "work" : "batch")}
             >批量</button>
             <span className="grow" />
-            <button type="button" className={`tbtn${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>我定的译法</button>
+            <button type="button" className={`tbtn${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>词汇库</button>
             <button type="button" className="tbtn" onClick={openSettings}>设置</button>
           </>
         )}
@@ -1410,7 +1410,7 @@ export default function App() {
                 <label className="row" title="尺寸数字、纯符号，一般不用译"><input type="checkbox" checked={filters.numbers} onChange={(event) => setFilters((prev) => ({ ...prev, numbers: event.target.checked }))} /> 数字、尺寸</label>
                 <label className="row" title="同一句在图上出现多次，只译一次"><input type="checkbox" checked={filters.dupes} onChange={(event) => setFilters((prev) => ({ ...prev, dupes: event.target.checked }))} /> 重复的句子</label>
                 <label className="row" title="已经是目标语言或夹杂别的文字，先跳过"><input type="checkbox" checked={filters.nonsource} onChange={(event) => setFilters((prev) => ({ ...prev, nonsource: event.target.checked }))} /> 不是原文那种语言</label>
-                <label className="row" title="勾上后，这张图会先查我定的译法"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 这张图用术语表</label>
+                <label className="row" title="勾上后，这张图会先查词汇库"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查词汇库</label>
               </div>
               <div className="card">
                 <h2>从哪里取字</h2>
@@ -1442,11 +1442,11 @@ export default function App() {
               </div>
               <div className="card">
                 <h2>版本和更新</h2>
-                <p className="help">图译 {appVersion || updateInfo?.current || "—"}。我定的译法在单独一页改。</p>
+                <p className="help">图译 {appVersion || updateInfo?.current || "—"}。词汇库在单独一页改。</p>
                 <div className="field">ODA <span>{oda.installed ? "已装" : "未装"}</span></div>
                 <div className="field">
                   <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
-                  <button type="button" className="tbtn ghost" onClick={openGlossary}>我定的译法</button>
+                  <button type="button" className="tbtn ghost" onClick={openGlossary}>词汇库</button>
                 </div>
                 {updateMsg && <p className="help">{updateMsg}</p>}
                 {updateInfo?.available && (
@@ -1460,10 +1460,10 @@ export default function App() {
 
       {view === "glossary" && (
         <div className="body page-enter">
-          <section className="gloss" aria-label="我定的译法">
+          <section className="gloss" aria-label="词汇库">
             <div className="head">
-              <h1>我定的译法</h1>
-              <p>图上碰到左边这句，就写成右边。软件自带的改不了。碰上两边都有，用我定的。</p>
+              <h1>词汇库</h1>
+              <p>图上碰到左边这句，就写成右边。软件自带的改不了。两边都有时用你加的。</p>
             </div>
             <div className="tools">
               <input type="search" value={termQuery} onChange={(event) => setTermQuery(event.target.value)} placeholder="搜一下…" aria-label="搜译法" />
@@ -1512,7 +1512,7 @@ export default function App() {
                           const checked = event.target.checked;
                           setPickedTerms(() => (checked ? new Set(allMineKeys) : new Set()));
                         }}
-                        aria-label="全选我定的"
+                        aria-label="全选词汇库"
                       />
                     </th>
                     <th>图上的中文</th>
@@ -1569,7 +1569,7 @@ export default function App() {
                             onBlur={() => saveTerm(term)}
                           />
                         </td>
-                        <td>我定的</td>
+                        <td>我加的</td>
                         <td><button type="button" className="tbtn" onClick={() => deleteTerm(term)}>删掉</button></td>
                       </tr>
                     );
