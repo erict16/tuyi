@@ -253,6 +253,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn(">全部文字", ui)
         self.assertIn("set-tabs", ui)
         self.assertIn("外观和更新", ui)
+        self.assertIn("/api/drawings/close", ui)
+        self.assertIn("去掉", ui)
         self.assertIn("style: layout", ui)
         self.assertIn(".go.busy .spin", css)
         self.assertIn("prefers-reduced-motion", css)

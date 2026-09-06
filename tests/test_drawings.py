@@ -920,6 +920,21 @@ class DrawingsApiTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_close_only_deletes_dropped_copies(self):
+        from backend.app_meta import DROPPED_FILES_DIR
+
+        DROPPED_FILES_DIR.mkdir(parents=True, exist_ok=True)
+        dropped = DROPPED_FILES_DIR / "tuyi-close-test.dxf"
+        dropped.write_text("x", encoding="utf-8")
+        outside = Path(self.tmp.name) / "keep.dxf"
+        outside.write_text("x", encoding="utf-8")
+        gone = self.client.post("/api/drawings/close", json={"path": str(dropped)})
+        keep = self.client.post("/api/drawings/close", json={"path": str(outside)})
+        self.assertEqual(gone.status_code, 200, gone.text)
+        self.assertEqual(keep.status_code, 200, keep.text)
+        self.assertFalse(dropped.exists())
+        self.assertTrue(outside.exists())
+
     def test_default_output_name_http(self):
         named = self.client.get("/api/default-output-name", params={"mode": "zh_to_en", "base": "floor_plan"})
         self.assertEqual(named.status_code, 200, named.text)

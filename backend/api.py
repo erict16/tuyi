@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from backend.app_meta import APP_TITLE, APP_VERSION, DROPPED_FILES_DIR, GITHUB_URL, default_output_dir as dwglot_output_dir
+from backend.app_meta import APP_TITLE, APP_VERSION, DROPPED_FILES_DIR, GITHUB_URL, LEGACY_DROPPED_FILES_DIR, default_output_dir as dwglot_output_dir
 from backend.providers.azure import AzureFreeQuotaExceededError
 from backend.providers.base import TranslationProviderError
 from backend.queue import BatchQueue
@@ -165,6 +165,10 @@ class BatchStartBody(BaseModel):
     use_glossary: bool = True
     preserve_tree: bool = True
     oda_fallback_dxf: bool = True
+
+
+class CloseBody(BaseModel):
+    path: str = ""
 
 
 class ExtractBody(BaseModel):
@@ -733,6 +737,26 @@ def updates_apply():
 @app.post("/api/updates/cancel")
 def updates_cancel():
     return request_cancel()
+
+
+def _is_dropped_copy(path: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except OSError:
+        return False
+    roots = (DROPPED_FILES_DIR.resolve(), LEGACY_DROPPED_FILES_DIR.resolve())
+    return any(root == resolved.parent or root in resolved.parents for root in roots)
+
+
+@app.post("/api/drawings/close")
+def drawings_close(body: CloseBody):
+    raw = (body.path or "").strip()
+    if not raw:
+        raise HTTPException(status_code=400, detail="没有这份图纸")
+    path = Path(raw)
+    if _is_dropped_copy(path):
+        path.unlink(missing_ok=True)
+    return {"ok": True}
 
 
 @app.post("/api/drawings/open")

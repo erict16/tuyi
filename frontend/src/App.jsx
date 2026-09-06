@@ -308,6 +308,29 @@ export default function App() {
     await extractFile(next[0].path);
   }
 
+  async function removeDrawing(path, event) {
+    event?.stopPropagation?.();
+    const next = files.filter((file) => file.path !== path);
+    setFiles(next);
+    if (current === path) {
+      setWrittenPath("");
+      if (next[0]) {
+        setCurrent(next[0].path);
+        if (view === "work") extractFile(next[0].path);
+        else setRows([]);
+      } else {
+        setCurrent("");
+        setRows([]);
+        setStatus("还没打开图纸，点「打开图纸」");
+      }
+    }
+    try {
+      await api("/api/drawings/close", { method: "POST", body: JSON.stringify({ path }) });
+    } catch {
+      /* queue already dropped it */
+    }
+  }
+
   async function openDrawings() {
     const native = py();
     if (native?.pick_cad_files) {
@@ -1156,6 +1179,12 @@ export default function App() {
                     <span className="name" title={file.name}>{file.name}</span>
                     <span className="meta">{file.ext}</span>
                     <span className={`st ${file.path === current ? "st-ok" : "st-idle"}`}>{file.path === current ? "当前" : "排队"}</span>
+                    <button
+                      type="button"
+                      className="del"
+                      aria-label={`从队列去掉 ${file.name}`}
+                      onClick={(event) => removeDrawing(file.path, event)}
+                    >去掉</button>
                   </div>
                 ))}
               </div>
