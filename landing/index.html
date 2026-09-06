@@ -17,12 +17,12 @@
   <link rel="preconnect" href="https://api.github.com" />
   <script>
     const FALLBACK = {
-      win: "https://github.com/erict16/tuyi/releases/download/v0.1.3/Tuyi_v0.1.3_Setup.exe",
-      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.3/Tuyi_v0.1.3_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.3/Tuyi_v0.1.3_macOS_x86_64.dmg",
+      win: "https://github.com/erict16/tuyi/releases/download/v0.1.4/Tuyi_v0.1.4_Setup.exe",
+      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.4/Tuyi_v0.1.4_macOS_arm64.dmg",
+      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.4/Tuyi_v0.1.4_macOS_x86_64.dmg",
     };
     window.DL = { ...FALLBACK };
-    window.DL_META = { version: "v0.1.3", winSize: "约 64 MB" };
+    window.DL_META = { version: "v0.1.4", winSize: "约 64 MB" };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -147,14 +147,14 @@
     <section id="download" class="scroll-mt-20 bg-accent py-16 text-white">
       <div class="mx-auto max-w-5xl px-4">
         <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">下载图译</h2>
-        <p id="dl-ver" class="mt-3 text-center text-white/90">v0.1.3 · MIT 开源 · 安装包未签名</p>
+        <p id="dl-ver" class="mt-3 text-center text-white/90">v0.1.4 · MIT 开源 · 安装包未签名</p>
 
         <div class="mt-10 grid gap-4 sm:grid-cols-2">
           <article class="dl-card rounded-3xl bg-white/10 p-6 text-left ring-1 ring-white/25" data-os="win">
             <h3 class="text-xl font-semibold">Windows</h3>
             <p class="mt-2 text-sm text-white/90">Windows 10 或 11，<strong class="font-semibold text-white">64 位</strong>。不要 32 位，不要 7 / 8。</p>
             <p class="mt-1 text-sm text-white/80">Setup.exe · <span id="win-size">约 64 MB</span> · Win10 要有 WebView2（一般已装）</p>
-            <a id="btn-win" class="dl-link mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-base font-semibold text-accent hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href="https://github.com/erict16/tuyi/releases/download/v0.1.3/Tuyi_v0.1.3_Setup.exe" rel="noopener">下载 Windows</a>
+            <a id="btn-win" class="dl-link mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-base font-semibold text-accent hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href="https://github.com/erict16/tuyi/releases/download/v0.1.4/Tuyi_v0.1.4_Setup.exe" rel="noopener">下载 Windows</a>
             <p class="mt-3 text-xs leading-5 text-white/80">第一次会拦：更多信息 → 仍要运行。</p>
           </article>
 
@@ -166,7 +166,7 @@
               <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" role="radio" aria-checked="false" data-chip="intel">Intel</button>
             </div>
             <p id="mac-hint" class="mt-3 text-sm text-white/90">M1 / M2 / M3 / M4。苹果菜单 → 关于本机 → 芯片。</p>
-            <a id="btn-mac" class="dl-link mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-base font-semibold text-accent hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href="https://github.com/erict16/tuyi/releases/download/v0.1.3/Tuyi_v0.1.3_macOS_arm64.dmg" rel="noopener">下载 macOS（Apple 芯片）</a>
+            <a id="btn-mac" class="dl-link mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-base font-semibold text-accent hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" href="https://github.com/erict16/tuyi/releases/download/v0.1.4/Tuyi_v0.1.4_macOS_arm64.dmg" rel="noopener">下载 macOS（Apple 芯片）</a>
             <p class="mt-3 text-xs leading-5 text-white/80">打开 DMG，把 图译 拖进应用程序。第一次运行：右键图标 → 打开。或系统设置 → 隐私与安全性 → 仍要打开。</p>
           </article>
         </div>
