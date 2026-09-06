@@ -10,19 +10,19 @@
   <meta property="og:title" content="图译 Tuyi — DWG / DXF Translator" />
   <meta property="og:description" content="打开图纸，译文字，写出新文件。原图不动。不用 AutoCAD。" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="shots/regular.png" />
+  <meta property="og:image" content="shots/home.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" href="shots/mark.png" type="image/png" />
   <link rel="preconnect" href="https://cdn.tailwindcss.com" />
   <link rel="preconnect" href="https://api.github.com" />
   <script>
     const FALLBACK = {
-      win: "https://github.com/erict16/tuyi/releases/download/v0.1.6/Tuyi_v0.1.6_Setup.exe",
-      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.6/Tuyi_v0.1.6_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.6/Tuyi_v0.1.6_macOS_x86_64.dmg",
+      win: "https://github.com/erict16/tuyi/releases/download/v0.1.7/Tuyi_v0.1.7_Setup.exe",
+      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.7/Tuyi_v0.1.7_macOS_arm64.dmg",
+      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.7/Tuyi_v0.1.7_macOS_x86_64.dmg",
     };
     window.DL = { ...FALLBACK };
-    window.DL_META = { version: "v0.1.6", winSize: "约 64 MB" };
+    window.DL_META = { version: "v0.1.7", winSize: "约 64 MB" };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -95,7 +95,7 @@
         </div>
         <p class="mt-4 text-sm text-slate-500">Windows 10 / 11（64 位）· Mac Apple 芯片 · 中译英默认</p>
         <div class="mx-auto mt-12 max-w-5xl">
-          <img src="shots/regular.png" alt="图译窗口：左边原文，右边译文，按图层列出" width="1280" height="800" fetchpriority="high" class="rounded-2xl shadow-xl ring-1 ring-black/10" />
+          <img src="shots/home.png" alt="图译：左边添加图纸，底下点翻译" width="1280" height="800" fetchpriority="high" class="rounded-2xl shadow-xl ring-1 ring-black/10" />
         </div>
       </div>
     </section>
@@ -106,8 +106,8 @@
         <ol class="mt-10 grid gap-8 sm:grid-cols-3">
           <li>
             <p class="text-sm font-semibold text-accent">1</p>
-            <h3 class="mt-1 text-lg font-semibold">打开图纸</h3>
-            <p class="mt-2 text-slate-600">DWG 或 DXF。列出 TITLE、注释、属性。原文件只读，不改。</p>
+            <h3 class="mt-1 text-lg font-semibold">添加图纸</h3>
+            <p class="mt-2 text-slate-600">点左边加号，或把 DWG / DXF 拖进去。一次可以多张。原文件只读，不改。</p>
           </li>
           <li>
             <p class="text-sm font-semibold text-accent">2</p>
@@ -117,7 +117,7 @@
           <li>
             <p class="text-sm font-semibold text-accent">3</p>
             <h3 class="mt-1 text-lg font-semibold">写出新文件</h3>
-            <p class="mt-2 text-slate-600">默认放到「文档 / Tuyi output」。批量可以按原来的文件夹结构排。</p>
+            <p class="mt-2 text-slate-600">点翻译就会另存一份。默认在「文档 / Tuyi output」。</p>
           </li>
         </ol>
         <p class="mx-auto mt-10 max-w-2xl rounded-2xl bg-mist px-5 py-4 text-sm text-slate-700">
@@ -133,11 +133,11 @@
         <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">译的是 CAD 里的字，不是把图当图片扫</h2>
         <p class="mx-auto mt-3 max-w-2xl text-center text-slate-600">标题、注释、属性、标注、表格。中、英、日、韩、德、法。网上翻译、自己配接口、或不联网。</p>
         <div class="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="界面预览">
-          <button type="button" data-tab="regular" aria-selected="true" class="tab on rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">常规处理</button>
-          <button type="button" data-tab="export" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">批量导出</button>
-          <button type="button" data-tab="params" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">设置</button>
+          <button type="button" data-tab="home" aria-selected="true" class="tab on rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">主界面</button>
+          <button type="button" data-tab="settings" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">设置</button>
+          <button type="button" data-tab="dark" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">深色</button>
         </div>
-        <img id="feature-shot" src="shots/regular.png" alt="常规处理：原文和译文表" width="1280" height="800" loading="lazy" class="mt-8 rounded-2xl bg-white shadow-xl ring-1 ring-black/10" />
+        <img id="feature-shot" src="shots/home.png" alt="图译主界面：左边添加图纸" width="1280" height="800" loading="lazy" class="mt-8 rounded-2xl bg-white shadow-xl ring-1 ring-black/10" />
       </div>
     </section>
 
@@ -159,7 +159,7 @@
     <section id="download" class="scroll-mt-20 bg-mist py-20">
       <div class="mx-auto max-w-5xl px-4">
         <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">下载图译</h2>
-        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.6 · MIT 开源 · 安装包未签名</p>
+        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.7 · MIT 开源 · 安装包未签名</p>
         <p id="dl-os" class="mt-1 hidden text-center text-sm font-medium text-accent"></p>
 
         <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2">
@@ -168,7 +168,7 @@
             <p class="mt-2 text-sm text-slate-600">Windows 10 或 11，<strong class="font-semibold text-ink">64 位</strong>。不要 32 位，不要 7 / 8。</p>
             <p class="mt-1 text-sm text-slate-500">Setup.exe · <span id="win-size">约 64 MB</span> · Win10 要有 WebView2（一般已装）</p>
             <div class="dl-foot">
-              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.6/Tuyi_v0.1.6_Setup.exe" rel="noopener">下载 Windows</a>
+              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.7/Tuyi_v0.1.7_Setup.exe" rel="noopener">下载 Windows</a>
               <p class="dl-note mt-3 text-xs leading-5 text-slate-500">第一次会拦：更多信息 → 仍要运行。</p>
             </div>
           </article>
@@ -182,7 +182,7 @@
             </div>
             <p id="mac-hint" class="mt-3 text-sm text-slate-600">M1 / M2 / M3 / M4。苹果菜单 → 关于本机 → 芯片。</p>
             <div class="dl-foot">
-              <a id="btn-mac" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.6/Tuyi_v0.1.6_macOS_arm64.dmg" rel="noopener">下载 macOS（Apple 芯片）</a>
+              <a id="btn-mac" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.7/Tuyi_v0.1.7_macOS_arm64.dmg" rel="noopener">下载 macOS（Apple 芯片）</a>
               <p class="dl-note mt-3 text-xs leading-5 text-slate-500">打开 DMG，把 图译 拖进应用程序。第一次运行：右键图标 → 打开。或系统设置 → 隐私与安全性 → 仍要打开。</p>
             </div>
           </article>
@@ -243,8 +243,8 @@
   </footer>
 
   <script>
-    const shot = { regular: "shots/regular.png", export: "shots/export.png", params: "shots/params.png" };
-    const alts = { regular: "常规处理：原文和译文表", export: "批量导出队列", params: "设置" };
+    const shot = { home: "shots/home.png", settings: "shots/settings.png", dark: "shots/dark.png" };
+    const alts = { home: "图译主界面：左边添加图纸", settings: "设置：网上翻译或自己配接口", dark: "图译深色模式" };
     const img = document.getElementById("feature-shot");
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.addEventListener("click", () => {

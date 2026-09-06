@@ -91,7 +91,7 @@ button { appearance: none; border: 0; background: none; cursor: default; }
   padding: 0 10px;
   gap: 6px;
   flex: none;
-  background: color-mix(in srgb, var(--bg) 70%, var(--elev));
+  background: var(--elev);
   border-bottom: 1px solid var(--border);
 }
 .tb button, .tb select, .tb label, .lights { -webkit-app-region: no-drag; }
@@ -565,6 +565,13 @@ td input[type="text"]:focus {
   background: var(--elev);
   border-bottom: 1px solid var(--border);
 }
+[data-theme="dark"] .set-pane > .help,
+[data-theme="dark"] .card p.help {
+  color: #c5d0e0;
+}
+[data-theme="dark"] .field {
+  color: #c5d0e0;
+}
 .set-tabs button {
   height: 34px;
   padding: 0 14px;
@@ -612,7 +619,7 @@ td input[type="text"]:focus {
   height: 32px;
   font-weight: 650;
   font-size: 13px;
-  background: var(--elev);
+  background: var(--soft);
   color: var(--text);
   transition: background 160ms var(--ease-out), color 160ms var(--ease-out);
 }

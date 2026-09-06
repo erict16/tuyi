@@ -56,6 +56,39 @@ class NativeBridge:
         path = str(paths[0]) if paths else ""
         return {"path": path or ""}
 
+    def set_chrome_theme(self, dark: bool = False) -> dict:
+        """Match the OS titlebar to the in-app light/dark theme."""
+        dark = bool(dark)
+        if sys.platform == "darwin":
+            try:
+                from AppKit import NSAppearance, NSApp
+
+                name = "NSAppearanceNameDarkAqua" if dark else "NSAppearanceNameAqua"
+                appearance = NSAppearance.appearanceNamed_(name)
+                NSApp.setAppearance_(appearance)
+                for window in NSApp.windows():
+                    window.setAppearance_(appearance)
+            except Exception:
+                return {"ok": False}
+            return {"ok": True}
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                from ctypes import wintypes
+
+                from backend.app_meta import APP_TITLE, APP_VERSION
+
+                user32 = ctypes.windll.user32
+                hwnd = user32.FindWindowW(None, f"{APP_TITLE} v{APP_VERSION}")
+                if not hwnd:
+                    return {"ok": False}
+                value = wintypes.BOOL(1 if dark else 0)
+                ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(value), ctypes.sizeof(value))
+            except Exception:
+                return {"ok": False}
+            return {"ok": True}
+        return {"ok": True}
+
     def open_url(self, url: str) -> dict:
         if not url or not url.startswith(("https://", "http://")):
             return {"error": "无效链接"}

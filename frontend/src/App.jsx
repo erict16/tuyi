@@ -222,6 +222,9 @@ export default function App() {
 
   useEffect(() => {
     try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    py()?.set_chrome_theme?.(theme === "dark");
   }, [theme]);
 
   useEffect(() => {
@@ -1502,10 +1505,10 @@ export default function App() {
                       onChange={setTheme}
                     />
                     <div className="field-actions">
-                      <button type="button" className="tbtn" onClick={openGlossary}>打开词汇库</button>
-                      <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
+                      <button type="button" className="tbtn ghost" onClick={openGlossary}>打开词汇库</button>
+                      <button type="button" className="tbtn ghost" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
                     </div>
-                    <p className="help">图译 {appVersion || updateInfo?.current || "—"} · ODA {oda.installed ? "已装" : "未装"}</p>
+                    <p className="help">图译 {appVersion || updateInfo?.current || "—"} · ODA {oda.installed ? "已安装" : "未装"}</p>
                     {updateMsg && <p className="help">{updateMsg}</p>}
                     {updateInfo?.available && (
                       <p className="help">有新版本 {updateInfo.latest}。</p>

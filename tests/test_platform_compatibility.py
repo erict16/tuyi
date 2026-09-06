@@ -153,6 +153,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("unittest discover", ci)
         self.assertIn("npm run build", ci)
         self.assertIn("PYTHONUTF8", ci)
+        self.assertIn("set_chrome_theme", (root / "desktop" / "native_bridge.py").read_text(encoding="utf-8"))
         self.assertIn("windows-latest", ci)
         self.assertIn("macos-latest", ci)
         self.assertIn("requirements-macos.txt", ci)
