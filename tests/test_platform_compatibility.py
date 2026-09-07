@@ -227,7 +227,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("拖进应用程序", html)
         self.assertIn('data-tab="glossary"', html)
         self.assertIn("shots/glossary.png", html)
-        self.assertNotIn("FAQ", html)
+        self.assertIn("常见问题", html)
+        self.assertNotIn(">FAQ</", html)
 
     def test_safe_log_survives_cp1252_stdout(self):
         from backend.translator import CADChineseTranslator
