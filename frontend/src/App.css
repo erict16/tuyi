@@ -1000,6 +1000,10 @@ td input[type="text"]:focus {
   flex: none;
 }
 .foot .ver {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  line-height: 1;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }

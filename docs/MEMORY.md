@@ -1,5 +1,7 @@
 # Project memory
 
+- 2026-09-07: Mac light native titlebar is white (`#ffffff`, titlebarAppearsTransparent) to match `--elev`. Footer `.ver` is 22px inline-flex like ODA and 中 ⇄ 英.
+
 - 2026-09-07: Home chrome is scheme E: OS titlebar, no second toolbar on work/batch. Footer: ODA | 中 ⇄ 英 | 导出 PDF / 术语管理 / 设置 (icons + original names, regular weight) | version. Language pop is scheme C: 原文/译文 chips, 检测 next to 原文 (one-shot, not a source option), swap, 10 langs (zh/en/vi/id/th/ms/ko/ru/ja/de). Same language cannot be selected on both sides. 翻译 button is 快速翻译. Pop 160ms ease-out. Do not put auto-detect in the source chip list.
 
 - 2026-09-07: Windows uses the OS caption bar (`frameless=False`), same as Mac. `hasNativeTitlebar` is true on Win and Mac so HTML traffic lights do not paint on Windows. `python run.py` and the Setup.exe share this chrome. Do not bring back `frameless=not mac` or Windows-only fake lights.

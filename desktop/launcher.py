@@ -168,7 +168,7 @@ def _run_web_app():
         min_size=(1024, 680),
         resizable=True,
         transparent=False,
-        background_color="#0e141c" if dark else "#e8e8ed",
+        background_color="#0e141c" if dark else "#ffffff",
         frameless=False,
         easy_drag=False,
         shadow=True,

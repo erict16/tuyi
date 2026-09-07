@@ -32,7 +32,7 @@ def _paint_macos(dark: bool) -> None:
     if dark:
         bg = NSColor.colorWithCalibratedRed_green_blue_alpha_(0.055, 0.078, 0.110, 1.0)
     else:
-        bg = NSColor.colorWithCalibratedRed_green_blue_alpha_(0.910, 0.910, 0.929, 1.0)
+        bg = NSColor.colorWithCalibratedRed_green_blue_alpha_(1.0, 1.0, 1.0, 1.0)
     NSApp.setAppearance_(appearance)
     windows = list(NSApp.windows() or [])
     try:
@@ -69,7 +69,7 @@ def _paint_macos(dark: bool) -> None:
         except Exception:
             pass
         try:
-            window.setTitlebarAppearsTransparent_(False)
+            window.setTitlebarAppearsTransparent_(True)
         except Exception:
             pass
         try:
