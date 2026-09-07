@@ -14,7 +14,17 @@
   <img alt="MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
+<p align="center">
+  <a href="https://erict16.github.io/tuyi/">官网</a>
+  ·
+  <a href="https://github.com/erict16/tuyi/releases/latest">下载</a>
+</p>
+
 打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
+
+<p align="center">
+  <img src="docs/screenshots/translate.gif" alt="DWG DXF CAD drawing translator: 天花图 to reflected ceiling plan, 剪力墙 to shear wall">
+</p>
 
 ## 界面
 
@@ -83,4 +93,4 @@
 
 ## 协议
 
-MIT。请自由地使用和参与开源。
+MIT。请自由地使用和参与开源。好用的话点一下右上角 Star。

@@ -1,5 +1,7 @@
 # Project memory
 
+- 2026-09-07: GitHub storefront. README 第一屏是 `docs/screenshots/translate.gif`（floor_plan.dxf 词汇库中→英：天花图 / 剪力墙）。官网+下载链在徽章下。Star 一句放协议段。删了 `README_CN.md`（留 `README.zh-CN.md` 指针）和误提交的 `__pycache__`。默认 README 仍是中文。GitHub 简介改成「图译 Tuyi · DWG/DXF translator」；profile README 第一条是图译。Social preview 没有 API，要在仓库 Settings → General → Social preview 手传 `landing/shots/og.png`。V2EX / Reddit 只出草稿，不代发。
+
 - 2026-09-07: Landing SEO. Live site is `https://erict16.github.io/tuyi/`. Added canonical / Open Graph (absolute `shots/og.png` 1200×630) / Twitter / JSON-LD (`SoftwareApplication` + `FAQPage`) / `robots.txt` / `sitemap.xml` / `llms.txt` / English `en.html` with hreflang. H1 is `图译 Tuyi`. GitHub topics include dwg-translator / cad-translator. OpenSEO MCP is not connected on this machine; this pass is on-page only. Do not invent a custom domain.
 
 - 2026-09-07: Root tidy + README shots. `PLAN.md` / `OSS-CHECK.md` → `docs/`; `SKETCH-LOCK.md` → `sketches/`; unused root `icon.ico` → `docs/icons/`; leftover `images/demo.png` → `docs/screenshots/demo.png`. README 界面 is one large 主界面 (`app-home.png`) plus a 2×2 of 词汇库 / 设置 / 图上怎么写 / 深色. Dark shot restored from `docs/screenshots/ui-dark.png` (deleted in `34fe334`). Do not move `Dwglot.spec` / `changelog.json` / `ico.ico` (pack + tests).

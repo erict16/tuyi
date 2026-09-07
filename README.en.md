@@ -14,7 +14,17 @@
   <img alt="MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
+<p align="center">
+  <a href="https://erict16.github.io/tuyi/en.html">Website</a>
+  ·
+  <a href="https://github.com/erict16/tuyi/releases/latest">Download</a>
+</p>
+
 Open a DWG or DXF. Translate the text. Get a new file. The original stays put. No AutoCAD. Windows and Mac.
+
+<p align="center">
+  <img src="docs/screenshots/translate.gif" alt="DWG DXF CAD drawing translator: 天花图 to reflected ceiling plan, 剪力墙 to shear wall">
+</p>
 
 ## Screenshots
 
@@ -75,4 +85,4 @@ DXF works out of the box. DWG needs [ODA File Converter](https://www.opendesign.
 
 ## License
 
-MIT.
+MIT. If it helps, star the repo.
