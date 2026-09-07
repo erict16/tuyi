@@ -123,6 +123,25 @@ class PlatformCompatibilityTests(unittest.TestCase):
             self.assertNotIn("statreload", excludes, name)
             self.assertNotIn("watchfilesreload", excludes, name)
 
+    def test_windows_ico_has_transparent_squircle_corners(self):
+        import struct
+
+        root = Path(__file__).resolve().parents[1]
+        data = (root / "ico.ico").read_bytes()
+        _reserved, kind, count = struct.unpack_from("<HHH", data)
+        self.assertEqual(kind, 1)
+        self.assertGreaterEqual(count, 5)
+        from PIL import Image
+
+        with Image.open(root / "ico.ico") as raw:
+            icon = raw.convert("RGBA")
+        px = icon.load()
+        w, h = icon.size
+        self.assertEqual(px[0, 0][3], 0)
+        self.assertEqual(px[w - 1, 0][3], 0)
+        self.assertEqual(px[0, h - 1][3], 0)
+        self.assertEqual(px[w - 1, h - 1][3], 0)
+
     def test_readme_icon_is_macos_squircle(self):
         path = Path(__file__).resolve().parents[1] / "docs" / "icons" / "app-rounded.png"
         self.assertTrue(path.is_file())
