@@ -1,5 +1,7 @@
 # Project memory
 
+- 2026-09-07: Landing SEO. Live site is `https://erict16.github.io/tuyi/`. Added canonical / Open Graph (absolute `shots/og.png` 1200×630) / Twitter / JSON-LD (`SoftwareApplication` + `FAQPage`) / `robots.txt` / `sitemap.xml` / `llms.txt` / English `en.html` with hreflang. H1 is `图译 Tuyi`. GitHub topics include dwg-translator / cad-translator. OpenSEO MCP is not connected on this machine; this pass is on-page only. Do not invent a custom domain.
+
 - 2026-09-07: Root tidy + README shots. `PLAN.md` / `OSS-CHECK.md` → `docs/`; `SKETCH-LOCK.md` → `sketches/`; unused root `icon.ico` → `docs/icons/`; leftover `images/demo.png` → `docs/screenshots/demo.png`. README 界面 is one large 主界面 (`app-home.png`) plus a 2×2 of 词汇库 / 设置 / 图上怎么写 / 深色. Dark shot restored from `docs/screenshots/ui-dark.png` (deleted in `34fe334`). Do not move `Dwglot.spec` / `changelog.json` / `ico.ico` (pack + tests).
 
 - 2026-09-07: v0.1.8. Auto-update check hits GitHub Releases, picks `Tuyi_v*_windows_x64.zip` / `Tuyi_v*_macOS_{arch}.zip` with sha256, `can_apply` only when frozen. Source `POST /api/updates/apply` is 400. Silent check on launch. Tag `v0.1.8` ships via windows-release.yml + macos-release.yml. Windows `ico.ico` / `icon.ico` rebuilt from `docs/icons/app-rounded.png` (transparent squircle corners, 16–256).

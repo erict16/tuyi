@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://erict16.github.io/tuyi/sitemap.xml

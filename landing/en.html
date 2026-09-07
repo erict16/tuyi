@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<!-- Tuyi landing. Same Mac-window language as the app: #007aff, system type. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#e8e8ed" />
+  <meta name="color-scheme" content="light" />
+  <title>Tuyi: open-source DWG / DXF translator</title>
+  <meta name="description" content="Open a DWG or DXF. Translate titles, notes, dimensions, and tables. Save a new file. The original stays put. No AutoCAD. Windows and Mac. MIT." />
+  <meta name="author" content="Eric Tan" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://erict16.github.io/tuyi/en.html" />
+  <link rel="alternate" hreflang="zh-Hans" href="https://erict16.github.io/tuyi/" />
+  <link rel="alternate" hreflang="en" href="https://erict16.github.io/tuyi/en.html" />
+  <link rel="alternate" hreflang="x-default" href="https://erict16.github.io/tuyi/en.html" />
+  <meta property="og:title" content="Tuyi: open-source DWG / DXF translator" />
+  <meta property="og:description" content="Open a drawing, translate the text, save a new file. Original stays put. No AutoCAD. Windows and Mac." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://erict16.github.io/tuyi/en.html" />
+  <meta property="og:site_name" content="图译 Tuyi" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
+  <meta property="og:image" content="https://erict16.github.io/tuyi/shots/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Tuyi: open-source DWG / DXF translator" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Tuyi: open-source DWG / DXF translator" />
+  <meta name="twitter:description" content="Open a DWG or DXF, translate the text, save a new file. No AutoCAD." />
+  <meta name="twitter:image" content="https://erict16.github.io/tuyi/shots/og.png" />
+  <link rel="icon" href="shots/mark.png" type="image/png" />
+  <link rel="apple-touch-icon" href="shots/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+  <link rel="preconnect" href="https://api.github.com" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "图译 Tuyi",
+        "alternateName": ["Tuyi", "图译"],
+        "url": "https://erict16.github.io/tuyi/en.html",
+        "image": "https://erict16.github.io/tuyi/shots/og.png",
+        "screenshot": "https://erict16.github.io/tuyi/shots/home.png",
+        "description": "Open a DWG or DXF. Translate titles, notes, dimensions, and tables. Save a new file. The original stays put. No AutoCAD.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Windows 10, Windows 11, macOS",
+        "license": "https://github.com/erict16/tuyi/blob/main/LICENSE",
+        "downloadUrl": "https://github.com/erict16/tuyi/releases/latest",
+        "softwareVersion": "0.1.8",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Eric Tan", "url": "https://github.com/erict16" }
+      },
+      {
+        "@type": "WebSite",
+        "name": "图译 Tuyi",
+        "url": "https://erict16.github.io/tuyi/",
+        "inLanguage": ["zh-Hans", "en"]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Which Windows versions work?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Windows 10 or 11, 64-bit. Not 32-bit, not Windows 7 / 8. On Windows 10, install Edge WebView2 if the app asks for it." }
+          },
+          {
+            "@type": "Question",
+            "name": "Which Mac download do I need?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Apple menu, About This Mac. If it says Apple M1 / M2 / M3 / M4, get Apple silicon. If it says Intel, get Intel. They are not interchangeable. If the Intel build is missing, the button says so." }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need AutoCAD?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. Tuyi is a standalone app. DXF opens directly. DWG uses ODA File Converter on your machine." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is ODA bundled?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No, and it will not be. The license does not allow shipping it with the app. Install ODA File Converter yourself. DXF-only work does not need it." }
+          },
+          {
+            "@type": "Question",
+            "name": "It will not open the first time?",
+            "acceptedAnswer": { "@type": "Answer", "text": "That is expected. The installer is not code-signed yet. Mac: right-click the icon, Open. Windows: More info, Run anyway." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does it cost money? Is there a license key?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. MIT. Translation keys are yours: DeepL, Azure, Ollama, or a custom endpoint. Tuyi does not create accounts. It does not call out unless you check for updates." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+  <script>
+    const FALLBACK = {
+      win: "https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_Setup.exe",
+      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_macOS_arm64.dmg",
+      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_macOS_x86_64.dmg",
+    };
+    window.DL = { ...FALLBACK };
+    window.DL_META = { version: "v0.1.8", winSize: "about 64 MB" };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: "#007aff",
+            ink: "#1d1d1f",
+            mist: "#e8e8ed",
+            navy: "#0b1120",
+          },
+          fontFamily: {
+            sans: ["-apple-system", "SF Pro Text", "SF Pro Display", "Helvetica Neue", "system-ui", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { color-scheme: light; scroll-behavior: smooth; }
+    .text-pretty { text-wrap: pretty; }
+    .chip[aria-checked="true"] { background: #1d1d1f; color: #fff; }
+    .dl-card { display: flex; flex-direction: column; height: 100%; }
+    .dl-foot { margin-top: auto; padding-top: 1.5rem; }
+    .dl-note { min-height: 3.6em; }
+    .dl-card[data-current="true"] { box-shadow: 0 0 0 2px #007aff; }
+    .dl-link {
+      transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), filter 160ms ease;
+    }
+    .dl-link:active { transform: scale(0.97); }
+    @media (hover: hover) and (pointer: fine) {
+      .dl-link:hover { filter: brightness(1.04); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .dl-link { transition: none; }
+      .dl-link:active { transform: none; }
+    }
+  </style>
+</head>
+<body class="bg-white text-ink antialiased">
+  <a class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-ink focus:shadow" href="#download">Skip to download</a>
+
+  <header class="sticky top-0 z-20 border-b border-black/5 bg-white/80 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+      <a href="en.html" class="flex items-center gap-2 font-semibold" translate="no">
+        <img src="shots/mark.png" alt="" width="28" height="28" class="rounded-md" />
+        图译 Tuyi
+      </a>
+      <nav class="hidden items-center gap-8 text-sm text-slate-600 sm:flex" aria-label="Page">
+        <a href="#how" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">How</a>
+        <a href="#features" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Features</a>
+        <a href="#download" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Download</a>
+        <a href="#faq" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">FAQ</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="./" lang="zh-Hans" class="text-sm text-slate-600 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">中文</a>
+        <a href="#download" class="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="bg-mist">
+      <div class="mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:pb-20 sm:pt-20">
+        <p class="text-sm font-medium text-slate-500">Desktop app. No AutoCAD.</p>
+        <h1 class="mt-2 text-pretty text-4xl font-semibold tracking-tight sm:text-5xl">图译 Tuyi</h1>
+        <p class="mt-3 text-xl font-medium text-ink sm:text-2xl">A powerful, open-source DWG/DXF translator</p>
+        <p class="mx-auto mt-4 max-w-xl text-lg text-slate-600">Open a DWG or DXF. Tuyi lists the text. You edit the translation. It saves a new file next to it. The original stays put.</p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a href="#download" class="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">Download Tuyi</a>
+          <a href="#how" class="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink ring-1 ring-black/10 hover:bg-mist focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">See how it works</a>
+        </div>
+        <p class="mt-4 text-sm text-slate-500">Windows 10 / 11 (64-bit). Mac Apple silicon. Chinese to English by default.</p>
+        <div class="mx-auto mt-12 max-w-5xl">
+          <img src="shots/home.png" alt="Tuyi: add a drawing on the left, translate at the bottom" width="1280" height="800" fetchpriority="high" class="rounded-2xl shadow-xl ring-1 ring-black/10" />
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="scroll-mt-20 bg-white py-20">
+      <div class="mx-auto max-w-5xl px-4">
+        <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">Three steps</h2>
+        <ol class="mt-10 grid gap-8 sm:grid-cols-3">
+          <li>
+            <p class="text-sm font-semibold text-accent">1</p>
+            <h3 class="mt-1 text-lg font-semibold">Add drawings</h3>
+            <p class="mt-2 text-slate-600">Click the plus on the left, or drop DWG / DXF files. Several at once is fine. The original is read-only.</p>
+          </li>
+          <li>
+            <p class="text-sm font-semibold text-accent">2</p>
+            <h3 class="mt-1 text-lg font-semibold">Translate</h3>
+            <p class="mt-2 text-slate-600">Glossary terms hit first. The rest go through your DeepL, Azure, Ollama, or custom endpoint. You can edit by hand.</p>
+          </li>
+          <li>
+            <p class="text-sm font-semibold text-accent">3</p>
+            <h3 class="mt-1 text-lg font-semibold">Save a new file</h3>
+            <p class="mt-2 text-slate-600">Translate writes a new file. Default folder is Documents / Tuyi output.</p>
+          </li>
+        </ol>
+        <p class="mx-auto mt-10 max-w-2xl rounded-2xl bg-mist px-5 py-4 text-sm text-slate-700">
+          DXF works after install. For DWG, install
+          <a class="font-semibold text-accent underline-offset-2 hover:underline" href="https://www.opendesign.com/guestfiles/oda_file_converter">ODA File Converter</a>。
+          on this machine. Tuyi does not bundle it.
+        </p>
+      </div>
+    </section>
+
+    <section id="features" class="scroll-mt-20 bg-mist py-20">
+      <div class="mx-auto max-w-6xl px-4">
+        <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">It translates CAD text, not a screenshot of the drawing</h2>
+        <p class="mx-auto mt-3 max-w-2xl text-center text-slate-600">Titles, notes, attributes, dimensions, tables. Chinese, English, Japanese, Korean, German, French. Cloud, your own endpoint, or offline.</p>
+        <div class="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="App previews">
+          <button type="button" data-tab="home" aria-selected="true" class="tab on rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Home</button>
+          <button type="button" data-tab="glossary" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Glossary</button>
+          <button type="button" data-tab="settings" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Settings</button>
+          <button type="button" data-tab="dark" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Dark</button>
+        </div>
+        <img id="feature-shot" src="shots/home.png" alt="Tuyi home: add a drawing on the left" width="1280" height="800" loading="lazy" class="mt-8 rounded-2xl bg-white shadow-xl ring-1 ring-black/10" />
+      </div>
+    </section>
+
+    <section class="bg-white py-20">
+      <div class="mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-2 lg:items-center">
+        <div>
+          <h2 class="text-pretty text-3xl font-semibold tracking-tight">A batch, a table, one write-back</h2>
+          <p class="mt-4 max-w-prose text-slate-600">Regular mode edits one drawing. Batch export runs a queue. Hand-edited rows export to CSV / Excel, then import and write back.</p>
+          <ul class="mt-6 space-y-2 text-slate-700">
+            <li>Chinese to English by default. Change direction in the toolbar.</li>
+            <li>Filter numbers, duplicates, and text already in the target language.</li>
+            <li>Check for updates inside the app.</li>
+          </ul>
+        </div>
+        <img src="shots/export.png" alt="Batch export queue" width="1280" height="800" loading="lazy" class="rounded-2xl shadow-lg ring-1 ring-black/10" />
+      </div>
+    </section>
+
+    <section id="download" class="scroll-mt-20 bg-mist py-20">
+      <div class="mx-auto max-w-5xl px-4">
+        <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">Download Tuyi</h2>
+        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.8 · MIT · unsigned installer</p>
+        <p id="dl-os" class="mt-1 hidden text-center text-sm font-medium text-accent"></p>
+
+        <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2">
+          <article class="dl-card flex h-full flex-col rounded-3xl bg-white p-7 text-left shadow-sm ring-1 ring-black/5" data-os="win">
+            <h3 class="text-xl font-semibold">Windows</h3>
+            <p class="mt-2 text-sm text-slate-600">Windows 10 or 11, <strong class="font-semibold text-ink">64-bit</strong>. Not 32-bit, not 7 / 8.</p>
+            <p class="mt-1 text-sm text-slate-500">Setup.exe · <span id="win-size">about 64 MB</span> · Windows 10 needs WebView2 (usually already there)</p>
+            <div class="dl-foot">
+              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_Setup.exe" rel="noopener">Download Windows</a>
+              <p class="dl-note mt-3 text-xs leading-5 text-slate-500">SmartScreen will block it the first time: More info, Run anyway.</p>
+            </div>
+          </article>
+
+          <article class="dl-card flex h-full flex-col rounded-3xl bg-white p-7 text-left shadow-sm ring-1 ring-black/5" data-os="mac">
+            <h3 class="text-xl font-semibold">Mac</h3>
+            <p class="mt-2 text-sm text-slate-600">Apple silicon and Intel are different packages. The wrong one will not open.</p>
+            <div class="mt-4 inline-flex rounded-full bg-mist p-1" role="radiogroup" aria-label="Mac chip">
+              <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="true" data-chip="arm">Apple silicon</button>
+              <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="false" data-chip="intel">Intel</button>
+            </div>
+            <p id="mac-hint" class="mt-3 text-sm text-slate-600">M1 / M2 / M3 / M4. Apple menu, About This Mac, Chip.</p>
+            <div class="dl-foot">
+              <a id="btn-mac" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_macOS_arm64.dmg" rel="noopener">Download macOS (Apple silicon)</a>
+              <p class="dl-note mt-3 text-xs leading-5 text-slate-500">Open the DMG and drag 图译 into Applications. First launch: right-click the icon, Open. Or System Settings, Privacy & Security, Open Anyway.</p>
+            </div>
+          </article>
+        </div>
+
+        <p id="dl-msg" class="mt-6 hidden text-center text-sm font-semibold text-ink" role="status" aria-live="polite"></p>
+        <p class="mt-8 text-center text-sm text-slate-500">
+          <a class="underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/releases">All releases</a>
+          · Your own keys. Tuyi does not create an account
+        </p>
+      </div>
+    </section>
+
+    <section id="faq" class="scroll-mt-20 bg-mist py-20">
+      <div class="mx-auto max-w-3xl px-4">
+        <h2 class="text-3xl font-semibold tracking-tight">FAQ</h2>
+        <dl class="mt-10 divide-y divide-black/10">
+          <div class="py-5">
+            <dt class="font-semibold">Which Windows versions work?</dt>
+            <dd class="mt-2 text-slate-600">Windows 10 or 11, 64-bit. Not 32-bit, not Windows 7 / 8. On Windows 10, install Edge WebView2 if the app asks for it.</dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-semibold">Which Mac download do I need?</dt>
+            <dd class="mt-2 text-slate-600">Apple menu, About This Mac. If it says Apple M1 / M2 / M3 / M4, get Apple silicon. If it says Intel, get Intel. They are not interchangeable. If the Intel build is missing, the button says so.</dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-semibold">Do I need AutoCAD?</dt>
+            <dd class="mt-2 text-slate-600">No. Tuyi is a standalone app. DXF opens directly. DWG uses ODA File Converter on your machine.</dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-semibold">Is ODA bundled?</dt>
+            <dd class="mt-2 text-slate-600">No, and it will not be. The license does not allow shipping it with the app. Install ODA File Converter yourself. DXF-only work does not need it.</dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-semibold">It will not open the first time?</dt>
+            <dd class="mt-2 text-slate-600">That is expected. The installer is not code-signed yet. Mac: right-click the icon, Open. Windows: More info, Run anyway.</dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-semibold">Does it cost money? Is there a license key?</dt>
+            <dd class="mt-2 text-slate-600">No. MIT. Translation keys are yours: DeepL, Azure, Ollama, or a custom endpoint. Tuyi does not create accounts. It does not call out unless you check for updates.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-black/5 py-5">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-sm text-slate-500">
+      <span translate="no">图译 Tuyi · MIT</span>
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/erict16/tuyi" class="text-slate-500 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+        </a>
+        <a href="https://github.com/erict16/tuyi/blob/main/CONTRIBUTING.md" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Contribute</a>
+        <a href="https://github.com/erict16/tuyi/releases" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Releases</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const shot = { home: "shots/home.png", glossary: "shots/glossary.png", settings: "shots/settings.png", dark: "shots/dark.png" };
+    const alts = { home: "Tuyi home: add a drawing on the left", glossary: "Glossary: your terms hit first", settings: "Settings: cloud translate or your own endpoint", dark: "Tuyi dark mode" };
+    const img = document.getElementById("feature-shot");
+    document.querySelectorAll(".tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((b) => {
+          b.classList.remove("on", "bg-ink", "text-white");
+          b.classList.add("bg-white", "text-slate-600", "ring-1", "ring-black/10");
+          b.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("on", "bg-ink", "text-white");
+        btn.classList.remove("bg-white", "text-slate-600", "ring-1", "ring-black/10");
+        btn.setAttribute("aria-selected", "true");
+        img.src = shot[btn.dataset.tab];
+        img.alt = alts[btn.dataset.tab] || "Tuyi";
+      });
+    });
+    document.querySelector('.tab[data-tab="home"]').setAttribute("aria-selected", "true");
+
+    const msg = document.getElementById("dl-msg");
+    const btnMac = document.getElementById("btn-mac");
+    const btnWin = document.getElementById("btn-win");
+    const macHint = document.getElementById("mac-hint");
+    let macChip = "arm";
+
+    function bytesLabel(n) {
+      if (!n) return "";
+      return `about ${Math.round(n / 1024 / 1024)} MB`;
+    }
+
+    function setLink(el, url, label, missing) {
+      if (url) {
+        el.href = url;
+        el.removeAttribute("aria-disabled");
+        el.classList.remove("opacity-60");
+        el.textContent = label;
+      } else {
+        el.href = "#download";
+        el.setAttribute("aria-disabled", "true");
+        el.classList.add("opacity-60");
+        el.textContent = missing;
+      }
+    }
+
+    function applyMacChip(chip) {
+      macChip = chip;
+      document.querySelectorAll("[data-chip]").forEach((b) => {
+        const on = b.dataset.chip === chip;
+        b.setAttribute("aria-checked", on ? "true" : "false");
+      });
+      if (chip === "intel") {
+        macHint.textContent = "Intel. Apple menu, About This Mac. This file is not the Apple silicon one.";
+        setLink(btnMac, window.DL.macIntel, "Download macOS (Intel)", "Intel build is not up yet");
+      } else {
+        macHint.textContent = "M1 / M2 / M3 / M4. Apple menu, About This Mac, Chip.";
+        setLink(btnMac, window.DL.macArm, "Download macOS (Apple silicon)", "Apple silicon build is not up yet");
+      }
+    }
+
+    document.querySelectorAll("[data-chip]").forEach((b) => {
+      b.addEventListener("click", () => applyMacChip(b.dataset.chip));
+    });
+
+    function detectOs() {
+      const ua = navigator.userAgent;
+      if (/Windows/i.test(ua)) return "win";
+      if (/Mac OS X|Macintosh/i.test(ua) && !/iPhone|iPad|iPod/i.test(ua)) return "mac";
+      return "";
+    }
+
+    async function detectMacChip() {
+      try {
+        if (navigator.userAgentData?.getHighEntropyValues) {
+          const { architecture } = await navigator.userAgentData.getHighEntropyValues(["architecture"]);
+          if (/arm/i.test(architecture || "")) return "arm";
+          if (/x86|amd64/i.test(architecture || "")) return "intel";
+        }
+      } catch (_) {}
+      return "arm";
+    }
+
+    async function hydrateFromGithub() {
+      try {
+        const res = await fetch("https://api.github.com/repos/erict16/tuyi/releases/latest");
+        if (!res.ok) return;
+        const data = await res.json();
+        const assets = data.assets || [];
+        let win = "", macArm = "", macIntel = "", winBytes = 0;
+        for (const asset of assets) {
+          const name = asset.name || "";
+          const url = asset.browser_download_url || "";
+          if (/Tuyi_v.+_Setup\.exe$/i.test(name)) {
+            win = url;
+            winBytes = asset.size || 0;
+          } else if (/macOS_arm64\.dmg$/i.test(name)) {
+            macArm = url;
+          } else if (/macOS_x86_64\.dmg$/i.test(name)) {
+            macIntel = url;
+          }
+        }
+        if (win) window.DL.win = win;
+        if (macArm) window.DL.macArm = macArm;
+        if (macIntel) window.DL.macIntel = macIntel;
+        if (data.tag_name) {
+          window.DL_META.version = data.tag_name;
+          const ver = document.getElementById("dl-ver");
+          if (ver) ver.textContent = `${data.tag_name} · MIT · unsigned installer`;
+        }
+        if (winBytes) {
+          const size = document.getElementById("win-size");
+          if (size) size.textContent = bytesLabel(winBytes);
+        }
+      } catch (_) {}
+    }
+
+    function highlightOs(os) {
+      document.querySelectorAll(".dl-card").forEach((card) => {
+        card.dataset.current = card.dataset.os === os ? "true" : "false";
+      });
+      const line = document.getElementById("dl-os");
+      if (!line) return;
+      if (os === "win") {
+        line.textContent = "This computer is Windows. Use the left download.";
+        line.classList.remove("hidden");
+      } else if (os === "mac") {
+        line.textContent = "This computer is a Mac. Use the right download. Check the chip first.";
+        line.classList.remove("hidden");
+      } else {
+        line.classList.add("hidden");
+      }
+    }
+
+    (async () => {
+      await hydrateFromGithub();
+      setLink(btnWin, window.DL.win, "Download Windows", "Windows build is not up yet");
+      const os = detectOs();
+      highlightOs(os);
+      if (os === "mac") applyMacChip(await detectMacChip());
+      else applyMacChip("arm");
+    })();
+
+    document.querySelectorAll(".dl-link").forEach((el) => {
+      el.addEventListener("click", (event) => {
+        if (el.getAttribute("aria-disabled") === "true") {
+          event.preventDefault();
+          msg.textContent = el.textContent;
+          msg.classList.remove("hidden");
+        } else {
+          msg.classList.add("hidden");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# 图译 Tuyi
+
+> Open-source DWG / DXF translator. Translate text inside CAD drawings. No AutoCAD. Windows and Mac. MIT.
+
+图译 opens a DWG or DXF, translates titles, notes, attributes, dimensions, and table text, then writes a new file. The original drawing is not modified.
+
+## Links
+
+- Home (中文): https://erict16.github.io/tuyi/
+- Home (English): https://erict16.github.io/tuyi/en.html
+- Source: https://github.com/erict16/tuyi
+- Releases: https://github.com/erict16/tuyi/releases/latest
+- License: https://github.com/erict16/tuyi/blob/main/LICENSE
+
+## Notes
+
+- DXF works after install. DWG needs ODA File Converter on the same machine; Tuyi does not bundle it.
+- Translation keys are yours (DeepL, Azure, Ollama, or an OpenAI-compatible endpoint). Tuyi does not create accounts.
+- Default direction is Chinese to English.
