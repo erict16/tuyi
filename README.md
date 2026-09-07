@@ -22,10 +22,6 @@
 
 打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
 
-<p align="center">
-  <img src="docs/screenshots/translate.gif" alt="DWG DXF CAD drawing translator: 天花图 to reflected ceiling plan, 剪力墙 to shear wall">
-</p>
-
 ## 界面
 
 <p align="center">

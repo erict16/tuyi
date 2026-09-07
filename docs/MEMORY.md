@@ -1,6 +1,6 @@
 # Project memory
 
-- 2026-09-07: GitHub storefront. README 第一屏是 `docs/screenshots/translate.gif`（floor_plan.dxf 词汇库中→英：天花图 / 剪力墙）。官网+下载链在徽章下。Star 一句放协议段。删了 `README_CN.md`（留 `README.zh-CN.md` 指针）和误提交的 `__pycache__`。默认 README 仍是中文。GitHub 简介改成「图译 Tuyi · DWG/DXF translator」；profile README 第一条是图译。Social preview 没有 API，要在仓库 Settings → General → Social preview 手传 `landing/shots/og.png`。V2EX / Reddit 只出草稿，不代发。
+- 2026-09-07: Eric killed the generated `translate.gif` (PDF thumbnail of floor_plan). Deleted gif + `translate-zh.png` / `translate-en.png`. README 第一屏回到真 app 截图。官网+下载链、Star 一句、简介、profile 仍留。不要再往 README 塞自渲图纸 GIF。
 
 - 2026-09-07: Landing SEO. Live site is `https://erict16.github.io/tuyi/`. Added canonical / Open Graph (absolute `shots/og.png` 1200×630) / Twitter / JSON-LD (`SoftwareApplication` + `FAQPage`) / `robots.txt` / `sitemap.xml` / `llms.txt` / English `en.html` with hreflang. H1 is `图译 Tuyi`. GitHub topics include dwg-translator / cad-translator. OpenSEO MCP is not connected on this machine; this pass is on-page only. Do not invent a custom domain.
 
