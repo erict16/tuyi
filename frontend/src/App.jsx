@@ -2,13 +2,64 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 const LANGS = [
-  ["zh-Hans", "中"],
-  ["en", "英"],
-  ["ja", "日"],
-  ["ko", "韩"],
-  ["de", "德"],
-  ["fr", "法"],
+  ["zh-Hans", "中文", "中"],
+  ["en", "英语", "英"],
+  ["vi", "越南语", "越"],
+  ["id", "印尼语", "印"],
+  ["th", "泰语", "泰"],
+  ["ms", "马来语", "马"],
+  ["ko", "韩语", "韩"],
+  ["ru", "俄语", "俄"],
+  ["ja", "日语", "日"],
+  ["de", "德语", "德"],
 ];
+
+const LATIN_LANGS = new Set(["en", "de", "id", "ms", "vi"]);
+
+function langLabel(code) {
+  return LANGS.find(([id]) => id === code)?.[1] || code;
+}
+
+function langShort(code) {
+  return LANGS.find(([id]) => id === code)?.[2] || code;
+}
+
+function guessLang(text) {
+  const sample = text == null ? "" : String(text);
+  if (/[\u4e00-\u9fff]/.test(sample)) return "zh-Hans";
+  if (/[\u3040-\u30ff]/.test(sample)) return "ja";
+  if (/[\uac00-\ud7af]/.test(sample)) return "ko";
+  if (/[\u0e00-\u0e7f]/.test(sample)) return "th";
+  if (/[\u0400-\u04ff]/.test(sample)) return "ru";
+  return "en";
+}
+
+function Icon({ name }) {
+  const box = name === "gear" ? "0 0 24 24" : "0 0 16 16";
+  return (
+    <svg viewBox={box} aria-hidden="true">
+      {name === "share" && (
+        <>
+          <path d="M6.2 3.2H4.2A1.7 1.7 0 0 0 2.5 4.9v7a1.7 1.7 0 0 0 1.7 1.7h7a1.7 1.7 0 0 0 1.7-1.7V9.8" />
+          <path d="M8.5 7.5 13.5 2.5M9.8 2.5h3.7V6.2" />
+        </>
+      )}
+      {name === "terms" && (
+        <>
+          <path d="M8 4.2c-.7-.7-1.8-1.1-3.2-1.1H3v9.2h2c1.3 0 2.3.3 3 1" />
+          <path d="M8 4.2c.7-.7 1.8-1.1 3.2-1.1H13v9.2h-2c-1.3 0-2.3.3-3 1" />
+          <path d="M8 4.2v9.1" />
+        </>
+      )}
+      {name === "gear" && (
+        <>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </>
+      )}
+    </svg>
+  );
+}
 
 const LAYOUTS = [
   ["纯译文", "图纸上只留译文", "写回后图纸上只看到译文"],
@@ -220,8 +271,10 @@ export default function App() {
   const cadInput = useRef(null);
   const glossaryInput = useRef(null);
   const tableInput = useRef(null);
+  const langRef = useRef(null);
   const extractSnap = useRef("");
   const pageReturn = useRef("work");
+  const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
     try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
@@ -236,6 +289,22 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem("tuyi-rail", String(railW)); } catch { /* ignore */ }
   }, [railW]);
+
+  useEffect(() => {
+    if (!langOpen) return undefined;
+    const onDoc = (event) => {
+      if (!langRef.current?.contains(event.target)) setLangOpen(false);
+    };
+    const onKey = (event) => {
+      if (event.key === "Escape") setLangOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [langOpen]);
 
   useEffect(() => {
     const shot = new URLSearchParams(window.location.search).get("shot");
@@ -264,7 +333,7 @@ export default function App() {
     const list = Array.isArray(rows) ? rows : [];
     const source = asText(sourceLang);
     const sourceIsZh = source.startsWith("zh");
-    const sourceIsAscii = source === "en" || source === "de" || source === "fr";
+    const sourceIsAscii = LATIN_LANGS.has(source);
     return list.filter((row) => {
       const source = asText(row?.source);
       if (filters.dupes && row?.duplicate) return false;
@@ -1110,6 +1179,33 @@ export default function App() {
     }
   }
 
+  function pickSource(code) {
+    if (code === targetLang) return;
+    setSourceLang(code);
+  }
+
+  function pickTarget(code) {
+    if (code === sourceLang) return;
+    setTargetLang(code);
+  }
+
+  function swapLangs() {
+    setSourceLang(targetLang);
+    setTargetLang(sourceLang);
+  }
+
+  function detectSource() {
+    const blob = (Array.isArray(rows) ? rows : []).slice(0, 40).map((row) => asText(row.source)).join("\n");
+    if (!blob.trim()) {
+      setStatus("先打开图纸再检测");
+      return;
+    }
+    const next = guessLang(blob);
+    setSourceLang(next);
+    if (next === targetLang) setTargetLang(next === "en" ? "zh-Hans" : "en");
+    setStatus(`原文设成${langLabel(next)}`);
+  }
+
   return (
     <div
       className="win"
@@ -1146,19 +1242,7 @@ export default function App() {
             )}
           </>
         ) : (
-          <>
-            {files.length > 1 && (
-              <button
-                type="button"
-                className={`tbtn${view === "batch" ? " on" : ""}`}
-                onClick={() => setView(view === "batch" ? "work" : "batch")}
-              >一起译</button>
-            )}
-            <span className="grow" />
-            <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(false)}>导出 PDF</button>
-            <button type="button" className={`tbtn${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>词汇库</button>
-            <button type="button" className="tbtn" onClick={openSettings}>设置</button>
-          </>
+          <span className="grow" />
         )}
       </header>
 
@@ -1214,7 +1298,7 @@ export default function App() {
             <div className="rail-go">
               <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
                 <i className="spin" aria-hidden="true" />
-                <span className="go-label">{translating ? "正在译…" : "翻译"}</span>
+                <span className="go-label">{translating ? "正在译…" : "快速翻译"}</span>
               </button>
             </div>
           </aside>
@@ -1242,17 +1326,6 @@ export default function App() {
 
           {view === "work" && (
             <section className="stage" id="main">
-              <div className="act">
-                <div className="pair">
-                  <select aria-label="原文" value={sourceLang} onChange={(event) => setSourceLang(event.target.value)}>
-                    {LANGS.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
-                  </select>
-                  →
-                  <select aria-label="译文" value={targetLang} onChange={(event) => setTargetLang(event.target.value)}>
-                    {LANGS.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
-                  </select>
-                </div>
-              </div>
               {files.length > 0 && (
                 <div className="status" aria-live="polite">{status}</div>
               )}
@@ -1332,7 +1405,7 @@ export default function App() {
                   <button type="button" className="tbtn" onClick={() => pauseExport(true)}>暂停</button>
                 ) : (
                   <button type="button" className="go" disabled={!files.length} onClick={() => (batch.started ? pauseExport(false) : startExport())}>
-                    <span className="go-label">{batch.started ? "继续" : "翻译这几张"}</span>
+                    <span className="go-label">{batch.started ? "继续" : "快速翻译这几张"}</span>
                   </button>
                 )}
               </div>
@@ -1460,7 +1533,7 @@ export default function App() {
                         }} /></div>
                       </>
                     )}
-                    <label className="row" title="勾上后，这张图会先查词汇库"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查词汇库</label>
+                    <label className="row" title="勾上后，这张图会先查术语表"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查术语表</label>
                   </div>
                   <div className="card">
                     <details>
@@ -1503,7 +1576,7 @@ export default function App() {
               {settingsTab === "more" && (
                 <>
                   <h1>外观和更新</h1>
-                  <p className="help">只改这个窗口。词汇库在单独一页。</p>
+                  <p className="help">只改这个窗口。术语管理在单独一页。</p>
                   <div className="card">
                     <Seg
                       label="窗口颜色"
@@ -1512,7 +1585,7 @@ export default function App() {
                       onChange={setTheme}
                     />
                     <div className="field-actions">
-                      <button type="button" className="tbtn ghost" onClick={openGlossary}>打开词汇库</button>
+                      <button type="button" className="tbtn ghost" onClick={openGlossary}>打开术语管理</button>
                       <button type="button" className="tbtn ghost" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
                     </div>
                     <p className="help">图译 {appVersion || updateInfo?.current || "—"} · ODA {oda.installed ? "已安装" : "未装"}</p>
@@ -1530,9 +1603,9 @@ export default function App() {
 
       {view === "glossary" && (
         <div className="body page-enter">
-          <section className="gloss" aria-label="词汇库">
+          <section className="gloss" aria-label="术语管理">
             <div className="head">
-              <h1>词汇库</h1>
+              <h1>术语管理</h1>
               <p>图上碰到左边这句，就写成右边。软件自带的改不了。两边都有时用你加的。</p>
             </div>
             <div className="tools">
@@ -1582,7 +1655,7 @@ export default function App() {
                           const checked = event.target.checked;
                           setPickedTerms(() => (checked ? new Set(allMineKeys) : new Set()));
                         }}
-                        aria-label="全选词汇库"
+                        aria-label="全选术语管理"
                       />
                     </th>
                     <th>图上的中文</th>
@@ -1710,8 +1783,71 @@ export default function App() {
         </div>
       )}
 
-      <footer className={footBusy ? "foot checking" : "foot"}>
+      <footer className={footBusy ? "foot slim checking" : "foot slim"}>
         <span className="live">{oda.installed ? "ODA 已安装" : "没装 ODA · 先用 DXF"}</span>
+        <span className="sep" aria-hidden="true" />
+        <span className="lang-anchor" ref={langRef}>
+          <button
+            type="button"
+            className={`lang-mini${langOpen ? " on" : ""}`}
+            aria-expanded={langOpen}
+            aria-haspopup="dialog"
+            onClick={() => setLangOpen((open) => !open)}
+          >
+            {langShort(sourceLang)} ⇄ {langShort(targetLang)}
+          </button>
+          {langOpen && (
+            <div className="lang-pop" role="dialog" aria-label="选择语言">
+              <div className="chip-row" aria-label="原文">
+                <span>
+                  原文
+                  <button type="button" className="detect" onClick={detectSource}>检测</button>
+                </span>
+                {LANGS.map(([code, label]) => (
+                  <button
+                    key={`src-${code}`}
+                    type="button"
+                    className={sourceLang === code ? "on" : ""}
+                    disabled={code === targetLang}
+                    onClick={() => pickSource(code)}
+                  >{label}</button>
+                ))}
+              </div>
+              <div className="chip-row" aria-label="译文">
+                <span>译文</span>
+                {LANGS.map(([code, label]) => (
+                  <button
+                    key={`dst-${code}`}
+                    type="button"
+                    className={targetLang === code ? "on" : ""}
+                    disabled={code === sourceLang}
+                    onClick={() => pickTarget(code)}
+                  >{label}</button>
+                ))}
+              </div>
+              <button type="button" className="pop-swap" onClick={swapLangs}>⇄ 对调</button>
+            </div>
+          )}
+        </span>
+        <span className="grow" />
+        {files.length > 1 && (view === "work" || view === "batch") && (
+          <button
+            type="button"
+            className={`tbtn${view === "batch" ? " on" : ""}`}
+            onClick={() => setView(view === "batch" ? "work" : "batch")}
+          >一起译</button>
+        )}
+        <button type="button" className="tbtn ico" disabled={busy || !current} onClick={() => exportPdf(false)}>
+          <Icon name="share" />导出 PDF
+        </button>
+        <button type="button" className={`tbtn ico${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>
+          <Icon name="terms" />术语管理
+        </button>
+        <button type="button" className={`tbtn ico${view === "settings" ? " on" : ""}`} onClick={openSettings}>
+          <Icon name="gear" />设置
+        </button>
+        <span className="sep" aria-hidden="true" />
+        <span className="ver">{appVersion ? `v${appVersion}` : ""}</span>
         <span className="end">
           <span className="spin" aria-hidden="true" />
           {updateInfo?.available && view !== "update" && (

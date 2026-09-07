@@ -1,5 +1,7 @@
 # Project memory
 
+- 2026-09-07: Home chrome is scheme E: OS titlebar, no second toolbar on work/batch. Footer: ODA | 中 ⇄ 英 | 导出 PDF / 术语管理 / 设置 (icons + original names, regular weight) | version. Language pop is scheme C: 原文/译文 chips, 检测 next to 原文 (one-shot, not a source option), swap, 10 langs (zh/en/vi/id/th/ms/ko/ru/ja/de). Same language cannot be selected on both sides. 翻译 button is 快速翻译. Pop 160ms ease-out. Do not put auto-detect in the source chip list.
+
 - 2026-09-07: Windows uses the OS caption bar (`frameless=False`), same as Mac. `hasNativeTitlebar` is true on Win and Mac so HTML traffic lights do not paint on Windows. `python run.py` and the Setup.exe share this chrome. Do not bring back `frameless=not mac` or Windows-only fake lights.
 
 - 2026-09-06: Sketch A is the live UI (`frontend/src/App.jsx` + `App.css`). 参数 overlay gone; 设置 is a full view (翻译 / 打开范围 / 写回 / 术语 / 这台电脑). Toolbar 参数 → 设置. Mac/native titlebar never draws HTML traffic lights (`isMacChrome` + `hasNativeTitlebar`). Beginner labels: 数字、尺寸 / 重复的句子 / 不是原文那种语言 / 图纸上只留译文 / 原文和译文都留 / 网上翻译 / 这台电脑 / 自己的接口 / 全部文字 / 去掉重复. API style values still 纯译文/原译对照/译原对照. 检查更新 is a 180ms CSS spinner, no `window.open`. Empty copy: 还没打开图纸，点左上角打开. APP_VERSION stays 0.1.5. See `sketches/ui-redesign-2026-09-06/BUILD.md`.
