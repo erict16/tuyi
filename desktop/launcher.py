@@ -153,14 +153,12 @@ def _run_web_app():
 
     mac = sys.platform == "darwin"
     webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = True
-    if not mac:
-        webview.settings["DRAG_REGION_DIRECT_TARGET_ONLY"] = True
 
     bridge = NativeBridge()
     dark = read_saved_dark()
-    # Borderless NSWindow on recent macOS can never become key, so Finder
-    # "opens" the app and you get a Dock icon with zero windows. Use a
-    # normal titled window on Mac. Windows keeps the frameless shell.
+    # OS titlebar on Windows and Mac. Frameless + HTML traffic lights made
+    # Windows look like a fake Mac window. Borderless NSWindow on recent
+    # macOS also never becomes key (Dock icon, zero windows).
     window = webview.create_window(
         TITLE,
         url,
@@ -171,7 +169,7 @@ def _run_web_app():
         resizable=True,
         transparent=False,
         background_color="#0e141c" if dark else "#e8e8ed",
-        frameless=not mac,
+        frameless=False,
         easy_drag=False,
         shadow=True,
     )

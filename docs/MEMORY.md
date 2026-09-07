@@ -1,5 +1,7 @@
 # Project memory
 
+- 2026-09-07: Windows uses the OS caption bar (`frameless=False`), same as Mac. `hasNativeTitlebar` is true on Win and Mac so HTML traffic lights do not paint on Windows. `python run.py` and the Setup.exe share this chrome. Do not bring back `frameless=not mac` or Windows-only fake lights.
+
 - 2026-09-06: Sketch A is the live UI (`frontend/src/App.jsx` + `App.css`). 参数 overlay gone; 设置 is a full view (翻译 / 打开范围 / 写回 / 术语 / 这台电脑). Toolbar 参数 → 设置. Mac/native titlebar never draws HTML traffic lights (`isMacChrome` + `hasNativeTitlebar`). Beginner labels: 数字、尺寸 / 重复的句子 / 不是原文那种语言 / 图纸上只留译文 / 原文和译文都留 / 网上翻译 / 这台电脑 / 自己的接口 / 全部文字 / 去掉重复. API style values still 纯译文/原译对照/译原对照. 检查更新 is a 180ms CSS spinner, no `window.open`. Empty copy: 还没打开图纸，点左上角打开. APP_VERSION stays 0.1.5. See `sketches/ui-redesign-2026-09-06/BUILD.md`.
 
 - 2026-09-06: v0.1.5. v0.1.4 Mac "opens" but shows nothing. Also: 检查更新 must not `window.open` / `open_url` (WKWebView new-window path). Mac titled window hides HTML traffic lights (red close was `os._exit`) and drops `pywebview-drag-region` (move-window JS on a titled NSWindow). `close_window` no longer `os._exit`. Wait for `/api/health`, ignore `server.started`. Tag `v0.1.5`.

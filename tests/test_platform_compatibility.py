@@ -58,7 +58,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn('"LSUIElement": False', spec)
         self.assertIn('"NSPrincipalClass": "NSApplication"', spec)
         launcher = (root / "desktop" / "launcher.py").read_text(encoding="utf-8")
-        self.assertIn("frameless=not mac", launcher)
+        self.assertIn("frameless=False", launcher)
+        self.assertNotIn("frameless=not mac", launcher)
         self.assertIn('gui="cocoa"', launcher)
         self.assertIn("setActivationPolicy_", launcher)
         self.assertIn("/api/health", launcher)
@@ -271,10 +272,13 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn(">这台电脑<", ui)
         self.assertNotIn("自己的接口", ui)
 
-    def test_frontend_ui_keeps_windows_lights_and_mac_native_bar(self):
+    def test_frontend_ui_uses_os_titlebar_not_mac_lights_on_windows(self):
         root = Path(__file__).resolve().parents[1]
         ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
         css = (root / "frontend" / "src" / "App.css").read_text(encoding="utf-8")
+        launcher = (root / "desktop" / "launcher.py").read_text(encoding="utf-8")
+        self.assertIn("frameless=False", launcher)
+        self.assertIn("/Win/i.test(platform)", ui)
         self.assertIn("className=\"lights\"", ui)
         self.assertIn("pywebview-drag-region", ui)
         self.assertIn("hasNativeTitlebar", ui)

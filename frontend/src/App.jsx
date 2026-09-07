@@ -33,9 +33,12 @@ function isMacChrome() {
 }
 
 function hasNativeTitlebar() {
+  // Desktop shell uses the OS caption bar on Windows and Mac.
+  // Do not paint fake Mac traffic lights on Windows.
   if (isMacChrome()) return true;
   const platform = `${navigator.platform || ""} ${navigator.userAgent || ""}`;
-  return Boolean(window.pywebview) && /Mac/i.test(platform);
+  if (/Win/i.test(platform)) return true;
+  return Boolean(window.pywebview);
 }
 
 function layoutLabel(value) {
