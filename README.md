@@ -18,25 +18,29 @@
 
 ## 界面
 
+<p align="center">
+  <img src="docs/screenshots/app-home.png" alt="主界面：左边加图纸，底下点翻译">
+</p>
+
 <table>
   <tr>
-    <td align="center" valign="top" width="50%">
-      <h3>主界面</h3>
-      <img src="docs/screenshots/app-home.png" alt="左边加图纸，底下点翻译">
-    </td>
     <td align="center" valign="top" width="50%">
       <h3>词汇库</h3>
       <img src="docs/screenshots/app-glossary.png" alt="自己的词先命中">
     </td>
-  </tr>
-  <tr>
     <td align="center" valign="top" width="50%">
       <h3>设置</h3>
       <img src="docs/screenshots/app-settings.png" alt="网上翻译或自己配接口">
     </td>
+  </tr>
+  <tr>
     <td align="center" valign="top" width="50%">
       <h3>图上怎么写</h3>
       <img src="docs/screenshots/app-write.png" alt="图纸上只留译文，或原文译文都留">
+    </td>
+    <td align="center" valign="top" width="50%">
+      <h3>深色</h3>
+      <img src="docs/screenshots/app-dark.png" alt="深色模式">
     </td>
   </tr>
 </table>

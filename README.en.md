@@ -18,25 +18,29 @@ Open a DWG or DXF. Translate the text. Get a new file. The original stays put. N
 
 ## Screenshots
 
+<p align="center">
+  <img src="docs/screenshots/app-home.png" alt="Home: add a drawing on the left, translate at the bottom">
+</p>
+
 <table>
   <tr>
-    <td align="center" valign="top" width="50%">
-      <h3>Home</h3>
-      <img src="docs/screenshots/app-home.png" alt="Add a drawing on the left, translate at the bottom">
-    </td>
     <td align="center" valign="top" width="50%">
       <h3>Glossary</h3>
       <img src="docs/screenshots/app-glossary.png" alt="Your terms hit first">
     </td>
-  </tr>
-  <tr>
     <td align="center" valign="top" width="50%">
       <h3>Settings</h3>
       <img src="docs/screenshots/app-settings.png" alt="Cloud translate or your own endpoint">
     </td>
+  </tr>
+  <tr>
     <td align="center" valign="top" width="50%">
       <h3>On the drawing</h3>
       <img src="docs/screenshots/app-write.png" alt="Keep translation only, or keep both">
+    </td>
+    <td align="center" valign="top" width="50%">
+      <h3>Dark</h3>
+      <img src="docs/screenshots/app-dark.png" alt="Dark mode">
     </td>
   </tr>
 </table>

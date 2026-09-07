@@ -151,18 +151,19 @@ class PlatformCompatibilityTests(unittest.TestCase):
         readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
         self.assertIn("docs/icons/app-rounded.png", readme)
         self.assertIn("<table>", readme)
-        self.assertIn("<h3>主界面</h3>", readme)
         self.assertIn("<h3>词汇库</h3>", readme)
+        self.assertIn("<h3>深色</h3>", readme)
         self.assertIn("<h1 align=\"center\">图译 Tuyi</h1>", readme)
         self.assertIn("<h3 align=\"center\">强大且开源的 DWG/DXF 翻译工具</h3>", readme)
         self.assertIn("docs/screenshots/app-glossary.png", readme)
         self.assertIn("docs/screenshots/app-write.png", readme)
         self.assertIn("docs/screenshots/app-settings.png", readme)
         self.assertIn("docs/screenshots/app-home.png", readme)
+        self.assertIn("docs/screenshots/app-dark.png", readme)
         self.assertNotIn("docs/screenshots/ui-", readme)
         from PIL import Image
 
-        for name in ("app-home.png", "app-settings.png", "app-write.png", "app-glossary.png"):
+        for name in ("app-home.png", "app-settings.png", "app-write.png", "app-glossary.png", "app-dark.png"):
             shot = Path(__file__).resolve().parents[1] / "docs" / "screenshots" / name
             px = Image.open(shot).convert("RGB").getpixel((0, 0))
             self.assertGreater(sum(px), 400, name)

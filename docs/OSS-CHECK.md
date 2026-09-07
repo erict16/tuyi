@@ -1,4 +1,4 @@
-Erica's OSS check (2026-08-27). Fold into PLAN.md. Pick fork Honsen vs greenfield.
+Erica's OSS check (2026-08-27). Fold into docs/PLAN.md. Pick fork Honsen vs greenfield.
 
 No 轻语-class clone exists.
 
@@ -17,4 +17,4 @@ Eric (via Erica), 2026-08-27 later:
 - Proceed with 图译/Dwglot.
 - Do NOT download/unpack/decompile 轻语. Public website feature list only.
 - Evaluate forking etianwang/CAD_translator (Honsen).
-- PLAN.md only, no app code.
+- docs/PLAN.md only, no app code.
