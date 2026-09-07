@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BookOpen, Settings, Share2 } from "lucide-react";
 import "./App.css";
 
 const LANGS = [
@@ -32,33 +33,6 @@ function guessLang(text) {
   if (/[\u0e00-\u0e7f]/.test(sample)) return "th";
   if (/[\u0400-\u04ff]/.test(sample)) return "ru";
   return "en";
-}
-
-function Icon({ name }) {
-  const box = name === "gear" ? "0 0 24 24" : "0 0 16 16";
-  return (
-    <svg viewBox={box} aria-hidden="true">
-      {name === "share" && (
-        <>
-          <path d="M6.2 3.2H4.2A1.7 1.7 0 0 0 2.5 4.9v7a1.7 1.7 0 0 0 1.7 1.7h7a1.7 1.7 0 0 0 1.7-1.7V9.8" />
-          <path d="M8.5 7.5 13.5 2.5M9.8 2.5h3.7V6.2" />
-        </>
-      )}
-      {name === "terms" && (
-        <>
-          <path d="M8 4.2c-.7-.7-1.8-1.1-3.2-1.1H3v9.2h2c1.3 0 2.3.3 3 1" />
-          <path d="M8 4.2c.7-.7 1.8-1.1 3.2-1.1H13v9.2h-2c-1.3 0-2.3.3-3 1" />
-          <path d="M8 4.2v9.1" />
-        </>
-      )}
-      {name === "gear" && (
-        <>
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-        </>
-      )}
-    </svg>
-  );
 }
 
 const LAYOUTS = [
@@ -260,6 +234,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [dropOver, setDropOver] = useState(false);
+  const [railDrag, setRailDrag] = useState(false);
   const [pickedTerms, setPickedTerms] = useState(() => new Set());
   const [termQuery, setTermQuery] = useState("");
   const [lastOutput, setLastOutput] = useState("");
@@ -511,14 +486,29 @@ export default function App() {
     if (view !== "update") pageReturn.current = view;
   }
 
-  function openSettings() {
+  async function openSettings() {
+    if (view === "settings") {
+      await closePage();
+      return;
+    }
     extractSnap.current = extractKey();
     rememberReturn();
     setSettingsTab("tr");
     setView("settings");
   }
 
+  function openOdaSettings() {
+    extractSnap.current = extractKey();
+    rememberReturn();
+    setSettingsTab("wr");
+    setView("settings");
+  }
+
   function openGlossary() {
+    if (view === "glossary") {
+      setView(pageReturn.current || "work");
+      return;
+    }
     rememberReturn();
     setView("glossary");
   }
@@ -1303,12 +1293,13 @@ export default function App() {
             </div>
           </aside>
           <div
-            className="split"
+            className={`split${railDrag ? " on" : ""}`}
             role="separator"
             aria-orientation="vertical"
             aria-label="调整左右宽度"
             onPointerDown={(event) => {
               event.preventDefault();
+              setRailDrag(true);
               const startX = event.clientX;
               const startW = railW;
               const move = (ev) => {
@@ -1316,6 +1307,7 @@ export default function App() {
                 setRailW(next);
               };
               const up = () => {
+                setRailDrag(false);
                 window.removeEventListener("pointermove", move);
                 window.removeEventListener("pointerup", up);
               };
@@ -1569,7 +1561,7 @@ export default function App() {
                     />
                     <label className="row" title="输出目录按原来的文件夹一层层放"><input type="checkbox" checked={params.tree} onChange={(event) => setParams((prev) => ({ ...prev, tree: event.target.checked }))} /> 按原来的文件夹放</label>
                     <label className="row" title="没有 ODA 时，写不出 DWG 就改成 DXF"><input type="checkbox" checked={params.odaDxf} onChange={(event) => setParams((prev) => ({ ...prev, odaDxf: event.target.checked }))} /> 打不开 DWG 时改存成 DXF</label>
-                    <p className="help">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>
+                    <p className="help" id="oda-setup">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>
                   </div>
                 </>
               )}
@@ -1784,7 +1776,11 @@ export default function App() {
       )}
 
       <footer className={footBusy ? "foot slim checking" : "foot slim"}>
-        <span className="live">{oda.installed ? "ODA 已安装" : "没装 ODA · 先用 DXF"}</span>
+        {oda.installed ? (
+          <span className="live">ODA 已安装</span>
+        ) : (
+          <button type="button" className="live missing" onClick={openOdaSettings}>没装 ODA · 点这里</button>
+        )}
         <span className="sep" aria-hidden="true" />
         <span className="lang-anchor" ref={langRef}>
           <button
@@ -1838,13 +1834,13 @@ export default function App() {
           >一起译</button>
         )}
         <button type="button" className="tbtn ico" disabled={busy || !current} onClick={() => exportPdf(false)}>
-          <Icon name="share" />导出 PDF
+          <Share2 size={14} strokeWidth={1.5} aria-hidden="true" />导出 PDF
         </button>
         <button type="button" className={`tbtn ico${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>
-          <Icon name="terms" />术语管理
+          <BookOpen size={14} strokeWidth={1.5} aria-hidden="true" />术语管理
         </button>
         <button type="button" className={`tbtn ico${view === "settings" ? " on" : ""}`} onClick={openSettings}>
-          <Icon name="gear" />设置
+          <Settings size={14} strokeWidth={1.5} aria-hidden="true" />设置
         </button>
         <span className="sep" aria-hidden="true" />
         <span className="ver">{appVersion ? `v${appVersion}` : ""}</span>

@@ -175,6 +175,10 @@ select.mini, .pair select {
   display: flex;
   background: var(--bg);
 }
+.win[data-view="work"] > .body,
+.win[data-view="batch"] > .body {
+  border-top: 1px solid var(--border);
+}
 .page-enter {
   animation: enter 180ms var(--ease-out);
 }
@@ -184,15 +188,37 @@ select.mini, .pair select {
 }
 
 .split {
-  width: 6px;
+  width: 8px;
+  margin-left: -4px;
+  margin-right: -4px;
+  z-index: 3;
   flex: none;
+  position: relative;
   cursor: col-resize;
   background: transparent;
   touch-action: none;
-  transition: background 160ms var(--ease-out);
 }
-.split:hover, .split:active {
-  background: color-mix(in srgb, var(--accent) 40%, transparent);
+.split::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: transparent;
+  transition: width 160ms var(--ease-out), background 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .split:hover::before {
+    width: 2px;
+    background: var(--accent);
+  }
+}
+.split.on::before,
+.split:active::before {
+  width: 2px;
+  background: var(--accent);
 }
 
 .rail {
@@ -912,7 +938,22 @@ td input[type="text"]:focus {
 }
 .foot.slim { height: 28px; }
 .foot b { color: var(--text); font-weight: 400; font-variant-numeric: tabular-nums; }
-.live { color: var(--ok); font-weight: 400; }
+.live {
+  color: var(--ok);
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  line-height: 1;
+}
+.live.missing {
+  color: var(--danger);
+  padding: 0;
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  .live.missing:hover { text-decoration: underline; }
+}
 .foot .msg {
   min-width: 0;
   overflow: hidden;
@@ -954,13 +995,22 @@ td input[type="text"]:focus {
   stroke-linejoin: round;
   flex: none;
 }
-.lang-anchor { position: relative; display: inline-flex; align-items: center; }
+.lang-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+}
 .lang-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 22px;
   padding: 0 8px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 400;
+  line-height: 1;
   color: #3d5a80;
   letter-spacing: 0.02em;
 }
