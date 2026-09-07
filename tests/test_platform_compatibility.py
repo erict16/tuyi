@@ -309,6 +309,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("border-top: 1px solid var(--border)", css)
         self.assertIn(".live.missing", css)
         self.assertNotIn("词汇库", ui)
+        self.assertIn("高级翻译设置", ui)
+        self.assertNotIn("少用的", ui)
         self.assertIn("冻住看不见的图层", ui)
         self.assertIn("className={`go${translating", ui)
         self.assertIn("正在译…", ui)

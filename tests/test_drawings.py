@@ -1601,6 +1601,7 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertIn("原文和译文都留", text)
         self.assertIn("这张图有", text)
         self.assertIn("from \"lucide-react\"", text)
+        self.assertIn("<Share ", text)
         self.assertIn("<Settings", text)
         self.assertNotIn(">参数<", text)
         self.assertNotIn('aria-label="参数"', text)

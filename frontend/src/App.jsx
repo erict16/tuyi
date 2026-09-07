@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, Settings, Share2 } from "lucide-react";
+import { BookOpen, Settings, Share } from "lucide-react";
 import "./App.css";
 
 const LANGS = [
@@ -1382,7 +1382,7 @@ export default function App() {
                 </>
               ) : (
                 <div className="empty">
-                  <p>还没打开图纸，点左边添加<span>DWG、DXF 都可以</span></p>
+                  <p>还没打开图纸，点左边添加</p>
                 </div>
               )}
             </section>
@@ -1526,10 +1526,8 @@ export default function App() {
                       </>
                     )}
                     <label className="row" title="勾上后，这张图会先查术语表"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查术语表</label>
-                  </div>
-                  <div className="card">
-                    <details>
-                      <summary>少用的</summary>
+                    <details className="adv">
+                      <summary>高级翻译设置</summary>
                       <p className="help">图上的字默认全译。一般不用改。</p>
                       <label className="row"><input type="radio" name="set-eng-adv" checked={engine === "local"} onChange={() => setEngine("local")} /> 不联网</label>
                       <label className="row" title="尺寸数字、纯符号，一般不用译"><input type="checkbox" checked={filters.numbers} onChange={(event) => setFilters((prev) => ({ ...prev, numbers: event.target.checked }))} /> 数字、尺寸先别译</label>
@@ -1834,7 +1832,7 @@ export default function App() {
           >一起译</button>
         )}
         <button type="button" className="tbtn ico" disabled={busy || !current} onClick={() => exportPdf(false)}>
-          <Share2 size={14} strokeWidth={1.5} aria-hidden="true" />导出 PDF
+          <Share size={14} strokeWidth={1.5} aria-hidden="true" />导出 PDF
         </button>
         <button type="button" className={`tbtn ico${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>
           <BookOpen size={14} strokeWidth={1.5} aria-hidden="true" />术语管理

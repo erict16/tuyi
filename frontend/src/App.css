@@ -691,6 +691,33 @@ td input[type="text"]:focus {
   padding: 10px 0 6px;
   color: var(--text);
 }
+.card .adv {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.card .adv summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+  font-weight: 650;
+  list-style: none;
+}
+.card .adv summary::-webkit-details-marker { display: none; }
+.card .adv summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px 0 5px 6px;
+  border-color: transparent transparent transparent currentColor;
+  transform: rotate(0deg);
+  transition: transform 160ms var(--ease-out);
+}
+.card .adv[open] summary::before { transform: rotate(90deg); }
+.card .adv[open] { padding-bottom: 4px; }
+.card .adv .help { margin: 0 0 8px; }
 .card h2 {
   margin: 10px 0 4px;
   font-size: 11px;
