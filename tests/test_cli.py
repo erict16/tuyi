@@ -198,6 +198,24 @@ class CliTranslateTests(unittest.TestCase):
         self.assertNotIn("Traceback", result.stderr)
 
 
+class CliAliasTests(unittest.TestCase):
+    def test_dwglot_module_is_tuyi_alias(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(REPO) + os.pathsep + env.get("PYTHONPATH", "")
+        env["PYTHONUTF8"] = "1"
+        env["PYTHONIOENCODING"] = "utf-8"
+        result = subprocess.run(
+            [sys.executable, "-m", "dwglot", "-V"],
+            cwd=str(REPO),
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertRegex(result.stdout, r"tuyi\s+\d")
+        self.assertNotIn("Traceback", result.stderr)
+
+
 @unittest.skipUnless(odafc_available(), "ODA not on PATH")
 class CliLiveDwgTests(unittest.TestCase):
     def test_live_dwg_uses_oda(self):

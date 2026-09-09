@@ -93,7 +93,7 @@ def _log(fn: LogFn, message: str) -> None:
 
 
 def _mount_embedded_macos_odafc() -> Optional[Path]:
-    """Dwglot does not ship ODA. Never mount a Resources DMG."""
+    """Tuyi does not ship ODA. Never mount a Resources DMG."""
     return None
 
 

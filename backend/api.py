@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from backend.app_meta import APP_TITLE, APP_VERSION, DROPPED_FILES_DIR, GITHUB_URL, LEGACY_DROPPED_FILES_DIR, default_output_dir as dwglot_output_dir
+from backend.app_meta import APP_TITLE, APP_VERSION, DROPPED_FILES_DIR, GITHUB_URL, LEGACY_DROPPED_FILES_DIR, default_output_dir
 from backend.providers.azure import AzureFreeQuotaExceededError
 from backend.providers.base import TranslationProviderError
 from backend.queue import BatchQueue
@@ -531,7 +531,7 @@ class TranslationService:
 
         macOS localizes ``Documents`` as “文稿” in Finder.
         """
-        return dwglot_output_dir()
+        return default_output_dir()
 
     def save_config(self, deepl_key: str, output_dir: str = "", provider: str = "deepl", azure_key: str = "", azure_region: str = "", project_package_path: Optional[str] = None, **extra):
         config = self.load_config()

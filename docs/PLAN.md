@@ -1,8 +1,8 @@
-# 图译 / Dwglot plan
+# 图译 / Tuyi plan
 
 **Fork Honsen, not greenfield:** [etianwang/CAD_translator](https://github.com/etianwang/CAD_translator) (MIT, v1.8.8). pywebview + FastAPI + ezdxf + user-installed ODA File Converter.
 
-That repo is already a Win/Mac desktop CAD text translator with batch, glossary, and DWG via ODA. Dwglot is a rebranded fork: v0.1 is TEXT/MTEXT/attribs plus DIMENSION overrides and ACAD_TABLE 302 cells, multilingual engines, Mac 轻语-genre UI, and auto-update from GitHub Releases. Signed installers stay v0.2.
+That repo is already a Win/Mac desktop CAD text translator with batch, glossary, and DWG via ODA. Tuyi is a rebranded fork: v0.1 is TEXT/MTEXT/attribs plus DIMENSION overrides and ACAD_TABLE 302 cells, multilingual engines, Mac 轻语-genre UI, and auto-update from GitHub Releases. Signed installers stay v0.2.
 
 轻语 CAD Translator is the public-site product bar only ([qingyucad.com](https://www.qingyucad.com/)). Do not download, unpack, or decompile it.
 
@@ -13,13 +13,13 @@ Checked 2026-08-27 against Honsen GitHub and 轻语’s public pages.
 ## Product
 
 - Chinese name: **图译**
-- English / repo: **Dwglot**
+- English / repo: **Tuyi**
 - Open-source desktop app in the 轻语 genre: translate text inside DWG/DXF, no AutoCAD.
 - Public MIT repo: `https://github.com/erict16/tuyi`. v0.1 unsigned. Gatekeeper / SmartScreen steps live in README 安装.
 - Windows x64 + macOS Intel + Apple Silicon.
-- MIT (keep Honsen’s MIT notice; add Dwglot copyright).
+- MIT (keep Honsen’s MIT notice; add Tuyi copyright).
 
-v0.1 is a usable fork of Honsen (default zh→en, more langs available), not a rewrite. UI follows the Mac sketches in `sketches/01.html` (常规处理).
+v0.1 is a usable fork of Honsen (default zh→en, more langs available), not a rewrite. UI follows the Mac window language (常规处理).
 
 ---
 
@@ -34,7 +34,7 @@ It already walks model space, paperspace, INSERT attribs, title-block text insid
 What Honsen is not, and what the fork changes:
 
 - Branded Honsen / 中法英, default `zh_to_fr`.
-- Optional licence overlay (`backend/licensing.py`, `license_public_key.txt`, `tools/` keygen). `LICENSE_ENFORCEMENT_ENABLED = False` today; still strip payment QR, trial registry, and keygen from the Dwglot tree.
+- Optional licence overlay (`backend/licensing.py`, `license_public_key.txt`, `tools/` keygen). `LICENSE_ENFORCEMENT_ENABLED = False` today; still strip payment QR, trial registry, and keygen from the Tuyi tree.
 - README/installer tell packagers to copy ODA into `dist/ODAFileConverter/` or embed `ODAFileConverter.dmg`. **Do not ship ODA.** Detect user install only.
 - SHX handling is incomplete (ODA `\M+xxxx` GBK decode + wrap MTEXT in `{\fSimSun…}`). v0.1 must rewrite STYLE to a Unicode TTF.
 - MTEXT write currently rebuilds the string with a font group and drops inline codes. Fork should keep `\P` `\C` `\H` etc. when translating.
@@ -49,9 +49,9 @@ No other GitHub app is a better fork. ezdxf is a library. bimwright/dwg-mcp need
 
 Do not switch to Tauri, Electron, or .NET for v0.1.
 
-| Layer | Honsen file / tool | Dwglot |
+| Layer | Honsen file / tool | Tuyi |
 |---|---|---|
-| Entry | `run.py` | Keep. Rename window title to 图译 / Dwglot. |
+| Entry | `run.py` | Keep. Rename window title to 图译 / Tuyi. |
 | Shell | `desktop/launcher.py` pywebview (Win WebView2, macOS native webview) + uvicorn on `127.0.0.1` | Keep. Rebrand mutex / title. |
 | Native | `desktop/native_bridge.py` | Keep (file dialogs, reveal in Finder/Explorer). |
 | API | `backend/api.py` FastAPI | Keep. Drop licence/activate routes from the UI. |
@@ -112,7 +112,7 @@ Honsen `SUPPORTED_TEXT_TYPES` = TEXT, MTEXT, ATTDEF, ATTRIB, MULTILEADER, DIMENS
 
 Not in v0.1 or v0.2 unless 轻语-parity later: proxy entities, OLE extract, 阵列, 原译对照 / 译原对照 overlays, 50 languages.
 
-轻语 public site (the bar, not the clone list): 单行/多行/块/属性/代理/表格/标注/引线/阵列; R12–R2018; 纯译文 + 对照; MT (百度/有道/腾讯) + LLM (DeepSeek/GPT/混元); 去重与非译过滤; 批量; 不依赖 AutoCAD. Dwglot v0.1 covers the core of that list (text + attribs + dims + table 302 + CN↔EN + batch + no AutoCAD). The rest is later.
+轻语 public site (the bar, not the clone list): 单行/多行/块/属性/代理/表格/标注/引线/阵列; R12–R2018; 纯译文 + 对照; MT (百度/有道/腾讯) + LLM (DeepSeek/GPT/混元); 去重与非译过滤; 批量; 不依赖 AutoCAD. Tuyi v0.1 covers the core of that list (text + attribs + dims + table 302 + CN↔EN + batch + no AutoCAD). The rest is later.
 
 ---
 
@@ -170,7 +170,7 @@ Keep `backend/queue.py`:
 
 - Add many DXF/DWG files. Start / pause / resume / stop / retry / clear.
 - New files only. Prefix `en_` / `zh_` (drop `fr_` as the default). Never overwrite the source.
-- Persist `~/.cad_translator_queue.json` (rename to a Dwglot path in v0.1). Restart restores queued work. Running jobs become queued.
+- Persist `~/.cad_translator_queue.json` (rename to a Tuyi path in v0.1). Restart restores queued work. Running jobs become queued.
 - Global max 3 files; per-key semaphore 2; **all ODA conversions serial**.
 - Keys live on the in-memory task (`_key`) and are stripped before disk.
 
@@ -192,7 +192,7 @@ Interface stays in `backend/providers/`. One function: batch of strings in, stri
 
 Rules:
 
-- User supplies keys. No Dwglot account.
+- User supplies keys. No Tuyi account.
 - **No telemetry by default.** Remove licence network time-sync (`TIME_SOURCES` HEAD to microsoft.com / cloudflare) from the default build. Local usage counters may stay. No crash-phone-home.
 - Quota errors fail the job (Azure F0 path already stops). No retry storm on 401.
 
@@ -232,9 +232,9 @@ Windows 10/11 needs WebView2 (Win11 usually has it). macOS 11+.
 Keep Honsen’s tree. Rename brands and config filenames.
 
 ```
-dwglot/                          # fork of etianwang/CAD_translator
+tuyi/                          # fork of etianwang/CAD_translator
   PLAN.md
-  LICENSE                        # MIT, Honsen + Dwglot
+  LICENSE                        # MIT, Honsen + Tuyi
   NOTICE                         # ezdxf, OFL font
   run.py
   backend/                       # cad, translator, queue, api, storage, providers
@@ -249,7 +249,7 @@ dwglot/                          # fork of etianwang/CAD_translator
 
 Delete or quarantine from the default product: `tools/` keygen, `license_public_key.txt`, payment QR URLs, Honsen WeChat. Leave `LICENSE_ENFORCEMENT_ENABLED` false until the files are gone.
 
-Config paths to rename: `~/.cad_translator_config.json`, `~/.cad_translator_queue.json`, `~/.cad_translator_language_assets.sqlite3` → Dwglot equivalents. Optional one-time migrate from Honsen names.
+Config paths to rename: `~/.cad_translator_config.json`, `~/.cad_translator_queue.json`, `~/.cad_translator_language_assets.sqlite3` → Tuyi equivalents. Optional one-time migrate from Honsen names.
 
 ---
 
@@ -257,8 +257,8 @@ Config paths to rename: `~/.cad_translator_config.json`, `~/.cad_translator_queu
 
 **v0.1**
 
-1. Fork Honsen into `/workspace/dwglot` (or GitHub `dwglot`). MIT.
-2. Rebrand 图译 / Dwglot. Default zh→en / en→zh.
+1. Fork Honsen into `/workspace/tuyi` (or GitHub `tuyi`). MIT.
+2. Rebrand 图译 / Tuyi. Default zh→en / en→zh.
 3. Strip licence/payment/keygen from the product path.
 4. ODA: detect only. Rewrite README/installer so they never copy ODA into dist.
 5. TEXT / MTEXT (codes kept) / ATTRIB / ATTDEF. Model + paperspace + title-block INSERTs. Batch new files.
@@ -268,7 +268,7 @@ Config paths to rename: `~/.cad_translator_config.json`, `~/.cad_translator_queu
 9. Auto-update: GitHub Releases + Sparkle/WinSparkle (unsigned OK) + Python fallback. In-app 检查更新.
 10. Unsigned PyInstaller + Inno/DMG without ODA.
 11. Tests on synthetic DXF (no ODA in CI).
-12. Mac UI from `sketches/01.html` (traffic lights, unified toolbar, sidebar, 原文|译文 table). 批量导出 and 参数 sheet as pages.
+12. Mac UI (traffic lights, unified toolbar, sidebar, 原文|译文 table). 批量导出 and 参数 sheet as pages.
 
 **v0.2**
 
@@ -282,7 +282,7 @@ Config paths to rename: `~/.cad_translator_config.json`, `~/.cad_translator_queu
 
 Do not do this in the plan turn.
 
-1. Clone Honsen; commit as the Dwglot baseline. Keep history.
+1. Clone Honsen; commit as the Tuyi baseline. Keep history.
 2. Rebrand strings: `desktop/launcher.py`, frontend, mutex, output prefixes, config paths.
 3. Remove licensing UI and `tools/`. Stop network time check.
 4. `installer/*` and README: delete ODA-embed instructions; keep path detect in `backend/cad.py`; drop `_mount_embedded_macos_odafc` as a release feature (or leave code but never put a DMG in Resources).

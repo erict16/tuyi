@@ -13,7 +13,7 @@ npm run build
 Pop-Location
 
 Write-Host "==> PyInstaller..." -ForegroundColor Cyan
-pyinstaller --clean --noconfirm Dwglot.spec
+pyinstaller --clean --noconfirm Tuyi.spec
 
 $exe = Join-Path $Root "dist\Tuyi\Tuyi.exe"
 if (-not (Test-Path $exe)) {
@@ -42,7 +42,7 @@ Write-Host "==> Update zip..." -ForegroundColor Cyan
 if ($LASTEXITCODE -ne 0) { throw "update zip failed" }
 
 Write-Host "==> Inno Setup v$version..." -ForegroundColor Cyan
-& $iscc "/DMyAppVersion=$version" (Join-Path $Root "installer\Dwglot_Setup.iss")
+& $iscc "/DMyAppVersion=$version" (Join-Path $Root "installer\Tuyi_Setup.iss")
 if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
 
 $setup = Join-Path $Root "installer\Output\Tuyi_v${version}_Setup.exe"

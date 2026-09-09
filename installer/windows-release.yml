@@ -57,7 +57,7 @@ jobs:
       - name: PyInstaller
         shell: pwsh
         run: |
-          pyinstaller --clean --noconfirm Dwglot.spec
+          pyinstaller --clean --noconfirm Tuyi.spec
           if (-not (Test-Path "dist\Tuyi\Tuyi.exe")) { throw "Tuyi.exe missing" }
           if (-not (Test-Path "dist\Tuyi\tuyi-cli.exe")) { throw "tuyi-cli.exe missing" }
           if (-not (Test-Path "dist\Tuyi\_internal")) { throw "_internal runtime missing" }
@@ -90,7 +90,7 @@ jobs:
             "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
           ) | Where-Object { Test-Path $_ } | Select-Object -First 1
           if (-not $iscc) { throw "ISCC.exe not found" }
-          & $iscc "/DMyAppVersion=$version" "installer\Dwglot_Setup.iss"
+          & $iscc "/DMyAppVersion=$version" "installer\Tuyi_Setup.iss"
           if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
           if (-not (Test-Path "installer\Output\Tuyi_v${version}_Setup.exe")) {
             throw "Tuyi_v${version}_Setup.exe missing"

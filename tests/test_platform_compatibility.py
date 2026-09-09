@@ -19,8 +19,10 @@ from backend.app_meta import DROPPED_FILES_DIR, LEGACY_DROPPED_FILES_DIR, migrat
 class PlatformCompatibilityTests(unittest.TestCase):
     def test_windows_pack_is_tuyi_without_oda(self):
         root = Path(__file__).resolve().parents[1]
-        spec = (root / "Dwglot.spec").read_text(encoding="utf-8")
-        iss = (root / "installer" / "Dwglot_Setup.iss").read_text(encoding="utf-8")
+        self.assertFalse((root / "Dwglot.spec").exists())
+        self.assertFalse((root / "installer" / "Dwglot_Setup.iss").exists())
+        spec = (root / "Tuyi.spec").read_text(encoding="utf-8")
+        iss = (root / "installer" / "Tuyi_Setup.iss").read_text(encoding="utf-8")
         run_py = (root / "run.py").read_text(encoding="utf-8")
         self.assertIn('name="Tuyi"', spec)
         self.assertIn("console=False", spec)
@@ -47,7 +49,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_macos_pack_is_tuyi_without_oda(self):
         root = Path(__file__).resolve().parents[1]
-        spec = (root / "Dwglot_macos.spec").read_text(encoding="utf-8")
+        spec = (root / "Tuyi_macos.spec").read_text(encoding="utf-8")
         script = (root / "installer" / "build_macos.py").read_text(encoding="utf-8")
         self.assertIn('name="Tuyi.app"', spec)
         self.assertIn('name="Tuyi"', spec)
@@ -114,7 +116,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_pack_keeps_uvicorn_statreload(self):
         root = Path(__file__).resolve().parents[1]
-        for name in ("Dwglot.spec", "Dwglot_macos.spec"):
+        for name in ("Tuyi.spec", "Tuyi_macos.spec"):
             spec = (root / name).read_text(encoding="utf-8")
             start = spec.index("excludes = [")
             end = spec.index("]", start)
@@ -203,7 +205,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("addOperationWithBlock_", bridge)
         self.assertIn("apply_chrome_theme", launch)
         self.assertIn("read_saved_dark", launch)
-        self.assertIn("NSRequiresAquaSystemAppearance", (root / "Dwglot_macos.spec").read_text(encoding="utf-8"))
+        self.assertIn("NSRequiresAquaSystemAppearance", (root / "Tuyi_macos.spec").read_text(encoding="utf-8"))
         ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
         self.assertIn("pywebviewready", ui)
         self.assertIn("windows-latest", ci)
@@ -229,6 +231,33 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("shots/glossary.png", html)
         self.assertIn("常见问题", html)
         self.assertNotIn(">FAQ</", html)
+        self.assertIn('rel="icon" href="shots/mark.png"', html)
+        self.assertIn('rel="apple-touch-icon" href="shots/apple-touch-icon.png"', html)
+        en = (Path(__file__).resolve().parents[1] / "landing" / "en.html").read_text(encoding="utf-8")
+        self.assertIn('rel="icon" href="shots/mark.png"', en)
+        self.assertIn('rel="apple-touch-icon" href="shots/apple-touch-icon.png"', en)
+        from PIL import Image
+
+        for name in ("mark.png", "apple-touch-icon.png"):
+            path = Path(__file__).resolve().parents[1] / "landing" / "shots" / name
+            with Image.open(path) as raw:
+                icon = raw.convert("RGBA")
+            px = icon.load()
+            w, h = icon.size
+            self.assertEqual(px[0, 0][3], 0, name)
+            self.assertEqual(px[w - 1, 0][3], 0, name)
+            self.assertEqual(px[0, h - 1][3], 0, name)
+            self.assertEqual(px[w - 1, h - 1][3], 0, name)
+        spa = (Path(__file__).resolve().parents[1] / "frontend" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('rel="icon"', spa)
+        self.assertIn("favicon.png", spa)
+        fav = Path(__file__).resolve().parents[1] / "frontend" / "public" / "favicon.png"
+        with Image.open(fav) as raw:
+            icon = raw.convert("RGBA")
+        px = icon.load()
+        w, h = icon.size
+        self.assertEqual(px[0, 0][3], 0)
+        self.assertEqual(px[w - 1, h - 1][3], 0)
 
     def test_safe_log_survives_cp1252_stdout(self):
         from backend.translator import CADChineseTranslator
@@ -356,7 +385,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("prefers-reduced-motion", css)
 
     def test_windows_setup_lets_user_pick_folder(self):
-        iss = (Path(__file__).resolve().parents[1] / "installer" / "Dwglot_Setup.iss").read_text(encoding="utf-8")
+        iss = (Path(__file__).resolve().parents[1] / "installer" / "Tuyi_Setup.iss").read_text(encoding="utf-8")
         self.assertIn("DisableDirPage=no", iss)
         self.assertIn("UsePreviousAppDir=yes", iss)
         self.assertIn("PrivilegesRequiredOverridesAllowed=dialog", iss)

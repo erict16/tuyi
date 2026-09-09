@@ -45,7 +45,7 @@ try:
 except ImportError:
     winreg = None
 
-from backend.app_meta import APP_VERSION, CONFIG_PATH as DWGLOT_CONFIG_PATH, migrate_user_data
+from backend.app_meta import APP_VERSION, CONFIG_PATH as TUYI_CONFIG_PATH, migrate_user_data
 
 migrate_user_data()
 from backend.languages import mode_key, split_mode, language_name
@@ -120,7 +120,7 @@ def pick_available_font():
     return "Arial"  # 默认 fallback
 
 
-CONFIG_PATH = str(DWGLOT_CONFIG_PATH)
+CONFIG_PATH = str(TUYI_CONFIG_PATH)
 OUTPUT_PREFIXES = {
     "zh_to_fr": "fr",
     "fr_to_zh": "zh",

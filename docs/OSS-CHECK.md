@@ -14,7 +14,7 @@ Also not complete apps:
 - CAD Studio TRANS — no CJK
 
 Eric (via Erica), 2026-08-27 later:
-- Proceed with 图译/Dwglot.
+- Proceed with 图译/Tuyi.
 - Do NOT download/unpack/decompile 轻语. Public website feature list only.
 - Evaluate forking etianwang/CAD_translator (Honsen).
 - docs/PLAN.md only, no app code.
