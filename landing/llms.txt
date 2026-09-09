@@ -17,3 +17,4 @@
 - DXF works after install. DWG needs ODA File Converter on the same machine; Tuyi does not bundle it.
 - Translation keys are yours (DeepL, Azure, Ollama, or an OpenAI-compatible endpoint). Tuyi does not create accounts.
 - Default direction is Chinese to English.
+- CLI: `python -m tuyi translate INPUT`. Frozen packs ship `tuyi-cli` beside `Tuyi`.

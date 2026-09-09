@@ -1,6 +1,8 @@
 # Project memory
 
-- 2026-09-09: Root tidy + pack rename. Deleted `quarantine/` (Honsen paid-licensing) and `sketches/` (Eric: unused). Pack files: `Tuyi.spec`, `Tuyi_macos.spec`, `installer/Tuyi_Setup.iss`. Product already 图译/Tuyi (`Tuyi.exe`, `Tuyi.app`, `com.erict16.tuyi`). Keep `dwglot/` stub + `python -m dwglot` / frozen `dwglot-cli` aliases. Keep `PREVIOUS_*` migrate from `~/.dwglot_*`. Landing + SPA favicon from `docs/icons/app-rounded.png` (`landing/shots/mark.png`, `apple-touch-icon.png`, `frontend/public/favicon.png`). Do not bump version. Do not move `changelog.json` / `ico.ico` / `run.py` / READMEs.
+- 2026-09-09: Finished the CLI/config wipe. Deleted the public `dwglot/` package. Preferred entry is only `python -m tuyi` (frozen `tuyi` / `tuyi-cli`). `run.py` still treats already-installed `dwglot-cli` binaries as CLI. Config/queue/assets/dropped stay `~/.tuyi_*`. One-time silent migrate from `PREVIOUS_*` (`~/.dwglot_config.json` / queue / assets / `.dwglot_dropped_files`) and Honsen names; do not write new `.dwglot_*` files. Docs and CLI help no longer say `python -m dwglot`. Do not bump version.
+
+- 2026-09-09: Root tidy + pack rename. Deleted `quarantine/` (Honsen paid-licensing) and `sketches/` (Eric: unused). Pack files: `Tuyi.spec`, `Tuyi_macos.spec`, `installer/Tuyi_Setup.iss`. Product already 图译/Tuyi (`Tuyi.exe`, `Tuyi.app`, `com.erict16.tuyi`). `PREVIOUS_*` migrate from old filenames. Landing + SPA favicon from `docs/icons/app-rounded.png` (`landing/shots/mark.png`, `apple-touch-icon.png`, `frontend/public/favicon.png`). Do not bump version. Do not move `changelog.json` / `ico.ico` / `run.py` / READMEs.
 
 - 2026-09-07: CI `test_landing_download_names_windows_and_mac_chips` failed on both OS after landing SEO: `assertNotIn("FAQ")` hit JSON-LD `@type": "FAQPage"`. Visible copy is still 常见问题. Test now checks `常见问题` and `>FAQ</` so schema can keep FAQPage.
 

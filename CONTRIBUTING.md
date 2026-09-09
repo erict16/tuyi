@@ -31,7 +31,7 @@ DXF tests do not need ODA. Live DWG tests skip unless ODA File Converter is on t
 - Do not add a paid licence, trial, activation code, or telemetry.
 - Do not pack with UPX.
 - Keep the UI Chinese-first. Default pair is Chinese → English.
-- `python -m tuyi` is the CLI. `python -m dwglot` stays as an alias.
+- `python -m tuyi` is the CLI (`tuyi` / `tuyi-cli` when frozen).
 
 ## Pull requests
 

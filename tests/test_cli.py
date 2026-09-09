@@ -198,8 +198,15 @@ class CliTranslateTests(unittest.TestCase):
         self.assertNotIn("Traceback", result.stderr)
 
 
-class CliAliasTests(unittest.TestCase):
-    def test_dwglot_module_is_tuyi_alias(self):
+class CliEntryTests(unittest.TestCase):
+    def test_help_uses_tuyi_prog(self):
+        result = _run(["--help"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        blob = (result.stdout + result.stderr).lower()
+        self.assertIn("tuyi", blob)
+        self.assertNotIn("dwglot", blob)
+
+    def test_public_dwglot_module_is_gone(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(REPO) + os.pathsep + env.get("PYTHONPATH", "")
         env["PYTHONUTF8"] = "1"
@@ -211,9 +218,10 @@ class CliAliasTests(unittest.TestCase):
             text=True,
             env=env,
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertRegex(result.stdout, r"tuyi\s+\d")
-        self.assertNotIn("Traceback", result.stderr)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("No module named", result.stderr)
+        self.assertNotIn("tuyi", result.stdout.lower())
+        self.assertFalse((REPO / "dwglot").exists())
 
 
 @unittest.skipUnless(odafc_available(), "ODA not on PATH")
