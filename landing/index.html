@@ -131,6 +131,12 @@
     .dl-card { display: flex; flex-direction: column; height: 100%; }
     .dl-foot { margin-top: auto; padding-top: 1.5rem; }
     .dl-note { min-height: 3.6em; }
+    .mac-hint { display: grid; align-items: start; }
+    .mac-hint > [data-mac-hint] { grid-area: 1 / 1; }
+    .mac-hint > [data-mac-hint]:not([data-active]) { visibility: hidden; }
+    #btn-mac { display: inline-grid; place-items: center; min-height: 3rem; }
+    #btn-mac > [data-mac-label] { grid-area: 1 / 1; }
+    #btn-mac > [data-mac-label]:not([data-active]) { visibility: hidden; }
     .dl-card[data-current="true"] { box-shadow: 0 0 0 2px #007aff; }
     .dl-link {
       transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), filter 160ms ease;
@@ -267,9 +273,17 @@
               <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="true" data-chip="arm">Apple 芯片</button>
               <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="false" data-chip="intel">Intel</button>
             </div>
-            <p id="mac-hint" class="mt-3 text-sm text-slate-600">M1 / M2 / M3 / M4。苹果菜单 → 关于本机 → 芯片。</p>
+            <p id="mac-hint" class="mac-hint mt-3 text-sm text-slate-600">
+              <span data-mac-hint="arm" data-active>M1 / M2 / M3 / M4。苹果菜单 → 关于本机 → 芯片。</span>
+              <span data-mac-hint="intel" aria-hidden="true">Intel 芯片。苹果菜单 → 关于本机。这份和 Apple 芯片不是同一个文件。</span>
+            </p>
             <div class="dl-foot">
-              <a id="btn-mac" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_macOS_arm64.dmg" rel="noopener">下载 macOS（Apple 芯片）</a>
+              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.8/Tuyi_v0.1.8_macOS_arm64.dmg" rel="noopener" aria-label="下载 macOS（Apple 芯片）">
+                <span data-mac-label="arm" data-active>下载 macOS（Apple 芯片）</span>
+                <span data-mac-label="intel" aria-hidden="true">下载 macOS（Intel）</span>
+                <span data-mac-label="arm-missing" aria-hidden="true">Apple 芯片安装包还没放上来</span>
+                <span data-mac-label="intel-missing" aria-hidden="true">Intel 安装包还没打出来</span>
+              </a>
               <p class="dl-note mt-3 text-xs leading-5 text-slate-500">打开 DMG，把 图译 拖进应用程序。第一次运行：右键图标 → 打开。或系统设置 → 隐私与安全性 → 仍要打开。</p>
             </div>
           </article>
@@ -312,6 +326,19 @@
             <dd class="mt-2 text-slate-600">没有。MIT 开源。翻译用的密钥是你自己的 DeepL / Azure / Ollama / 自定义接口。图译不建账号，默认也不往外打电话，除非你点检查更新。</dd>
           </div>
         </dl>
+      </div>
+    </section>
+
+    <section id="cli" class="scroll-mt-20 bg-white py-16">
+      <div class="mx-auto max-w-3xl px-4 text-center">
+        <h2 class="text-pretty text-3xl font-semibold tracking-tight">命令行 / CLI</h2>
+        <p class="mt-3 text-slate-600">不打开窗口也能译，和软件里同一条写回。免费。</p>
+        <pre class="mt-8 overflow-x-auto rounded-2xl bg-mist px-5 py-4 text-left font-mono text-sm leading-6 text-ink ring-1 ring-black/5"><code>python -m tuyi translate drawing.dxf
+python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en</code></pre>
+        <p class="mt-4 text-sm text-slate-500">
+          详见 <a class="font-semibold text-accent underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/blob/main/README.md">README</a>
+          · <code class="rounded-md bg-mist px-1.5 py-0.5 font-mono text-ink">python -m tuyi --help</code>
+        </p>
       </div>
     </section>
   </main>
@@ -374,19 +401,36 @@
       }
     }
 
+    function showLayer(nodes, key, attr) {
+      nodes.forEach((el) => {
+        const on = el.getAttribute(attr) === key;
+        if (on) el.setAttribute("data-active", "");
+        else el.removeAttribute("data-active");
+        el.setAttribute("aria-hidden", on ? "false" : "true");
+      });
+    }
+
     function applyMacChip(chip) {
       macChip = chip;
       document.querySelectorAll("[data-chip]").forEach((b) => {
         const on = b.dataset.chip === chip;
         b.setAttribute("aria-checked", on ? "true" : "false");
       });
-      if (chip === "intel") {
-        macHint.textContent = "Intel 芯片。苹果菜单 → 关于本机。这份和 Apple 芯片不是同一个文件。";
-        setLink(btnMac, window.DL.macIntel, "下载 macOS（Intel）", "Intel 安装包还没打出来");
+      showLayer(macHint.querySelectorAll("[data-mac-hint]"), chip, "data-mac-hint");
+      const url = chip === "intel" ? window.DL.macIntel : window.DL.macArm;
+      const labelKey = url ? chip : `${chip}-missing`;
+      if (url) {
+        btnMac.href = url;
+        btnMac.removeAttribute("aria-disabled");
+        btnMac.classList.remove("opacity-60");
       } else {
-        macHint.textContent = "M1 / M2 / M3 / M4。苹果菜单 → 关于本机 → 芯片。";
-        setLink(btnMac, window.DL.macArm, "下载 macOS（Apple 芯片）", "Apple 芯片安装包还没放上来");
+        btnMac.href = "#download";
+        btnMac.setAttribute("aria-disabled", "true");
+        btnMac.classList.add("opacity-60");
       }
+      showLayer(btnMac.querySelectorAll("[data-mac-label]"), labelKey, "data-mac-label");
+      const label = btnMac.querySelector(`[data-mac-label="${labelKey}"]`);
+      if (label) btnMac.setAttribute("aria-label", label.textContent.trim());
     }
 
     document.querySelectorAll("[data-chip]").forEach((b) => {
@@ -475,7 +519,7 @@
       el.addEventListener("click", (event) => {
         if (el.getAttribute("aria-disabled") === "true") {
           event.preventDefault();
-          msg.textContent = el.textContent;
+          msg.textContent = el.getAttribute("aria-label") || el.textContent.trim();
           msg.classList.remove("hidden");
         } else {
           msg.classList.add("hidden");

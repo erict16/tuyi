@@ -79,6 +79,16 @@ DXF works out of the box. DWG needs [ODA File Converter](https://www.opendesign.
 3. Click **翻译**. Tuyi writes a new file.
 4. Keys and layout live in **设置**. Your word list is **词汇库**.
 
+## Command line
+
+Same write-back as the app, without the window:
+
+```bash
+python -m tuyi translate drawing.dxf
+```
+
+On Windows, `tuyi-cli.exe` sits next to `Tuyi.exe`. See `python -m tuyi --help`.
+
 ## License
 
 MIT. If it helps, star the repo.
