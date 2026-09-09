@@ -87,6 +87,16 @@
 - **自己配接口**：兼容 OpenAI 的网址
 - **不联网**：本机 Ollama（在「高级翻译设置」里）
 
+## 命令行
+
+不打开窗口也能译：
+
+```bash
+python -m tuyi translate drawing.dxf
+```
+
+Windows 安装目录里，`tuyi-cli.exe` 在 `Tuyi.exe` 旁边。`python -m tuyi --help` 看参数。
+
 ## 协议
 
 MIT。请自由地使用和参与开源。好用的话点一下右上角 Star。

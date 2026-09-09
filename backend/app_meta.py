@@ -22,10 +22,11 @@ ASSETS_PATH = Path.home() / ".tuyi_language_assets.sqlite3"
 DROPPED_FILES_DIR = Path.home() / ".tuyi_dropped_files"
 OUTPUT_DIR_NAME = "Tuyi output"
 
-# One-time copy from the Dwglot filenames, then from Honsen.
+# One-time copy from previous filenames, then from Honsen. Do not write new files here.
 PREVIOUS_CONFIG_PATH = Path.home() / ".dwglot_config.json"
 PREVIOUS_QUEUE_PATH = Path.home() / ".dwglot_queue.json"
 PREVIOUS_ASSETS_PATH = Path.home() / ".dwglot_language_assets.sqlite3"
+PREVIOUS_DROPPED_FILES_DIR = Path.home() / ".dwglot_dropped_files"
 LEGACY_CONFIG_PATH = Path.home() / ".cad_translator_config.json"
 LEGACY_QUEUE_PATH = Path.home() / ".cad_translator_queue.json"
 LEGACY_ASSETS_PATH = Path.home() / ".cad_translator_language_assets.sqlite3"
@@ -62,6 +63,7 @@ def migrate_user_data() -> None:
     migrate_legacy_file(LEGACY_QUEUE_PATH, QUEUE_PATH)
     migrate_legacy_file(PREVIOUS_ASSETS_PATH, ASSETS_PATH)
     migrate_legacy_file(LEGACY_ASSETS_PATH, ASSETS_PATH)
+    migrate_legacy_dir(PREVIOUS_DROPPED_FILES_DIR, DROPPED_FILES_DIR)
     migrate_legacy_dir(LEGACY_DROPPED_FILES_DIR, DROPPED_FILES_DIR)
 
 

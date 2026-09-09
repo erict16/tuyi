@@ -77,7 +77,7 @@ python -m tuyi translate drawing.dxf
 python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en
 ```
 
-Windows では `Tuyi.exe` の隣に `tuyi-cli.exe` があります。`python -m dwglot` も使えます。
+Windows では `Tuyi.exe` の隣に `tuyi-cli.exe` があります。
 
 ## ソースから動かす
 
