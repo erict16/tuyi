@@ -238,7 +238,7 @@ def main() -> None:
         "PyInstaller",
         "--clean",
         "--noconfirm",
-        "Dwglot_macos.spec",
+        "Tuyi_macos.spec",
         env=build_env,
     )
     if not APP_EXECUTABLE.is_file():

@@ -1,4 +1,4 @@
-"""MT plug-in interface. User supplies keys; Dwglot does not phone home."""
+"""MT plug-in interface. User supplies keys; Tuyi does not phone home."""
 
 from __future__ import annotations
 

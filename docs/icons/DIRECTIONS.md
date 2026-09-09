@@ -1,8 +1,8 @@
-# 图译 / Dwglot icon directions
+# 图译 / Tuyi icon directions
 
 Eight independent squares from Grok imagine (`image_gen`). Copied jpg→png with no redraw. No `generate_icons.py`, no polygons, no mascots. Not the README blue 图 tile. No winner — Eric picks.
 
-Official app icon is the cream cat with the play-triangle hat (`app.png`, from Eric's paste 2026-08-28). Root `ico.ico` (Windows pack) / `docs/icons/icon.ico` / landing `shots/mark.png` are generated from that PNG. The navy+steel fox and `01.png`–`08.png` stay as rejected candidates.
+Official app icon is the cream cat with the play-triangle hat (`app.png`, from Eric's paste 2026-08-28). Live mark uses the squircle cut `app-rounded.png`. Root `ico.ico` (Windows pack) / `docs/icons/icon.ico` / landing `shots/mark.png` / `shots/apple-touch-icon.png` / SPA `frontend/public/favicon.png` come from that rounded PNG. Square `app.png` stays as the unmasked source. The navy+steel fox and `01.png`–`08.png` stay as rejected candidates.
 
 | File | Style | Inks | Imagine |
 |---|---|---|---|

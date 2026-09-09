@@ -1,4 +1,4 @@
-"""Licensing is quarantined: not on the default 图译 product path."""
+"""Licensing is gone: not on the default 图译 product path."""
 
 import unittest
 from pathlib import Path
@@ -12,11 +12,10 @@ class LicensePathTests(unittest.TestCase):
         self.assertFalse((ROOT / "license_public_key.txt").exists())
         self.assertFalse((ROOT / "tools" / "license_issuer.py").exists())
 
-    def test_quarantine_holds_old_files(self):
-        held = ROOT / "quarantine"
-        self.assertTrue((held / "licensing.py").is_file())
-        self.assertTrue((held / "license_public_key.txt").is_file())
-        self.assertTrue((held / "license_issuer.py").is_file())
+    def test_quarantine_folder_is_gone(self):
+        self.assertFalse((ROOT / "quarantine").exists())
+        self.assertFalse((ROOT / "sketches").exists())
+        self.assertFalse((ROOT / "docs" / "sketches").exists())
 
     def test_api_has_no_license_routes(self):
         from backend import api as web_api
