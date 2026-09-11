@@ -78,9 +78,9 @@
       "date": "2026年8月",
       "title": "Windows 安装包瘦身",
       "content": [
-        "[优化] Dwglot.exe 和 dwglot-cli.exe 共用 _internal，不再打两份 one-file Python",
+        "[优化] Tuyi.exe 和 tuyi-cli.exe 共用 _internal，不再打两份 one-file Python",
         "[优化] 去掉第二份 matplotlib / Noto，PDF 和 CJK 字体仍在",
-        "[说明] 命令行仍叫 dwglot-cli.exe"
+        "[说明] 命令行叫 tuyi-cli.exe"
       ]
     },
     {
@@ -88,14 +88,14 @@
       "date": "2026年8月",
       "title": "Windows 安装包含命令行",
       "content": [
-        "[新增] 安装目录里有 dwglot-cli.exe，和 Dwglot.exe 并排（Windows 不能叫 dwglot.exe）",
-        "[新增] python -m dwglot translate 走常规写回"
+        "[新增] 安装目录里有 tuyi-cli.exe，和 Tuyi.exe 并排",
+        "[新增] python -m tuyi translate 走常规写回"
       ]
     },
     {
       "version": "0.1.0",
       "date": "2026年8月",
-      "title": "图译 Dwglot 首发",
+      "title": "图译 Tuyi 首发",
       "content": [
         "[新增] 常规处理：提取、术语表优先翻译、写回、导出 PDF",
         "[新增] 同时翻译文件名（默认关）",

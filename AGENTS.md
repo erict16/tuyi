@@ -9,7 +9,7 @@ Before handing off every task, record its completed work, current state, and any
 ## Cursor Cloud specific instructions
 
 - Environment install: `pip install -r requirements.txt` and `frontend/npm install` (see `.cursor/environment.json`).
-- Prefer `python -m tuyi` for CLI; do not document `python -m dwglot`.
+- Prefer `python -m tuyi` for CLI.
 - Verify with `python -m unittest discover -s tests` when touching backend/CLI. For UI, `cd frontend && npm run build`.
 - Do not bundle ODA. Do not add paid licensing.
 - Secrets (API keys for DeepL/Azure/etc.) stay in Cursor Dashboard Secrets, not in this file.

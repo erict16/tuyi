@@ -34,6 +34,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
             root / "README.ja.md",
             root / "README.ko.md",
             root / "README.zh-CN.md",
+            root / "changelog.json",
             root / "landing" / "llms.txt",
             root / "landing" / "index.html",
             root / "landing" / "en.html",
@@ -66,7 +67,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn("collect_submodules", spec)
         self.assertNotRegex(spec, r'(?m)^\s*datas \+= collect_data_files\("matplotlib"\)')
         self.assertIn("tuyi-cli.exe", run_py)
-        self.assertIn("dwglot-cli.exe", run_py)
+        self.assertNotIn("dwglot-cli.exe", run_py)
         self.assertNotIn('name="dwglot-cli"', spec)
         self.assertNotIn("dwglot-cli.exe", iss)
         self.assertIn("Tuyi.exe", iss)
@@ -329,19 +330,6 @@ class PlatformCompatibilityTests(unittest.TestCase):
         with (
             patch.object(run.sys, "frozen", True, create=True),
             patch.object(run.sys, "argv", [r"C:\Program Files\Tuyi\tuyi-cli.exe", "translate", "a.dxf"]),
-            patch("backend.cli.main", return_value=0) as cli_main,
-        ):
-            with self.assertRaises(SystemExit) as caught:
-                run.main()
-        self.assertEqual(caught.exception.code, 0)
-        cli_main.assert_called_once()
-
-    def test_frozen_legacy_cli_name_still_dispatches(self):
-        import run
-
-        with (
-            patch.object(run.sys, "frozen", True, create=True),
-            patch.object(run.sys, "argv", [r"C:\Program Files\Tuyi\dwglot-cli.exe", "translate", "a.dxf"]),
             patch("backend.cli.main", return_value=0) as cli_main,
         ):
             with self.assertRaises(SystemExit) as caught:
