@@ -16,42 +16,26 @@ from backend.api import TranslationService, service
 from backend.app_meta import (
     DROPPED_FILES_DIR,
     LEGACY_DROPPED_FILES_DIR,
-    PREVIOUS_DROPPED_FILES_DIR,
     migrate_legacy_dir,
     migrate_user_data,
 )
 
 
 class PlatformCompatibilityTests(unittest.TestCase):
-    def test_docs_do_not_point_at_removed_cli_module(self):
+    def test_docs_name_the_tuyi_cli(self):
         root = Path(__file__).resolve().parents[1]
         paths = [
             root / "AGENTS.md",
-            root / "CONTRIBUTING.md",
             root / "README.md",
-            root / "README.en.md",
-            root / "README.es.md",
-            root / "README.ja.md",
-            root / "README.ko.md",
-            root / "README.zh-CN.md",
-            root / "changelog.json",
-            root / "landing" / "llms.txt",
             root / "landing" / "index.html",
             root / "landing" / "en.html",
-            root / "backend" / "cli.py",
-            root / "tuyi" / "__init__.py",
-            root / "tuyi" / "__main__.py",
         ]
         for path in paths:
             text = path.read_text(encoding="utf-8")
-            self.assertNotIn("python -m dwglot", text, path.name)
-            self.assertNotIn("python -m Dwglot", text, path.name)
+            self.assertIn("python -m tuyi", text, path.name)
 
     def test_windows_pack_is_tuyi_without_oda(self):
         root = Path(__file__).resolve().parents[1]
-        self.assertFalse((root / "Dwglot.spec").exists())
-        self.assertFalse((root / "installer" / "Dwglot_Setup.iss").exists())
-        self.assertFalse((root / "dwglot").exists())
         spec = (root / "Tuyi.spec").read_text(encoding="utf-8")
         iss = (root / "installer" / "Tuyi_Setup.iss").read_text(encoding="utf-8")
         run_py = (root / "run.py").read_text(encoding="utf-8")
@@ -67,9 +51,6 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn("collect_submodules", spec)
         self.assertNotRegex(spec, r'(?m)^\s*datas \+= collect_data_files\("matplotlib"\)')
         self.assertIn("tuyi-cli.exe", run_py)
-        self.assertNotIn("dwglot-cli.exe", run_py)
-        self.assertNotIn('name="dwglot-cli"', spec)
-        self.assertNotIn("dwglot-cli.exe", iss)
         self.assertIn("Tuyi.exe", iss)
         self.assertIn("tuyi-cli.exe", iss)
         self.assertIn("_internal", iss)
@@ -88,7 +69,6 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn('name="Tuyi.app"', spec)
         self.assertIn('name="Tuyi"', spec)
         self.assertIn('name="tuyi-cli"', spec)
-        self.assertNotIn('name="dwglot-cli"', spec)
         self.assertIn('bundle_identifier="com.erict16.tuyi"', spec)
         self.assertIn('"CFBundleDisplayName": "图译"', spec)
         self.assertIn('"LSBackgroundOnly": False', spec)
@@ -269,7 +249,6 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn('id="cli"', html)
         self.assertIn("命令行 / CLI", html)
         self.assertIn("python -m tuyi translate", html)
-        self.assertNotIn("python -m dwglot", html)
         self.assertIn("data-mac-hint", html)
         self.assertIn("data-mac-label", html)
         self.assertIn("grid-area: 1 / 1", html)
@@ -281,7 +260,6 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn('id="cli"', en)
         self.assertIn("Command line / CLI", en)
         self.assertIn("python -m tuyi translate", en)
-        self.assertNotIn("python -m dwglot", en)
         self.assertIn("data-mac-hint", en)
         self.assertIn("grid-area: 1 / 1", en)
         from PIL import Image
@@ -571,7 +549,6 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_dropped_files_cache_is_tuyi_hidden_dir(self):
         self.assertEqual(DROPPED_FILES_DIR.name, ".tuyi_dropped_files")
-        self.assertEqual(PREVIOUS_DROPPED_FILES_DIR.name, ".dwglot_dropped_files")
         self.assertEqual(LEGACY_DROPPED_FILES_DIR.name, "cad_translator_dropped_files")
         self.assertEqual(Path(service.dropped_files_dir).name, ".tuyi_dropped_files")
         api_src = (Path(__file__).resolve().parents[1] / "backend" / "api.py").read_text(encoding="utf-8")
@@ -597,37 +574,33 @@ class PlatformCompatibilityTests(unittest.TestCase):
             self.assertTrue((new / "abc" / "plan.dxf").is_file())
             self.assertTrue((leftover / "stale.dxf").is_file())
 
-    def test_migrate_user_data_copies_previous_paths_once(self):
+    def test_migrate_user_data_copies_legacy_paths_once(self):
         import backend.app_meta as meta
 
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp)
-            previous_config = home / ".dwglot_config.json"
+            legacy_config = home / ".cad_translator_config.json"
             current_config = home / ".tuyi_config.json"
-            previous_queue = home / ".dwglot_queue.json"
+            legacy_queue = home / ".cad_translator_queue.json"
             current_queue = home / ".tuyi_queue.json"
-            previous_assets = home / ".dwglot_language_assets.sqlite3"
+            legacy_assets = home / ".cad_translator_language_assets.sqlite3"
             current_assets = home / ".tuyi_language_assets.sqlite3"
-            previous_dropped = home / ".dwglot_dropped_files"
+            legacy_dropped = home / "cad_translator_dropped_files"
             current_dropped = home / ".tuyi_dropped_files"
-            previous_config.write_text('{"provider":"azure"}', encoding="utf-8")
-            previous_queue.write_text("[]", encoding="utf-8")
-            previous_assets.write_bytes(b"sqlite")
-            (previous_dropped / "abc").mkdir(parents=True)
-            (previous_dropped / "abc" / "plan.dxf").write_bytes(b"dxf")
+            legacy_config.write_text('{"provider":"azure"}', encoding="utf-8")
+            legacy_queue.write_text("[]", encoding="utf-8")
+            legacy_assets.write_bytes(b"sqlite")
+            (legacy_dropped / "abc").mkdir(parents=True)
+            (legacy_dropped / "abc" / "plan.dxf").write_bytes(b"dxf")
             with (
-                patch.object(meta, "PREVIOUS_CONFIG_PATH", previous_config),
                 patch.object(meta, "CONFIG_PATH", current_config),
-                patch.object(meta, "PREVIOUS_QUEUE_PATH", previous_queue),
                 patch.object(meta, "QUEUE_PATH", current_queue),
-                patch.object(meta, "PREVIOUS_ASSETS_PATH", previous_assets),
                 patch.object(meta, "ASSETS_PATH", current_assets),
-                patch.object(meta, "PREVIOUS_DROPPED_FILES_DIR", previous_dropped),
                 patch.object(meta, "DROPPED_FILES_DIR", current_dropped),
-                patch.object(meta, "LEGACY_CONFIG_PATH", home / "missing_legacy_config"),
-                patch.object(meta, "LEGACY_QUEUE_PATH", home / "missing_legacy_queue"),
-                patch.object(meta, "LEGACY_ASSETS_PATH", home / "missing_legacy_assets"),
-                patch.object(meta, "LEGACY_DROPPED_FILES_DIR", home / "missing_legacy_dropped"),
+                patch.object(meta, "LEGACY_CONFIG_PATH", legacy_config),
+                patch.object(meta, "LEGACY_QUEUE_PATH", legacy_queue),
+                patch.object(meta, "LEGACY_ASSETS_PATH", legacy_assets),
+                patch.object(meta, "LEGACY_DROPPED_FILES_DIR", legacy_dropped),
             ):
                 migrate_user_data()
                 self.assertEqual(current_config.read_text(encoding="utf-8"), '{"provider":"azure"}')
@@ -635,10 +608,9 @@ class PlatformCompatibilityTests(unittest.TestCase):
                 self.assertEqual(current_assets.read_bytes(), b"sqlite")
                 self.assertTrue((current_dropped / "abc" / "plan.dxf").is_file())
                 current_config.write_text('{"provider":"deepl"}', encoding="utf-8")
-                previous_config.write_text('{"provider":"ollama"}', encoding="utf-8")
+                legacy_config.write_text('{"provider":"ollama"}', encoding="utf-8")
                 migrate_user_data()
             self.assertEqual(current_config.read_text(encoding="utf-8"), '{"provider":"deepl"}')
-            self.assertFalse(any(home.glob(".dwglot_config.json.*")))
             written = {path.name for path in home.iterdir()}
             self.assertIn(".tuyi_config.json", written)
             self.assertIn(".tuyi_queue.json", written)

@@ -1973,7 +1973,7 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertNotIn("Traceback", written.text)
 
 
-REAL_DWG_DIR = Path("/workspace/dwglot-drawings")
+REAL_DWG_DIR = Path("/workspace/tuyi-drawings")
 
 
 class RealDwgWithoutOdaTests(unittest.TestCase):
@@ -1989,7 +1989,7 @@ class RealDwgWithoutOdaTests(unittest.TestCase):
         if odafc_available():
             self.skipTest("ODA is installed")
         if not self.dwgs:
-            self.skipTest("no /workspace/dwglot-drawings")
+            self.skipTest("no /workspace/tuyi-drawings")
         client = TestClient(app)
         self.assertGreaterEqual(len(self.dwgs), 2)
         for dwg in self.dwgs:

@@ -1149,10 +1149,10 @@ class BatchApiTests(unittest.TestCase):
 
         if odafc_available():
             self.skipTest("ODA is installed")
-        drawings = Path("/workspace/dwglot-drawings")
+        drawings = Path("/workspace/tuyi-drawings")
         dwgs = sorted(drawings.glob("*.dwg"))
         if not dwgs:
-            self.skipTest("no DWG fixtures in /workspace/dwglot-drawings")
+            self.skipTest("no DWG fixtures in /workspace/tuyi-drawings")
         live = Path(self.tmp.name) / "live.dxf"
         shutil.copy(FIXTURES / "floor_plan.dxf", live)
         dwg = Path(self.tmp.name) / dwgs[0].name

@@ -23,7 +23,7 @@ from backend.translator import CADChineseTranslator
 REPO = Path(__file__).resolve().parents[1]
 FIXTURES = REPO / "tests" / "fixtures"
 FLOOR = FIXTURES / "floor_plan.dxf"
-LIVE_DWG_DIR = Path("/workspace/dwglot-drawings")
+LIVE_DWG_DIR = Path("/workspace/tuyi-drawings")
 
 
 def _run(args: list[str], **kwargs) -> subprocess.CompletedProcess:
@@ -204,31 +204,13 @@ class CliEntryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         blob = (result.stdout + result.stderr).lower()
         self.assertIn("tuyi", blob)
-        self.assertNotIn("dwglot", blob)
-
-    def test_public_dwglot_module_is_gone(self):
-        env = os.environ.copy()
-        env["PYTHONPATH"] = str(REPO) + os.pathsep + env.get("PYTHONPATH", "")
-        env["PYTHONUTF8"] = "1"
-        env["PYTHONIOENCODING"] = "utf-8"
-        result = subprocess.run(
-            [sys.executable, "-m", "dwglot", "-V"],
-            cwd=str(REPO),
-            capture_output=True,
-            text=True,
-            env=env,
-        )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("No module named", result.stderr)
-        self.assertNotIn("tuyi", result.stdout.lower())
-        self.assertFalse((REPO / "dwglot").exists())
 
 
 @unittest.skipUnless(odafc_available(), "ODA not on PATH")
 class CliLiveDwgTests(unittest.TestCase):
     def test_live_dwg_uses_oda(self):
         if not LIVE_DWG_DIR.is_dir():
-            self.skipTest("no /workspace/dwglot-drawings")
+            self.skipTest("no /workspace/tuyi-drawings")
         dwgs = sorted(LIVE_DWG_DIR.glob("工作位置表*.dwg")) or sorted(LIVE_DWG_DIR.glob("*.dwg"))
         if not dwgs:
             self.skipTest("no live DWG")
