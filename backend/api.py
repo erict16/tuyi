@@ -20,12 +20,27 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from backend.app_meta import APP_TITLE, APP_VERSION, DROPPED_FILES_DIR, GITHUB_URL, LEGACY_DROPPED_FILES_DIR, default_output_dir
+from backend.app_meta import (
+    APP_TITLE,
+    APP_VERSION,
+    DROPPED_FILES_DIR,
+    GITHUB_URL,
+    LEGACY_DROPPED_FILES_DIR,
+    default_output_dir,
+    resolve_output_dir,
+)
 from backend.providers.azure import AzureFreeQuotaExceededError
 from backend.providers.base import TranslationProviderError
 from backend.queue import BatchQueue
 from backend.cad import ODA_OUTPUT_VERSIONS, analyze_source, dwg_unavailable_short, odafc_available, odafc_status, output_path_for
-from backend.translator import CADChineseTranslator, CONFIG_PATH, load_yaml_data, output_prefix, resource_path
+from backend.translator import (
+    CADChineseTranslator,
+    CONFIG_PATH,
+    load_yaml_data,
+    merged_zh_to_en_context,
+    output_prefix,
+    resource_path,
+)
 from backend.language_assets import LanguageAssets
 from backend.storage import atomic_write_json, quarantine_corrupt_file
 from backend.updates import ApplyError, check_github_release, request_cancel, start_apply, unavailable_payload, update_status
@@ -93,7 +108,11 @@ def builtin_terms() -> list[dict]:
     """Expose the shipped YAML glossary as a read-only asset list."""
     entries = []
     for mode, (filename, key) in BUILTIN_GLOSSARIES.items():
-        for index, (source, target) in enumerate(load_yaml_data(filename).get(key, {}).items()):
+        if mode == "zh_to_en":
+            pairs = merged_zh_to_en_context().items()
+        else:
+            pairs = (load_yaml_data(filename).get(key) or {}).items()
+        for index, (source, target) in enumerate(pairs):
             entries.append({"id": f"{mode}:{index}", "scope": "builtin", "mode": mode, "source": source, "target": target, "layer_contains": ""})
     return entries
 
@@ -223,6 +242,7 @@ class PdfBody(BaseModel):
     output_name: str = ""
     layout: str = ""
     style: str = "纯译文"
+    appearance: str = ""
     items: list[dict] = []
     print_after: bool = False
 
@@ -576,6 +596,8 @@ class TranslationService:
                 text = str(value).strip()
                 if key == "provider":
                     data[key] = text if text in ENGINE_PROVIDERS else "deepl"
+                elif key == "output_dir":
+                    data[key] = resolve_output_dir(text)
                 else:
                     data[key] = text
             return data
@@ -828,7 +850,7 @@ def drawings_translate(body: TranslateRowsBody):
 def drawings_writeback(body: WritebackBody):
     try:
         split_mode(body.translation_mode)
-        output_dir = body.output_dir or service.load_config().get("output_dir") or service.default_output_dir()
+        output_dir = resolve_output_dir(body.output_dir or service.load_config().get("output_dir") or "")
         ensure_output_dir(output_dir)
         named = body.output_name.strip()
         if body.translate_filename:
@@ -857,13 +879,20 @@ def drawings_writeback(body: WritebackBody):
 @app.post("/api/drawings/export-pdf")
 def drawings_export_pdf(body: PdfBody):
     try:
-        output_dir = body.output_dir or service.load_config().get("output_dir") or service.default_output_dir()
+        output_dir = resolve_output_dir(body.output_dir or service.load_config().get("output_dir") or "")
         ensure_output_dir(output_dir)
         name = (body.output_name or Path(body.path).stem).strip()
         if not name.lower().endswith(".pdf"):
             name = f"{name}.pdf"
         dest = str(Path(output_dir) / Path(name).name)
-        result = export_pdf(body.path, dest, body.layout, style=body.style, items=body.items)
+        result = export_pdf(
+            body.path,
+            dest,
+            body.layout,
+            style=body.style,
+            items=body.items,
+            appearance=body.appearance,
+        )
         if body.print_after:
             result["print"] = print_pdf(result["path"])
         return result
@@ -889,6 +918,7 @@ def drawings_print(body: PdfBody):
                 output_name=body.output_name,
                 layout=body.layout,
                 style=body.style,
+                appearance=body.appearance,
                 items=body.items,
                 print_after=False,
             )
@@ -1156,7 +1186,7 @@ def drawings_import_table(body: TablePreviewBody):
 
 @app.post("/api/batch/import")
 def batch_import(body: BatchImportBody):
-    output_dir = body.output_dir or service.load_config().get("output_dir") or service.default_output_dir()
+    output_dir = resolve_output_dir(body.output_dir or service.load_config().get("output_dir") or "")
     try:
         ensure_output_dir(output_dir)
         split_mode(body.translation_mode)
@@ -1191,7 +1221,7 @@ async def drop_batch(files: list[UploadFile] = File(default=[])):
 
 @app.post("/api/batch/start")
 def start_batch(body: BatchStartBody):
-    output_dir = body.output_dir or service.load_config().get("output_dir") or service.default_output_dir()
+    output_dir = resolve_output_dir(body.output_dir or service.load_config().get("output_dir") or "")
     try:
         ensure_output_dir(output_dir)
     except ValueError as exc:

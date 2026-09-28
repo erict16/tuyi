@@ -59,10 +59,31 @@ def migrate_user_data() -> None:
     migrate_legacy_dir(LEGACY_DROPPED_FILES_DIR, DROPPED_FILES_DIR)
 
 
+def legacy_output_dir() -> Path:
+    return Path.home() / "Documents" / OUTPUT_DIR_NAME
+
+
+def downloads_dir() -> Path:
+    return Path.home() / "Downloads"
+
+
+def _same_dir(left: Path, right: Path) -> bool:
+    try:
+        return left.expanduser().resolve() == right.expanduser().resolve()
+    except OSError:
+        return os.path.normcase(str(left)) == os.path.normcase(str(right))
+
+
+def resolve_output_dir(chosen: str = "") -> str:
+    """Chosen folder, or Downloads. The old Documents/Tuyi output default does not win."""
+    text = str(chosen or "").strip()
+    if text and not _same_dir(Path(text), legacy_output_dir()):
+        return str(Path(text).expanduser())
+    return str(downloads_dir())
+
+
 def default_output_dir() -> str:
-    path = Path.home() / "Documents" / OUTPUT_DIR_NAME
-    path.mkdir(parents=True, exist_ok=True)
-    return str(path)
+    return resolve_output_dir("")
 
 
 def resource_base() -> Path:

@@ -46,7 +46,7 @@ El instalador no está firmado. El sistema te va a parar la primera vez. Es norm
 1. Abre un `.dwg` o un `.dxf`.
 2. Pulsa traducir. Sale una tabla: original | traducción | capa.
 3. Si una fila está mal, la cambias ahí mismo.
-4. Escribe el plano. El archivo nuevo va a `Documentos/Tuyi output` (en inglés, `Documents/Tuyi output`).
+4. Escribe el plano. El archivo nuevo va a la carpeta Descargas, salvo que elijas otra.
 
 También puedes tirar una carpeta entera y exportarla de una vez.
 

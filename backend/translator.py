@@ -87,8 +87,39 @@ def load_yaml_data(filename):
     full_path = resource_path(filename)
     if os.path.exists(full_path):
         with open(full_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)
+            return yaml.safe_load(f) or {}
     return {}
+
+
+# Workbook rows, then these. OS locks and the six drawing spellings win.
+SWITCH_OVERRIDES_ZH_TO_EN = {
+    "均压罩": "terminal screen caps",
+    "气体继电器": "Buchholz relay",
+    "有载开关保护": "OLTC protective relay",
+    "有载开关顶盖": "OLTC head cover",
+    "冷压管": "crimp sleeve",
+    "组合式": "combined",
+    "复合式": "compound",
+    "笼式": "cage",
+    "鼓式": "drum",
+    "极性选择器": "change-over selector",
+    "有载分接开关": "on-load tap-changer",
+    "分接选择器": "tap selector",
+    "电位电阻": "tie-in resistor",
+}
+
+
+def merged_zh_to_en_context() -> dict:
+    """Architectural YAML, then the shipped switch workbook, then OS locks."""
+    base = load_yaml_data("glossaries/translation_context_zh_to_en.yaml").get("context_zh_to_en") or {}
+    switch = load_yaml_data("glossaries/switch_zh_to_en.yaml").get("context_zh_to_en") or {}
+    merged = {}
+    for source, target in list(base.items()) + list(switch.items()) + list(SWITCH_OVERRIDES_ZH_TO_EN.items()):
+        key = str(source or "").strip()
+        value = str(target or "").strip()
+        if key and value:
+            merged[key] = value
+    return merged
 
 def get_installed_fonts():
     fonts = set()
@@ -186,7 +217,7 @@ class CADChineseTranslator:
 
         context_zh_to_fr = load_yaml_data("glossaries/translation_context.yaml").get("context_zh_to_fr", {})
         context_fr_to_zh = load_yaml_data("glossaries/translation_context_fr_to_zh.yaml").get("context_fr_to_zh", {})
-        context_zh_to_en = load_yaml_data("glossaries/translation_context_zh_to_en.yaml").get("context_zh_to_en", {})
+        context_zh_to_en = merged_zh_to_en_context()
         context_en_to_zh = load_yaml_data("glossaries/translation_context_en_to_zh.yaml").get("context_en_to_zh", {})
         corrections_fr_to_zh = load_yaml_data("glossaries/translation_corrections.yaml").get("corrections_fr_to_zh", {})
 

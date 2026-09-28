@@ -65,7 +65,9 @@ def translate_one(
     project = glossary.strip() if glossary else config.get("project_package_path", "")
     if glossary.strip():
         LanguageAssets().project_info(glossary.strip())
-    directory = output_dir or config.get("output_dir") or service.default_output_dir()
+    from backend.app_meta import resolve_output_dir
+
+    directory = resolve_output_dir(output_dir or config.get("output_dir") or "")
     name = output_name
     if name:
         directory, name = _split_output(name, directory)

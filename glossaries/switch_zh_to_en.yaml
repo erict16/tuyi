@@ -1,0 +1,357 @@
+context_zh_to_en:
+  E1- 开关油室放气阀.: 'E1: Bleeding of on-load tap changer'
+  E1:开关油箱放气阀: 'E1: Bleeding of on-load tap changer'
+  E2- 变压器油箱放气口: 'E2: Bleeding of transformer tank'
+  E2:变压器油箱放气口: 'E2: Bleeding of transformer tank'
+  E2：变压器油箱放气口: 'E2: Bleeding of transformer tank'
+  P向/D 向: P view/D view
+  Q - 注油管接头: Pipe connection Q
+  Q:回油连接弯管: 'Q: Pipe connection for oil return'
+  Q：回油连接弯管: 'Q: Pipe connection for oil return'
+  R - 保护继电器接头: Pipe connection R
+  R:保护继电器连接弯管: 'R: Pipe connection for protective relay'
+  R：保护继电器连接弯管: 'R: Pipe connection for protective relay'
+  S - 抽油管接头: Pipe connection S
+  S:抽油连接弯管: 'S: Pipe connection for suction pipe'
+  S：抽油连接弯管: 'S: Pipe connection for suction pipe'
+  W - 扁齿轮盒/减速齿轮盒: 'W: Top gearbox'
+  万向节: cardan joint
+  不受天气影响的: weatherproof
+  不同电压数: Different voltage number
+  中性点引出排: Current take off terminal
+  中性点端子: Neutral point terminal
+  中性点集电环/引出环: Current take off ring
+  中间支撑盒: intermediate gear box
+  串联: be connected in series with
+  主绝缘: main insulation
+  主触头: shunt contact
+  主通断触头: main switching contact
+  产品型号: Product model
+  伞齿轮盒: bevel gearbox
+  传动轴: Driving shaft
+  例行试验: routine test
+  保护继电器: Protective relay
+  储油柜: conservator
+  全波雷电冲击试验: full wave lightening impulse test (LI)
+  共 页: ( ) pages in total
+  内置式: in-tank type
+  冷压管: crimp sleeve
+  减速齿轮箱: ratio reduction gearbox
+  凸块: protruding tab
+  出油口法兰: oil outlet flange
+  出轴: output shaft
+  击穿电压: breakdown voltage
+  分接位置指示器: Tap position indicator
+  分接变化指示: tap-change in progress indication
+  分接开关位置: Tap changer position
+  分接开关位置数: Operation position number
+  分接开关头部: OLTC head
+  分接指示位置: Display position
+  分接选择器: tap selector
+  分接选择器上层触头: Upper contacts of tap selector
+  分接选择器上触头平面层: Upper contacts of tap selector
+  分接选择器下层触头: Lower contacts of tap selector
+  分接选择器下触头平面层: Lower contacts of tap selector
+  分接选择器底部与A等电位: Tap selector bottom and are equal potential
+  分接选择器触头位置: Tap selector contact position
+  切换开关: diverter switch
+  切换测试: switching test
+  切换电流: switched current
+  切换脉冲试验: switching impulse test (SI)
+  切换芯子: diverter switch insert
+  功率因数: power factor
+  动触头: moving contact
+  动触头系统: moving contact structure
+  励磁绕组: excitation winding
+  升高座: elevated flange
+  华明接线: Connected by HM
+  卡箍: clamp
+  压力释放装置: pressure relief device
+  压力释放阀: pressure relief valve
+  压板: clamping plate
+  反向转换选择器: reversing change-over selector
+  变压器油: transformer oil
+  变压器绕组: Transformer winding
+  可活动范围: Operating Range
+  吊耳: Lifting lugs
+  吊装带: lift sling
+  回油管: oil return pipe
+  固有分接位置数: number of inherent tap positions
+  图样标记: Mark pattern
+  圆柱销: cylindrical pin
+  圆齿轮盒/扁齿轮盒/减速齿轮盒/传动齿轮盒: Top gearbox
+  均压片: corona plate
+  均压环: Grading ring
+  均压罩: terminal screen caps
+  垂直防护罩: vertical guard
+  型式试验: type test
+  壁挂式: wall mounting type
+  处数: Place several
+  复合式: compound
+  外挂式: compartment type
+  外施耐压试验: applied voltage test
+  头盖: head cover
+  头部安装法兰: Mounting flange
+  夹片式触头: clamping
+  套管: bushing
+  安装板: Mounting plate
+  定位板: locating plate
+  定位销钉: locating pin
+  审定: Approve
+  审核: Audit
+  客户接线: To be connected by customer
+  密封圈: sealing ring
+  密封性测试: tightness test
+  对周围介质的温升: the temperature rise above the surrouding liquid
+  就地控制开关: Local control switch
+  局部放电: PD partial discharge
+  屏蔽帽: screen cap/stress cap corona cap
+  屏蔽罩: shield
+  工作位置数: Operation position number
+  工作分接位置数: number of service tap positions
+  工作档位: operating position
+  工作负载试验: service duty test
+  工艺: process
+  工频电压: power-frequency voltage/ AC voltage test
+  布置图: layout drawing
+  带手摇把联锁开关的手摇把开孔: Hand-crank access port with interlock switch
+  带槽: with groove
+  带电外限: Live part
+  带电部分: live parts
+  平衡绕组: equalizer winding
+  并联: be connected in parallel with
+  并联触头: by-pass contact/shunt contact
+  开口锁片: open-type lock washer
+  开断容量试验: breaking capacity test
+  开断电流: break and make the load/current
+  异步电动机: induction/asynchronous motor
+  引出触头端子: Current take-off terminal
+  弧形板: contact shell
+  弯油管: pipe connection
+  循环电流: circuilating current
+  快速机构/储能机构: (spring)energy accumulator
+  截波冲击试验: chopped wave lightening impulse (LIC)
+  手动操作: manual operation
+  手提灯: Portable lamp
+  手摇把: Hand crank
+  手摇柄: hand crank
+  扭矩/扭力: torque
+  抽头绕组: tap winding
+  抽油管: oil suction pipe
+  拉弧前: Pre-arc
+  拉弧时间: arcing time
+  拨槽件: Genevawheel driving piece
+  指示位置: Display position
+  指示区域: Indication area
+  指示区域观察窗: Viewing window for indication area
+  排气塞: gas discharge plug
+  接地螺栓: Earth stud
+  接线图: Connection diagram
+  控制器: Controller
+  控制箱: control cabinet
+  控制选择开关: Control selector switch
+  操作电压: operating voltage
+  支撑法兰: Support flange
+  放大图: Magnified figure
+  放气阀: bleeder valve
+  放油螺钉: oil discharge screw
+  数控机床: CNC (computer numerical control)
+  整定位置: Set position
+  整流变压器: rectification transformer
+  文件袋: Document pocket
+  断路器: circuit breaker
+  方齿轮盒/伞齿轮盒: Bevel gearbox
+  旁通管: bypass pipe
+  旋转角度: Swiveling angle
+  日期: Date
+  更改文件号: Changes file number
+  有载分接开关: on-load tap-changer
+  有载开关保护: OLTC protective relay
+  有载开关顶盖: OLTC head cover
+  机座: frame
+  机械传动机构护板: Drive mechanism cover
+  机械寿命试验: mechanical endurance test
+  机械测试: mechanical test
+  机械端位止动装置: mechanical end stop
+  机械限位装置: Mechanical limit device
+  条形: Linear type
+  板式电位电阻: Board type Tie-in -ressistor
+  极性: polarity
+  极性选择器: change-over selector
+  极限位置: Limit position
+  标准化: Standard
+  标记: Mark pattern
+  校准: Calibrate
+  校对: Proofreading
+  档位显示牌: position indicator dial
+  档位观察窗: position display window
+  检修手册: inspection manual
+  槽深: Groove depth
+  槽轮/日内瓦轮: Geneva wheel
+  模块化: modular
+  止回阀: check valve
+  正负极: positive/negative polarity
+  步进控制: step-by-step control
+  死点: dead positions
+  比例: Scale
+  气体继电器: Buchholz relay
+  水平防护罩: horizontal guard
+  油中溶解气体分析法: DGA (dissolved and free gases analysis)
+  油位: oil level
+  油位计: Oil level gauge
+  油室: oil compartment
+  油枕: liquid/oil conservator
+  油流: liquid flow
+  油流继电器: oil flow relay/oil surge relay
+  法兰环: flange ring
+  注意事项: Caution label
+  注：弯油管加高100mm: 'Note: Q, S, R pipes with extra 100mm'
+  注：所有弯油管和齿轮盒均可360°旋转。: Note：all oil pipe and gearbox can be rotated by 360°.
+  流体静压力: static pressure
+  流出端子: current led-out/take-off terminal
+  浪涌电流: inrush current/ surge current
+  消散在电弧中的电荷: The charges dissipated in the arcs
+  液位计: liquid level gauges
+  溢油排气阀: oil discharge valve
+  滚动式触头: rolling
+  漏电感: Leakage inductance
+  火花间隙: spark gap
+  烧结测试: sintering process
+  热电偶: thermocouple
+  爆破盖: rupture disk
+  环氧树脂玻璃纤维: epoxy fiberglass
+  电位电阻: tie-in resistor
+  电动机构: Motor Drive Unit (MDU)
+  电动机构箱: motor drive cubicle
+  电压崩溃: voltage collapse
+  电容耦合: capacitive coupling
+  电感器: inductor
+  电机回路: motor circuit/main circuit
+  电气信号: electrical signal
+  电气寿命: electrical life
+  电气控制元件: Electrical control components
+  电气限位开关: Electrical limit switch
+  电流引出端子: Current take-off terminal
+  电流输出端子: Current take-off terminal
+  电流输出触头: current led-out/take-off contact
+  电源电压: power supply voltage
+  电磁式计数器: electromagnetic counter
+  盘形: disc type
+  真空泡: vacuum interrupter (VI)
+  真空灭弧型分接开关: vacuum interrupter tap changer
+  真空灭弧室: vacuum interrupter chamber
+  瞬时过电压: transient overvoltage
+  短路电流测试: short-circuit current test
+  矿物油: mineral oil
+  碳化: carbonization
+  磁路: magnetic circuit
+  示波图: oscillogram
+  空气开关: Miniature circuit breaker
+  空转: run without load
+  突发压力继电器: Rapid pressure rise relay
+  第 页: Page NO. ( )
+  笼型: cage type
+  笼式: cage
+  等电位连线: potential connection
+  签字: Signature
+  箱门: Enclosure door
+  箱门锁扣: Door latch
+  箱顶式变压器: top-mounted transformer (standard transformer)
+  粉末冶金: PM (powder metallurgy)
+  粗调选择器: coarse change-over selector
+  粘性: viscosity
+  精密溶模铸法: precision investment casting
+  紧固螺栓: Fastening bolt
+  紧急脱扣装置: emergency tripping device
+  线性调: Linear regulation
+  组合式: combined
+  细调选择器: fine change-over selector
+  绝缘测试: dielectric test
+  绝缘等级: insulation class
+  绝缘转轴: insulation main shaft
+  综合试验电路: Synthetic test circuit
+  编织线: braided leads
+  联轴器/联轴节: coupling
+  航空插座: aviation socket
+  色谱分析: DGA disolved gas analysis
+  落地式: pad mounting type
+  薄弱环节: shear pin
+  螺柱: stud
+  螺栓: bolt
+  螺钉: screw
+  表面镀银的铜/合金: Silver-plated copper/alloys
+  衬套: bushing
+  装机容量: installed capacity
+  装配图: Assembly drawing
+  裸铜: plain copper
+  观察窗: Inspection window
+  视在电荷: apparent charge (pC)
+  触头分离: contact separation
+  触头温升测试: temperature rise of contacts
+  触头磨损: contact wear
+  触点: contact
+  警示标志: warning label
+  警示标识: Warning label
+  计数器: Counter
+  设计: Design
+  调压级数: Different voltage number
+  调压绕组: transformer regulating winding
+  调整垫块: temporary shim
+  起吊环: Lifting ring
+  起始角度: Starting Angle
+  转圈: rotation
+  转换触头（电抗式）: transfer contact
+  转换选择器: Change-over selector
+  转换选择器位置: Change-over selector position
+  转换选择器端子: Change-over selector terminal
+  软连接: braided contact lead
+  载流方向: load direction
+  输出端0: take-off terminal
+  输出轴: Output shaft
+  过渡阻抗: transition impedance
+  过渡阻抗测试: transition impedance test
+  过电流自闭接点: overcurrent self-resetting contact
+  过电流闭锁装置: overcurrent blocking device
+  过载: overload
+  运行指示器: Operation indicator
+  进油口法兰: oil inlet flange
+  连接法兰: Connecting flange
+  选择开关: selector switch
+  选择开关位置: Selector switch position
+  选择开关端子: Selector switch terminal
+  逐级控制: Step-by-step control
+  通断触头: switching contact
+  重量: Weight
+  钟罩式变压器: bell-type transformer
+  钟罩式变压器箱盖: bell tank cover
+  铜焊: brazed
+  铜线: copper leads
+  铭牌: Nameplate
+  锁片: lock washer
+  闭合/开断: make/break
+  闭合电压: closed circuit voltage
+  阀杆: valve stem
+  防止越级的保护装置: over-riding protection
+  防爆盖: Rupture disk
+  阻尼: damper
+  限位开关: limit switches
+  限流自耦变压器(电抗开关匹配的电抗器）: preventive autotransformer
+  除杂滤芯: imurity filter core
+  除水滤芯: water filter core
+  隔弧板: arcing chute
+  隔板: Barrier
+  隔离触头: isolated contacts
+  集成板/集成电路: integrated circuit(PCB board)
+  集电环: current take-off ring
+  静触头: fixed contact
+  顶盖: top cover
+  预计开断电流: prospective current
+  额定交流工频耐受电压试验: rated AC power frequency withstand voltage testing
+  驱动侧: Drive side of tap selector
+  驱动机构: drive unit
+  高压检测和诊断系统: high-voltage testing and diagnostic system
+  鼓型: drum type
+  鼓式: drum
+  齿轮盒出轴: Gearbox shaft
+  齿轮盒座（变压器）: gearbox bracket (transformer)
+  （压力释放阀）自我封闭膜: self-sealing diaphragm
