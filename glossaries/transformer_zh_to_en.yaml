@@ -1,0 +1,103 @@
+# Transformer-user drawing terms. Well-known abbreviations win.
+context_zh_to_en:
+  变压器: transformer
+  电力变压器: power transformer
+  配电变压器: distribution transformer
+  自耦变压器: autotransformer
+  整流变压器: rectifier transformer
+  钟罩式变压器: bell-type transformer
+  箱顶式变压器: top-mounted transformer
+  高压: HV
+  低压: LV
+  中压: MV
+  高压侧: HV side
+  低压侧: LV side
+  中压侧: MV side
+  高压绕组: HV winding
+  低压绕组: LV winding
+  中压绕组: MV winding
+  调压绕组: regulating winding
+  绕组: winding
+  铁心: core
+  铁轭: yoke
+  夹件: core clamp
+  油箱: tank
+  变压器油箱: transformer tank
+  箱盖: tank cover
+  钟罩: bell cover
+  钟罩式: bell type
+  箱沿: tank flange
+  套管: bushing
+  高压套管: HV bushing
+  低压套管: LV bushing
+  中性点套管: neutral bushing
+  升高座: turret
+  储油柜: conservator
+  吸湿器: dehydrating breather
+  气体继电器: Buchholz relay
+  压力释放阀: PRV
+  油位计: oil level gauge
+  信号温度计: thermometer
+  绕组温度计: winding temperature indicator
+  放油阀: drain valve
+  注油阀: oil filling valve
+  放气塞: vent plug
+  接地端子: earthing terminal
+  铭牌: nameplate
+  吊攀: lifting lug
+  千斤顶支架: jacking pad
+  片式散热器: radiator
+  风机: fan
+  油泵: oil pump
+  变压器油: transformer oil
+  密封垫: gasket
+  有载分接开关: OLTC
+  无载分接开关: OCTC
+  无励磁分接开关: OCTC
+  有载调压: on-load tap-changing
+  无励磁调压: off-circuit tap-changing
+  分接: tapping
+  额定容量: rated power
+  额定电压: rated voltage
+  额定电流: rated current
+  额定频率: rated frequency
+  相数: number of phases
+  联结组标号: vector group
+  联结组别: vector group
+  星形: star
+  三角形: delta
+  中性点: neutral
+  冷却方式: cooling
+  油浸自冷: ONAN
+  油浸风冷: ONAF
+  强迫油循环风冷: OFAF
+  强迫油循环水冷: OFWF
+  强迫导向油循环风冷: ODAF
+  强迫导向油循环水冷: ODWF
+  短路阻抗: short-circuit impedance
+  空载损耗: P0
+  负载损耗: Pk
+  空载电流: I0
+  绝缘水平: insulation level
+  温升: temperature rise
+  声级: sound power level
+  总重: total weight
+  油重: oil weight
+  器身重: core and winding weight
+  运输重: transport weight
+  户内: indoor
+  户外: outdoor
+  图号: drawing No.
+  比例: scale
+  日期: date
+  设计: drawn
+  校对: checked
+  审核: reviewed
+  审定: approved
+  重量: weight
+  材料: material
+  数量: qty
+  备注: remarks
+  技术要求: technical requirements
+  未注公差: unspecified tolerance
+  其余: remainder

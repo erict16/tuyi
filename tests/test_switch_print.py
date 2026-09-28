@@ -19,7 +19,7 @@ from backend.translator import CADChineseTranslator
 
 REPO = Path(__file__).resolve().parents[1]
 TERMS = {
-    "有载分接开关": "on-load tap-changer",
+    "有载分接开关": "OLTC",
     "极性选择器": "change-over selector",
     "分接选择器": "tap selector",
     "气体继电器": "Buchholz relay",
@@ -105,7 +105,7 @@ class SwitchGlossaryTests(unittest.TestCase):
             "放气塞": "vent plug",
             "输出端子": "output terminal",
             "循环电流": "circulating current",
-            "有载分接开关": "on-load tap-changer",
+            "有载分接开关": "OLTC",
             "气体继电器": "Buchholz relay",
         }
         for source, english in expect.items():

@@ -103,7 +103,7 @@ SWITCH_OVERRIDES_ZH_TO_EN = {
     "笼式": "cage",
     "鼓式": "drum",
     "极性选择器": "change-over selector",
-    "有载分接开关": "on-load tap-changer",
+    "有载分接开关": "OLTC",
     "分接选择器": "tap selector",
     "电位电阻": "tie-in resistor",
     "审核": "Reviewed",
@@ -131,8 +131,20 @@ SWITCH_OVERRIDES_ZH_TO_EN = {
     "输出端子": "output terminal",
     "极性选择器位置": "change-over selector position",
     "选择开关触头位置": "selector switch contact position",
-    "型有载分接开关": "on-load tap-changer",
-    "开关重量（kg）": "Tap-changer weight (kg)",
+    "型有载分接开关": "OLTC",
+    "开关重量（kg）": "OLTC weight (kg)",
+    "电动机构": "MDU",
+    "分接开关驱动装置": "MDU",
+    "真空泡": "VI",
+    "真空灭弧室": "VI",
+    "无载分接开关": "OCTC",
+    "无励磁分接开关": "OCTC",
+    "局部放电": "PD",
+    "色谱分析": "DGA",
+    "油中溶解气体分析法": "DGA",
+    "全波雷电冲击试验": "LI",
+    "截波冲击试验": "LIC",
+    "切换脉冲试验": "SI",
     "全波雷电冲击试验": "full-wave lightning impulse test (LI)",
     "截波冲击试验": "chopped-wave lightning impulse (LIC)",
     "板式电位电阻": "board-type tie-in resistor",
@@ -151,17 +163,80 @@ SWITCH_OVERRIDES_ZH_TO_EN = {
 }
 
 
-def merged_zh_to_en_context() -> dict:
-    """Architectural YAML, then the shipped switch workbook, then OS locks."""
-    base = load_yaml_data("glossaries/translation_context_zh_to_en.yaml").get("context_zh_to_en") or {}
-    switch = load_yaml_data("glossaries/switch_zh_to_en.yaml").get("context_zh_to_en") or {}
+def _clean_pairs(*groups) -> dict:
     merged = {}
-    for source, target in list(base.items()) + list(switch.items()) + list(SWITCH_OVERRIDES_ZH_TO_EN.items()):
-        key = str(source or "").strip()
-        value = str(target or "").strip()
-        if key and value:
-            merged[key] = value
+    for group in groups:
+        for source, target in (group or {}).items():
+            key = str(source or "").strip()
+            value = str(target or "").strip()
+            if key and value:
+                merged[key] = value
     return merged
+
+
+def switch_zh_to_en_context() -> dict:
+    """Switch workbook plus the drawing overrides. No architectural terms."""
+    switch = load_yaml_data("glossaries/switch_zh_to_en.yaml").get("context_zh_to_en") or {}
+    return _clean_pairs(switch, SWITCH_OVERRIDES_ZH_TO_EN)
+
+
+def transformer_zh_to_en_context() -> dict:
+    """Transformer-user drawing terms. No architectural and no switch workbook."""
+    data = load_yaml_data("glossaries/transformer_zh_to_en.yaml").get("context_zh_to_en") or {}
+    return _clean_pairs(data)
+
+
+def merged_zh_to_en_context() -> dict:
+    """Architectural YAML, then transformer terms, then the switch workbook and its locks."""
+    base = load_yaml_data("glossaries/translation_context_zh_to_en.yaml").get("context_zh_to_en") or {}
+    return _clean_pairs(base, transformer_zh_to_en_context(), switch_zh_to_en_context())
+
+
+NAMED_GLOSSARIES = {
+    "all": "全部内置",
+    "switch": "开关",
+    "transformer": "变压器",
+    "off": "不用内置",
+}
+
+
+def normalize_builtin_glossary(name: str) -> str:
+    text = str(name or "").strip()
+    key = text.casefold()
+    aliases = {
+        "": "all",
+        "all": "all",
+        "全部": "all",
+        "switch": "switch",
+        "开关": "switch",
+        "transformer": "transformer",
+        "变压器": "transformer",
+        "off": "off",
+        "none": "off",
+        "关": "off",
+    }
+    if text in aliases:
+        return aliases[text]
+    if key in aliases:
+        return aliases[key]
+    raise ValueError("没有这个词库。可用：all、switch、transformer、off，或一个术语 JSON 路径")
+
+
+def apply_builtin_glossary(translator, name: str = "all") -> str:
+    """Point zh→en glossary lookup at all, switch-only, or nothing."""
+    chosen = normalize_builtin_glossary(name)
+    if chosen == "switch":
+        context = switch_zh_to_en_context()
+    elif chosen == "transformer":
+        context = transformer_zh_to_en_context()
+    elif chosen == "off":
+        context = {}
+    else:
+        context = merged_zh_to_en_context()
+    config = translator.language_configs["zh_to_en"]
+    config["context"] = context
+    config["glossary"] = {str(key).casefold(): value for key, value in context.items()}
+    return chosen
 
 def get_installed_fonts():
     fonts = set()

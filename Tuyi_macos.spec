@@ -20,6 +20,7 @@ glossary_files = [
     "translation_context_en_to_zh.yaml",
     "translation_corrections.yaml",
     "switch_zh_to_en.yaml",
+    "transformer_zh_to_en.yaml",
 ]
 datas = [(os.path.join(spec_dir, "changelog.json"), ".")]
 datas += [(os.path.join(spec_dir, "glossaries", name), "glossaries") for name in glossary_files]

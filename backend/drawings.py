@@ -391,6 +391,7 @@ def translate_rows(
     skip_dupes: bool = False,
     skip_nonsource: bool = False,
     use_glossary: bool = True,
+    builtin_glossary: str = "all",
 ) -> dict:
     split_mode(mode)
     items = [
@@ -404,8 +405,11 @@ def translate_rows(
             translation_mode=mode,
         )
     ]
+    from backend.translator import apply_builtin_glossary
+
     translator = CADChineseTranslator()
     translator.configure_language_assets(project_package_path)
+    apply_builtin_glossary(translator, builtin_glossary)
     translator.use_glossary = use_glossary
     engine = engine or {}
     translator.configure_engine(provider, **{k: engine.get(k, "") for k in ENGINE_KEYS})
@@ -656,6 +660,7 @@ def translate_drawing(
     provider: str = "deepl",
     engine: dict | None = None,
     style: str = "纯译文",
+    builtin_glossary: str = "all",
 ) -> dict:
     """Open → extract → glossary-first translate → write-back. Same as 常规 写回."""
     split_mode(mode)
@@ -670,11 +675,15 @@ def translate_drawing(
         skip_numbers=REGULAR_EXTRACT["skip_numbers"],
         skip_dupes=REGULAR_EXTRACT["skip_dupes"],
         skip_nonsource=REGULAR_EXTRACT["skip_nonsource"],
+        builtin_glossary=builtin_glossary,
     )
     named = strip_cad_suffix(output_name)
     if not named:
+        from backend.translator import apply_builtin_glossary
+
         translator = CADChineseTranslator(log_callback=lambda *args, **kwargs: None)
         translator.configure_language_assets(project_package_path)
+        apply_builtin_glossary(translator, builtin_glossary)
         translator.configure_engine(provider, **{k: engine.get(k, "") for k in ENGINE_KEYS})
         named = build_output_name(
             mode,

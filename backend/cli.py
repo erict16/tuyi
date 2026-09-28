@@ -44,6 +44,22 @@ def _emit_result(result: dict) -> None:
     print(f"translated: {result['translated']}")
 
 
+def _glossary_args(glossary: str, saved_project: str) -> tuple[str, str]:
+    """Named pack (switch/all/off) or a project JSON path."""
+    from backend.translator import normalize_builtin_glossary
+
+    text = str(glossary or "").strip()
+    if not text:
+        return "all", saved_project or ""
+    try:
+        return normalize_builtin_glossary(text), ""
+    except ValueError:
+        from backend.language_assets import LanguageAssets
+
+        LanguageAssets().project_info(text)
+        return "all", text
+
+
 def translate_one(
     path: str,
     *,
@@ -56,17 +72,13 @@ def translate_one(
     style: str = "纯译文",
 ) -> dict:
     from backend.api import service
+    from backend.app_meta import resolve_output_dir
     from backend.drawings import translate_drawing
-    from backend.language_assets import LanguageAssets
 
     config = service.load_config()
     provider = (provider or "").strip() or config.get("provider") or "deepl"
     engine = service._engine_from({**config, "provider": provider}, {})
-    project = glossary.strip() if glossary else config.get("project_package_path", "")
-    if glossary.strip():
-        LanguageAssets().project_info(glossary.strip())
-    from backend.app_meta import resolve_output_dir
-
+    builtin, project = _glossary_args(glossary, config.get("project_package_path", ""))
     directory = resolve_output_dir(output_dir or config.get("output_dir") or "")
     name = output_name
     if name:
@@ -84,7 +96,30 @@ def translate_one(
             provider=provider,
             engine=engine,
             style=style,
+            builtin_glossary=builtin,
         )
+
+
+def export_one(path: str, *, output_dir: str, output_name: str, appearance: str, style: str) -> dict:
+    from backend.api import service
+    from backend.app_meta import resolve_output_dir
+    from backend.drawings import export_pdf
+
+    appearance = str(appearance or "").strip() or "Chrome"
+    if appearance not in {"Chrome", "彩色"}:
+        raise ValueError("打印色彩只能是 Chrome 或 彩色")
+    config = service.load_config()
+    directory = resolve_output_dir(output_dir or config.get("output_dir") or "")
+    name = output_name
+    if name:
+        directory, name = _split_output(name, directory)
+        if not name.lower().endswith(".pdf"):
+            dest = str(Path(directory) / f"{name}.pdf")
+        else:
+            dest = str(Path(directory) / Path(name).name)
+    else:
+        dest = str(Path(directory) / f"{Path(path).stem}.pdf")
+    return export_pdf(path, dest, style=style, appearance=appearance)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -104,8 +139,18 @@ def build_parser() -> argparse.ArgumentParser:
     translate.add_argument("--provider", default="", help="deepl, azure, ollama, or openai (default: saved config)")
     translate.add_argument("--translate-filename", action="store_true", default=False)
     translate.add_argument("--output-dir", default="")
-    translate.add_argument("--glossary", default="", help="optional project terminology JSON")
+    translate.add_argument(
+        "--glossary",
+        default="",
+        help="词库：switch（开关）、transformer（变压器）、all（全部内置，默认）、off（不用内置），或一个术语 JSON 路径",
+    )
     translate.add_argument("--style", default="纯译文", help="纯译文 / 原译对照 / 译原对照")
+    pdf = sub.add_parser("pdf", help="export a PDF; default look is Chrome")
+    pdf.add_argument("inputs", nargs="+", help="DWG / DXF path")
+    pdf.add_argument("-o", "--output", default="", help="output PDF (single input only)")
+    pdf.add_argument("--output-dir", default="")
+    pdf.add_argument("--appearance", default="Chrome", help="Chrome（默认，深色）或 彩色（白纸）")
+    pdf.add_argument("--style", default="纯译文", help="纯译文 / 原译对照 / 译原对照")
     return parser
 
 
@@ -113,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     _configure_stdio()
     parser = build_parser()
     args = parser.parse_args(argv)
-    if args.command != "translate":
+    if args.command not in {"translate", "pdf"}:
         parser.print_help(sys.stderr)
         return 2
     if args.output and len(args.inputs) > 1:
@@ -123,7 +168,8 @@ def main(argv: list[str] | None = None) -> int:
         from backend.cad import configure_odafc
         from backend.languages import split_mode
 
-        split_mode(args.mode)
+        if args.command == "translate":
+            split_mode(args.mode)
         configure_odafc()
     except Exception as exc:
         print(_chinese_error(exc, "翻译失败"), file=sys.stderr)
@@ -133,6 +179,18 @@ def main(argv: list[str] | None = None) -> int:
         path = os.path.abspath(raw)
         output_name = args.output if index == 0 else ""
         try:
+            if args.command == "pdf":
+                result = export_one(
+                    path,
+                    output_dir=args.output_dir,
+                    output_name=output_name,
+                    appearance=args.appearance,
+                    style=args.style,
+                )
+                print(result["path"])
+                print(f"appearance: {result.get('appearance') or 'Chrome'}")
+                print(f"pages: {result['pages']}")
+                continue
             result = translate_one(
                 path,
                 mode=args.mode,

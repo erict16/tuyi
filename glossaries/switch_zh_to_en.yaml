@@ -33,7 +33,7 @@ context_zh_to_en:
   例行试验: routine test
   保护继电器: Protective relay
   储油柜: conservator
-  全波雷电冲击试验: full-wave lightning impulse test (LI)
+  全波雷电冲击试验: LI
   共 页: ( ) pages in total
   内置式: in-tank type
   冷压管: crimp sleeve
@@ -58,7 +58,7 @@ context_zh_to_en:
   切换开关: diverter switch
   切换测试: switching test
   切换电流: switched current
-  切换脉冲试验: switching impulse test (SI)
+  切换脉冲试验: SI
   切换芯子: diverter switch insert
   功率因数: power factor
   动触头: moving contact
@@ -86,7 +86,7 @@ context_zh_to_en:
   均压罩: terminal screen caps
   垂直防护罩: vertical guard
   型式试验: type test
-  型有载分接开关: on-load tap-changer
+  型有载分接开关: OLTC
   壁挂式: wall mounting type
   处数: Places
   复合式: compound
@@ -107,7 +107,7 @@ context_zh_to_en:
   密封性测试: tightness test
   对周围介质的温升: temperature rise above the surrounding liquid
   就地控制开关: Local control switch
-  局部放电: PD partial discharge
+  局部放电: PD
   屏蔽帽: screen cap
   屏蔽罩: shield
   工作位置数: Operation position number
@@ -124,7 +124,7 @@ context_zh_to_en:
   平衡绕组: equalizer winding
   并联: be connected in parallel with
   并联触头: by-pass contact/shunt contact
-  开关重量（kg）: Tap-changer weight (kg)
+  开关重量（kg）: OLTC weight (kg)
   开口锁片: open-type lock washer
   开断容量试验: breaking capacity test
   开断电流: switched current
@@ -134,7 +134,7 @@ context_zh_to_en:
   弯油管: bent oil pipe
   循环电流: circulating current
   快速机构/储能机构: (spring) energy accumulator
-  截波冲击试验: chopped-wave lightning impulse (LIC)
+  截波冲击试验: LIC
   手动操作: manual operation
   手提灯: Portable lamp
   手摇把: Hand crank
@@ -171,7 +171,9 @@ context_zh_to_en:
   日 期: Date
   日期: Date
   更改文件号: Changes file number
-  有载分接开关: on-load tap-changer
+  有载分接开关: OLTC
+  无载分接开关: OCTC
+  无励磁分接开关: OCTC
   有载开关保护: OLTC protective relay
   有载开关顶盖: OLTC head cover
   机座: frame
@@ -205,7 +207,7 @@ context_zh_to_en:
   比例: Scale
   气体继电器: Buchholz relay
   水平防护罩: horizontal guard
-  油中溶解气体分析法: DGA (dissolved and free gases analysis)
+  油中溶解气体分析法: DGA
   油位: oil level
   油位计: Oil level gauge
   油室: oil compartment
@@ -231,7 +233,8 @@ context_zh_to_en:
   爆破盖: rupture disk
   环氧树脂玻璃纤维: epoxy fiberglass
   电位电阻: tie-in resistor
-  电动机构: Motor Drive Unit (MDU)
+  电动机构: MDU
+  分接开关驱动装置: MDU
   电动机构箱: motor drive cubicle
   电压崩溃: voltage collapse
   电容耦合: capacitive coupling
@@ -247,9 +250,9 @@ context_zh_to_en:
   电源电压: power supply voltage
   电磁式计数器: electromagnetic counter
   盘形: disc type
-  真空泡: vacuum interrupter (VI)
+  真空泡: VI
   真空灭弧型分接开关: vacuum interrupter tap changer
-  真空灭弧室: vacuum interrupter chamber
+  真空灭弧室: VI
   瞬时过电压: transient overvoltage
   短路电流测试: short-circuit current test
   矿物油: mineral oil
@@ -283,7 +286,7 @@ context_zh_to_en:
   编织线: braided leads
   联轴器/联轴节: coupling
   航空插座: aviation socket
-  色谱分析: DGA (dissolved gas analysis)
+  色谱分析: DGA
   落地式: pad mounting type
   薄弱环节: shear pin
   螺柱: stud
