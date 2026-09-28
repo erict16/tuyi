@@ -15,6 +15,7 @@ import ezdxf
 
 from backend.app_meta import legacy_output_dir, resolve_output_dir
 from backend.drawings import export_pdf, extract_preview, translate_drawing
+from backend.translator import CADChineseTranslator
 
 REPO = Path(__file__).resolve().parents[1]
 TERMS = {
@@ -90,6 +91,25 @@ class SwitchGlossaryTests(unittest.TestCase):
                 self.assertNotIn(chinese, texts)
                 self.assertTrue(any(english.casefold() in line.casefold() for line in texts), texts)
             self.assertIn(UNKNOWN, texts)
+
+    def test_corrected_sheet_english_and_spaced_title_block(self):
+        translator = CADChineseTranslator(log_callback=lambda *args, **kwargs: None)
+        expect = {
+            "审核": "Reviewed",
+            "校对": "Checked",
+            "审 核": "Reviewed",
+            "校 对": "Checked",
+            "分接开关位置数": "Number of tap positions",
+            "不同电压数": "Number of voltages",
+            "弯油管": "bent oil pipe",
+            "放气塞": "vent plug",
+            "输出端子": "output terminal",
+            "循环电流": "circulating current",
+            "有载分接开关": "on-load tap-changer",
+            "气体继电器": "Buchholz relay",
+        }
+        for source, english in expect.items():
+            self.assertEqual(translator.glossary_hit(source, "zh_to_en"), english)
 
     def test_chrome_is_dark_and_color_keeps_a_non_gray_ink(self):
         with tempfile.TemporaryDirectory() as tmp:
