@@ -41,6 +41,11 @@ const LAYOUTS = [
   ["译原对照", "译文在上、原文在下", "先写译文，原文叠在下面"],
 ];
 
+const APPEARANCES = [
+  ["彩色", "白纸，颜色还在", "白底。青、红、绿、黄保持原色"],
+  ["Chrome", "深色屏幕", "深灰底，像在模型空间里看"],
+];
+
 const ENGINES = [
   ["cloud", "网上翻译"],
   ["local", "不联网"],
@@ -193,6 +198,7 @@ export default function App() {
   const [sourceLang, setSourceLang] = useState("zh-Hans");
   const [targetLang, setTargetLang] = useState("en");
   const [layout, setLayout] = useState("纯译文");
+  const [appearance, setAppearance] = useState("彩色");
   const [filters, setFilters] = useState({ numbers: true, dupes: true, nonsource: true });
   const [params, setParams] = useState({
     attribs: true,
@@ -655,6 +661,7 @@ export default function App() {
           output_dir: config.output_dir,
           output_name: `${stem}.pdf`,
           style: layout,
+          appearance,
           items: fromWriteback ? [] : visibleRows,
         }),
       });
@@ -1465,6 +1472,12 @@ export default function App() {
                 <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportTable("xlsx")}>导出 Excel</button>
                 <button type="button" className="tbtn" disabled={busy} onClick={importTable}>导入表格</button>
                 <button type="button" className="tbtn" disabled={busy} onClick={writeBackAll}>全部写回</button>
+                <h3>PDF 看起来</h3>
+                <div className="choices">
+                  {APPEARANCES.map(([value, label, title]) => (
+                    <Choice key={value} on={appearance === value} title={title} onClick={() => setAppearance(value)}>{label}</Choice>
+                  ))}
+                </div>
                 <h3>PDF</h3>
                 <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(false)}>导出 PDF</button>
                 <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(true)}>打印</button>
@@ -1549,7 +1562,7 @@ export default function App() {
               {settingsTab === "wr" && (
                 <>
                   <h1>图上怎么写</h1>
-                  <p className="help">译完的新文件里，图上留什么字。导出 PDF 也按这个。</p>
+                  <p className="help">译完的新文件里，图上留什么字。打印样子另选，跟这三项无关。</p>
                   <div className="card">
                     <Seg
                       label="图纸上怎么写"
@@ -1557,6 +1570,25 @@ export default function App() {
                       options={LAYOUTS.map(([value, text]) => [value, text])}
                       onChange={setLayout}
                     />
+                    <Seg
+                      label="PDF 看起来"
+                      value={appearance}
+                      options={APPEARANCES.map(([value, text]) => [value, text])}
+                      onChange={setAppearance}
+                    />
+                    <div className="field">导出到
+                      <input value={config.output_dir || ""} readOnly aria-label="输出文件夹" />
+                    </div>
+                    <div className="field-actions">
+                      <button type="button" className="tbtn" onClick={async () => {
+                        const picked = await py()?.pick_output_dir?.();
+                        if (picked?.path) {
+                          await api("/api/config", { method: "POST", body: JSON.stringify({ ...config, output_dir: picked.path }) });
+                          setConfig((prev) => ({ ...prev, output_dir: picked.path }));
+                        }
+                      }}>选取文件夹</button>
+                    </div>
+                    <p className="help">没选的话，文件进下载文件夹。不会再建 Tuyi output。</p>
                     <label className="row" title="输出目录按原来的文件夹一层层放"><input type="checkbox" checked={params.tree} onChange={(event) => setParams((prev) => ({ ...prev, tree: event.target.checked }))} /> 按原来的文件夹放</label>
                     <label className="row" title="没有 ODA 时，写不出 DWG 就改成 DXF"><input type="checkbox" checked={params.odaDxf} onChange={(event) => setParams((prev) => ({ ...prev, odaDxf: event.target.checked }))} /> 打不开 DWG 时改存成 DXF</label>
                     <p className="help" id="oda-setup">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>

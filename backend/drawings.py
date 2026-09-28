@@ -14,7 +14,7 @@ from pathlib import Path
 
 import ezdxf
 
-from backend.app_meta import default_output_dir
+from backend.app_meta import default_output_dir, resolve_output_dir
 from backend.cad import (
     CadConversionSession,
     analyze_source,
@@ -505,7 +505,7 @@ def writeback_rows(
     if not writable:
         raise ValueError("没有勾选且已填译文的条目")
     style = normalize_pdf_style(style)
-    output_dir = output_dir or default_output_dir()
+    output_dir = resolve_output_dir(output_dir or "")
     ensure_output_dir(output_dir)
     meta = analyze_source(path)
     if not output_name.strip():
@@ -723,11 +723,19 @@ def _layout_pages(doc, layout_name: str = ""):
 
 
 PDF_STYLES = {"纯译文", "原译对照", "译原对照"}
+PDF_APPEARANCES = {"Chrome", "彩色"}
+CHROME_BACKGROUND = "#212830"
+COLOR_BACKGROUND = "#ffffff"
 
 
 def normalize_pdf_style(style: str) -> str:
     text = str(style or "").strip() or "纯译文"
     return text if text in PDF_STYLES else "纯译文"
+
+
+def normalize_pdf_appearance(appearance: str) -> str:
+    text = str(appearance or "").strip()
+    return text if text in PDF_APPEARANCES else ""
 
 
 def _pair_labels(source: str, target: str, style: str) -> tuple[str, str] | None:
@@ -845,11 +853,32 @@ def apply_pdf_style(doc, items: list[dict] | None, style: str) -> int:
     return applied
 
 
-def export_pdf(path: str, output_path: str = "", layout_name: str = "", *, style: str = "纯译文", items=None) -> dict:
+def _page_properties(layout, appearance: str):
+    from ezdxf.addons.drawing.properties import LayoutProperties
+
+    props = LayoutProperties.from_layout(layout)
+    appearance = normalize_pdf_appearance(appearance)
+    if appearance == "Chrome":
+        props.set_colors(CHROME_BACKGROUND)
+    elif appearance == "彩色":
+        props.set_colors(COLOR_BACKGROUND)
+    return props
+
+
+def export_pdf(
+    path: str,
+    output_path: str = "",
+    layout_name: str = "",
+    *,
+    style: str = "纯译文",
+    items=None,
+    appearance: str = "",
+) -> dict:
     """DWG → ODA → DXF → PDF via ezdxf drawing (matplotlib). Not AutoCAD plot quality."""
     dest = Path(output_path) if output_path else Path(default_output_dir()) / f"{Path(path).stem}.pdf"
     ensure_output_dir(str(dest.parent))
     style = normalize_pdf_style(style)
+    appearance = normalize_pdf_appearance(appearance)
     register_cjk_font()
     with open_work_dxf(path) as work_dxf:
         doc = _read_dxf(work_dxf)
@@ -857,7 +886,7 @@ def export_pdf(path: str, output_path: str = "", layout_name: str = "", *, style
         if style != "纯译文":
             apply_pdf_style(doc, items or [], style)
         pages = _layout_pages(doc, layout_name)
-        _render_pdf(pages, dest)
+        _render_pdf(pages, dest, appearance)
     if not dest.is_file() or dest.stat().st_size < 8:
         raise RuntimeError("PDF 导出失败")
     return {
@@ -866,10 +895,11 @@ def export_pdf(path: str, output_path: str = "", layout_name: str = "", *, style
         "bytes": dest.stat().st_size,
         "cad_path": str(path),
         "style": style,
+        "appearance": appearance,
     }
 
 
-def _render_pdf(layouts, dest: Path) -> None:
+def _render_pdf(layouts, dest: Path, appearance: str = "") -> None:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -879,7 +909,7 @@ def _render_pdf(layouts, dest: Path) -> None:
     from ezdxf.addons.drawing import Frontend
     from ezdxf.addons.drawing.config import Configuration
     from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
-    from ezdxf.addons.drawing.properties import LayoutProperties, RenderContext
+    from ezdxf.addons.drawing.properties import RenderContext
 
     dpi = 150
     try:
@@ -888,7 +918,7 @@ def _render_pdf(layouts, dest: Path) -> None:
                 fig = plt.figure(dpi=dpi)
                 ax = fig.add_axes((0, 0, 1, 1))
                 ctx = RenderContext(layout.doc)
-                props = LayoutProperties.from_layout(layout)
+                props = _page_properties(layout, appearance)
                 backend = MatplotlibBackend(ax)
                 Frontend(ctx, backend, Configuration()).draw_layout(
                     layout,

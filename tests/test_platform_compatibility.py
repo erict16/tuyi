@@ -501,13 +501,15 @@ class PlatformCompatibilityTests(unittest.TestCase):
             self.assertEqual(NativeBridge().reveal_file(output.name), {"ok": True})
         popen.assert_called_once_with(["open", "-R", os.path.normpath(output.name)])
 
-    def test_macos_default_output_is_in_documents(self):
-        with tempfile.TemporaryDirectory() as home, patch("backend.api.sys.platform", "darwin"), patch("backend.api.Path.home", return_value=Path(home)), patch("backend.app_meta.Path.home", return_value=Path(home)):
-            self.assertEqual(
-                TranslationService.default_output_dir(),
-                str(Path(home) / "Documents" / "Tuyi output"),
-            )
-            self.assertTrue((Path(home) / "Documents" / "Tuyi output").is_dir())
+    def test_default_output_is_downloads_and_does_not_create_tuyi_output(self):
+        with tempfile.TemporaryDirectory() as home, patch("backend.api.Path.home", return_value=Path(home)), patch("backend.app_meta.Path.home", return_value=Path(home)):
+            self.assertEqual(TranslationService.default_output_dir(), str(Path(home) / "Downloads"))
+            legacy = str(Path(home) / "Documents" / "Tuyi output")
+            self.assertEqual(TranslationService.default_output_dir(), str(Path(home) / "Downloads"))
+            from backend.app_meta import resolve_output_dir
+            self.assertEqual(resolve_output_dir(""), str(Path(home) / "Downloads"))
+            self.assertEqual(resolve_output_dir(legacy), str(Path(home) / "Downloads"))
+            self.assertFalse((Path(home) / "Documents" / "Tuyi output").exists())
 
     def test_macos_system_theme_uses_control_accent_colour(self):
         color = SimpleNamespace(
