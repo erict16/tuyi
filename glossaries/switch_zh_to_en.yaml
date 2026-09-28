@@ -1,3 +1,4 @@
+# Switch terms. Corrections in SWITCH_OVERRIDES_ZH_TO_EN win over the 20260130 sheet.
 context_zh_to_en:
   E1- 开关油室放气阀.: 'E1: Bleeding of on-load tap changer'
   E1:开关油箱放气阀: 'E1: Bleeding of on-load tap changer'
@@ -17,7 +18,7 @@ context_zh_to_en:
   W - 扁齿轮盒/减速齿轮盒: 'W: Top gearbox'
   万向节: cardan joint
   不受天气影响的: weatherproof
-  不同电压数: Different voltage number
+  不同电压数: Number of voltages
   中性点引出排: Current take off terminal
   中性点端子: Neutral point terminal
   中性点集电环/引出环: Current take off ring
@@ -32,7 +33,7 @@ context_zh_to_en:
   例行试验: routine test
   保护继电器: Protective relay
   储油柜: conservator
-  全波雷电冲击试验: full wave lightening impulse test (LI)
+  全波雷电冲击试验: full-wave lightning impulse test (LI)
   共 页: ( ) pages in total
   内置式: in-tank type
   冷压管: crimp sleeve
@@ -44,7 +45,7 @@ context_zh_to_en:
   分接位置指示器: Tap position indicator
   分接变化指示: tap-change in progress indication
   分接开关位置: Tap changer position
-  分接开关位置数: Operation position number
+  分接开关位置数: Number of tap positions
   分接开关头部: OLTC head
   分接指示位置: Display position
   分接选择器: tap selector
@@ -52,7 +53,7 @@ context_zh_to_en:
   分接选择器上触头平面层: Upper contacts of tap selector
   分接选择器下层触头: Lower contacts of tap selector
   分接选择器下触头平面层: Lower contacts of tap selector
-  分接选择器底部与A等电位: Tap selector bottom and are equal potential
+  分接选择器底部与A等电位: Tap selector bottom and A are equal potential
   分接选择器触头位置: Tap selector contact position
   切换开关: diverter switch
   切换测试: switching test
@@ -77,35 +78,37 @@ context_zh_to_en:
   吊装带: lift sling
   回油管: oil return pipe
   固有分接位置数: number of inherent tap positions
-  图样标记: Mark pattern
+  图样标记: Revision mark
   圆柱销: cylindrical pin
   圆齿轮盒/扁齿轮盒/减速齿轮盒/传动齿轮盒: Top gearbox
   均压片: corona plate
-  均压环: Grading ring
+  均压环: grading ring
   均压罩: terminal screen caps
   垂直防护罩: vertical guard
   型式试验: type test
+  型有载分接开关: on-load tap-changer
   壁挂式: wall mounting type
-  处数: Place several
+  处数: Places
   复合式: compound
   外挂式: compartment type
   外施耐压试验: applied voltage test
   头盖: head cover
   头部安装法兰: Mounting flange
-  夹片式触头: clamping
+  夹片式触头: clamping contact
   套管: bushing
   安装板: Mounting plate
   定位板: locating plate
   定位销钉: locating pin
-  审定: Approve
-  审核: Audit
+  审 核: Reviewed
+  审定: Approved
+  审核: Reviewed
   客户接线: To be connected by customer
   密封圈: sealing ring
   密封性测试: tightness test
-  对周围介质的温升: the temperature rise above the surrouding liquid
+  对周围介质的温升: temperature rise above the surrounding liquid
   就地控制开关: Local control switch
   局部放电: PD partial discharge
-  屏蔽帽: screen cap/stress cap corona cap
+  屏蔽帽: screen cap
   屏蔽罩: shield
   工作位置数: Operation position number
   工作分接位置数: number of service tap positions
@@ -116,21 +119,22 @@ context_zh_to_en:
   布置图: layout drawing
   带手摇把联锁开关的手摇把开孔: Hand-crank access port with interlock switch
   带槽: with groove
-  带电外限: Live part
+  带电外限: Max. size of live part
   带电部分: live parts
   平衡绕组: equalizer winding
   并联: be connected in parallel with
   并联触头: by-pass contact/shunt contact
+  开关重量（kg）: Tap-changer weight (kg)
   开口锁片: open-type lock washer
   开断容量试验: breaking capacity test
-  开断电流: break and make the load/current
+  开断电流: switched current
   异步电动机: induction/asynchronous motor
   引出触头端子: Current take-off terminal
   弧形板: contact shell
-  弯油管: pipe connection
-  循环电流: circuilating current
-  快速机构/储能机构: (spring)energy accumulator
-  截波冲击试验: chopped wave lightening impulse (LIC)
+  弯油管: bent oil pipe
+  循环电流: circulating current
+  快速机构/储能机构: (spring) energy accumulator
+  截波冲击试验: chopped-wave lightning impulse (LIC)
   手动操作: manual operation
   手提灯: Portable lamp
   手摇把: Hand crank
@@ -140,8 +144,8 @@ context_zh_to_en:
   抽油管: oil suction pipe
   拉弧前: Pre-arc
   拉弧时间: arcing time
-  拨槽件: Genevawheel driving piece
-  指示位置: Display position
+  拨槽件: Geneva wheel driving piece
+  指示位置: Indicated position
   指示区域: Indication area
   指示区域观察窗: Viewing window for indication area
   排气塞: gas discharge plug
@@ -153,16 +157,18 @@ context_zh_to_en:
   操作电压: operating voltage
   支撑法兰: Support flange
   放大图: Magnified figure
+  放气塞: vent plug
   放气阀: bleeder valve
   放油螺钉: oil discharge screw
   数控机床: CNC (computer numerical control)
-  整定位置: Set position
+  整定位置: Nominal position
   整流变压器: rectification transformer
   文件袋: Document pocket
   断路器: circuit breaker
   方齿轮盒/伞齿轮盒: Bevel gearbox
   旁通管: bypass pipe
   旋转角度: Swiveling angle
+  日 期: Date
   日期: Date
   更改文件号: Changes file number
   有载分接开关: on-load tap-changer
@@ -175,14 +181,16 @@ context_zh_to_en:
   机械端位止动装置: mechanical end stop
   机械限位装置: Mechanical limit device
   条形: Linear type
-  板式电位电阻: Board type Tie-in -ressistor
+  板式电位电阻: board-type tie-in resistor
   极性: polarity
   极性选择器: change-over selector
+  极性选择器位置: change-over selector position
   极限位置: Limit position
-  标准化: Standard
-  标记: Mark pattern
+  标准化: Std.
+  标记: Mark
+  校 对: Checked
   校准: Calibrate
-  校对: Proofreading
+  校对: Checked
   档位显示牌: position indicator dial
   档位观察窗: position display window
   检修手册: inspection manual
@@ -193,6 +201,7 @@ context_zh_to_en:
   正负极: positive/negative polarity
   步进控制: step-by-step control
   死点: dead positions
+  比 例: Scale
   比例: Scale
   气体继电器: Buchholz relay
   水平防护罩: horizontal guard
@@ -205,15 +214,16 @@ context_zh_to_en:
   油流继电器: oil flow relay/oil surge relay
   法兰环: flange ring
   注意事项: Caution label
-  注：弯油管加高100mm: 'Note: Q, S, R pipes with extra 100mm'
-  注：所有弯油管和齿轮盒均可360°旋转。: Note：all oil pipe and gearbox can be rotated by 360°.
+  注：弯油管加高100mm: 'Note: bent oil pipe raised by 100 mm'
+  注：弯油管加高100mm，加放气塞。: 'Note: bent oil pipe raised by 100 mm, with vent plug.'
+  注：所有弯油管和齿轮盒均可360°旋转。: 'Note: all bent oil pipes and the gearbox can be rotated by 360°.'
   流体静压力: static pressure
   流出端子: current led-out/take-off terminal
-  浪涌电流: inrush current/ surge current
+  浪涌电流: inrush current/surge current
   消散在电弧中的电荷: The charges dissipated in the arcs
   液位计: liquid level gauges
   溢油排气阀: oil discharge valve
-  滚动式触头: rolling
+  滚动式触头: rolling contact
   漏电感: Leakage inductance
   火花间隙: spark gap
   烧结测试: sintering process
@@ -273,7 +283,7 @@ context_zh_to_en:
   编织线: braided leads
   联轴器/联轴节: coupling
   航空插座: aviation socket
-  色谱分析: DGA disolved gas analysis
+  色谱分析: DGA (dissolved gas analysis)
   落地式: pad mounting type
   薄弱环节: shear pin
   螺柱: stud
@@ -293,8 +303,9 @@ context_zh_to_en:
   警示标志: warning label
   警示标识: Warning label
   计数器: Counter
+  设 计: Design
   设计: Design
-  调压级数: Different voltage number
+  调压级数: Number of regulating steps
   调压绕组: transformer regulating winding
   调整垫块: temporary shim
   起吊环: Lifting ring
@@ -304,9 +315,10 @@ context_zh_to_en:
   转换选择器: Change-over selector
   转换选择器位置: Change-over selector position
   转换选择器端子: Change-over selector terminal
-  软连接: braided contact lead
+  软连接: flexible lead
   载流方向: load direction
   输出端0: take-off terminal
+  输出端子: output terminal
   输出轴: Output shaft
   过渡阻抗: transition impedance
   过渡阻抗测试: transition impedance test
@@ -319,6 +331,7 @@ context_zh_to_en:
   选择开关: selector switch
   选择开关位置: Selector switch position
   选择开关端子: Selector switch terminal
+  选择开关触头位置: selector switch contact position
   逐级控制: Step-by-step control
   通断触头: switching contact
   重量: Weight
@@ -336,12 +349,12 @@ context_zh_to_en:
   阻尼: damper
   限位开关: limit switches
   限流自耦变压器(电抗开关匹配的电抗器）: preventive autotransformer
-  除杂滤芯: imurity filter core
+  除杂滤芯: impurity filter core
   除水滤芯: water filter core
   隔弧板: arcing chute
   隔板: Barrier
   隔离触头: isolated contacts
-  集成板/集成电路: integrated circuit(PCB board)
+  集成板/集成电路: integrated circuit (PCB board)
   集电环: current take-off ring
   静触头: fixed contact
   顶盖: top cover
