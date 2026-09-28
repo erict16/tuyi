@@ -573,16 +573,18 @@ export default function App() {
       setRows(nextRows);
       const bits = [`术语对上 ${asCount(data.glossary)}`, `网上译了 ${asCount(data.mt)}`];
       if (asCount(data.skipped)) bits.push(`未译 ${asCount(data.skipped)}`);
-      if (data.skipped && !data.has_engine) {
+      const ready = nextRows.some((row) => row.selected !== false && asText(row.target).trim());
+      if (!ready) {
         const hint = engine === "local"
           ? "请先启动 Ollama。"
           : engine === "custom"
             ? "无法连接自定义接口。"
             : "剩下的要填网上翻译的密钥，或手填译文。";
         setStatus(`${bits.join("，")}。${hint}`);
-        if (engine !== "local") openSettings();
+        if (engine !== "local" && !data.has_engine) openSettings();
       } else {
-        setStatus(`译完。${bits.join("，")}。正在写出新文件…`);
+        const leftover = asCount(data.skipped) && !data.has_engine ? "没对上的先留中文。" : "";
+        setStatus(`译完。${bits.join("，")}。${leftover}正在写出新文件…`);
         await writeBackRows(nextRows);
       }
     } catch (error) {

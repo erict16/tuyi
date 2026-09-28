@@ -118,6 +118,15 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("dmg-background.png", script)
         self.assertNotIn('-srcfolder", str(OUTPUT_APP)', " ".join(script.split()))
 
+    def test_translate_button_writes_when_glossary_hits_and_some_rows_are_skipped(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        start = source.index("async function runTranslate")
+        body = source[start:source.index("async function writeBack", start)]
+        self.assertNotIn("if (data.skipped && !data.has_engine)", body)
+        self.assertIn("writeBackRows(nextRows)", body)
+        self.assertIn("asText(row.target).trim()", body)
+
     def test_changelog_leads_with_app_version(self):
         import json
 
