@@ -1,5 +1,7 @@
 # Project memory
 
+- 2026-09-30: v0.1.10. PDF export defaults to A4 portrait (`pdfPaper`: a4 / a4l / a3 / a3l), separate from paperspace `params.paper`. Sheet size stays fixed and the drawing keeps its aspect. UI default look is 黑白 (black lines, white paper); 彩色 and Chrome stay. Plot-time decode of ODA `\M+` GBK escapes. Greek delta uses Arial because Noto Sans SC has no U+03B4. Tag `v0.1.10`. v0.1.9 is already the glossary / Chrome-or-color release. Do not bundle ODA.
+
 - 2026-09-18: Product name is 图译 / Tuyi only. Removed leftover home-file migrate constants and tests that still spelled the retired English name. CLI is `python -m tuyi`. User data is `~/.tuyi_*`. Honsen `LEGACY_*` migrate stays. Do not bump version.
 
 - 2026-09-11: CI `test_docs_name_the_tuyi_cli` failed on Windows and macOS because `AGENTS.md` Cursor Cloud notes named a removed CLI module. Docs/changelog/CLI now say Tuyi only. Frozen CLI names are `tuyi` / `tuyi-cli` (no old exe aliases). Honsen `LEGACY_*` in `backend/app_meta.py` migrate once; do not write new files under those names. Do not bump version.

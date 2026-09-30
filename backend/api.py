@@ -243,6 +243,7 @@ class PdfBody(BaseModel):
     layout: str = ""
     style: str = "纯译文"
     appearance: str = ""
+    paper: str = "a4"
     items: list[dict] = []
     print_after: bool = False
 
@@ -892,6 +893,7 @@ def drawings_export_pdf(body: PdfBody):
             style=body.style,
             items=body.items,
             appearance=body.appearance,
+            paper=body.paper,
         )
         if body.print_after:
             result["print"] = print_pdf(result["path"])
@@ -919,6 +921,7 @@ def drawings_print(body: PdfBody):
                 layout=body.layout,
                 style=body.style,
                 appearance=body.appearance,
+                paper=body.paper,
                 items=body.items,
                 print_after=False,
             )

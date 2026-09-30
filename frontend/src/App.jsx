@@ -42,8 +42,16 @@ const LAYOUTS = [
 ];
 
 const APPEARANCES = [
+  ["黑白", "白纸黑线", "打印用。线都是黑的"],
   ["彩色", "白纸，颜色还在", "白底。青、红、绿、黄保持原色"],
   ["Chrome", "深色屏幕", "深灰底，像在模型空间里看"],
+];
+
+const PDF_PAPERS = [
+  ["a4", "A4 竖向"],
+  ["a4l", "A4 横向"],
+  ["a3", "A3 竖向"],
+  ["a3l", "A3 横向"],
 ];
 
 const ENGINES = [
@@ -198,7 +206,8 @@ export default function App() {
   const [sourceLang, setSourceLang] = useState("zh-Hans");
   const [targetLang, setTargetLang] = useState("en");
   const [layout, setLayout] = useState("纯译文");
-  const [appearance, setAppearance] = useState("彩色");
+  const [appearance, setAppearance] = useState("黑白");
+  const [pdfPaper, setPdfPaper] = useState("a4");
   const [filters, setFilters] = useState({ numbers: true, dupes: true, nonsource: true });
   const [params, setParams] = useState({
     attribs: true,
@@ -664,6 +673,7 @@ export default function App() {
           output_name: `${stem}.pdf`,
           style: layout,
           appearance,
+          paper: pdfPaper,
           items: fromWriteback ? [] : visibleRows,
         }),
       });
@@ -1480,6 +1490,12 @@ export default function App() {
                     <Choice key={value} on={appearance === value} title={title} onClick={() => setAppearance(value)}>{label}</Choice>
                   ))}
                 </div>
+                <div className="field">
+                  纸张
+                  <select className="mini" aria-label="PDF 纸张" value={pdfPaper} onChange={(event) => setPdfPaper(event.target.value)}>
+                    {PDF_PAPERS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </div>
                 <h3>PDF</h3>
                 <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(false)}>导出 PDF</button>
                 <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(true)}>打印</button>
@@ -1578,6 +1594,12 @@ export default function App() {
                       options={APPEARANCES.map(([value, text]) => [value, text])}
                       onChange={setAppearance}
                     />
+                    <div className="field">
+                      纸张
+                      <select className="mini" aria-label="PDF 纸张" value={pdfPaper} onChange={(event) => setPdfPaper(event.target.value)}>
+                        {PDF_PAPERS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                      </select>
+                    </div>
                     <div className="field">导出到
                       <input value={config.output_dir || ""} readOnly aria-label="输出文件夹" />
                     </div>

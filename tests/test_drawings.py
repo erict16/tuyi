@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,7 @@ from backend.drawings import (
     _layout_has_entities,
     apply_pdf_style,
     extract_preview,
+    _prepare_plot_text,
     export_pdf,
     print_pdf,
     translate_rows,
@@ -476,6 +478,41 @@ class DrawingsLoopTests(unittest.TestCase):
         self.assertEqual(header, b"%PDF-")
         self.assertGreater(result["bytes"], 200)
         self.assertGreaterEqual(result["pages"], 1)
+
+    def _mediabox(self, path: Path) -> tuple[float, float]:
+        raw = path.read_bytes()
+        match = re.search(rb"/MediaBox\s*\[\s*([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s*\]", raw)
+        self.assertIsNotNone(match)
+        return float(match.group(3)), float(match.group(4))
+
+    def test_export_pdf_default_paper_is_a4(self):
+        dest = self.root / "a4.pdf"
+        result = export_pdf(str(self.dxf), str(dest))
+        self.assertEqual(result["paper"], "a4")
+        width, height = self._mediabox(dest)
+        self.assertAlmostEqual(width, 210 / 25.4 * 72, delta=1.5)
+        self.assertAlmostEqual(height, 297 / 25.4 * 72, delta=1.5)
+
+    def test_export_pdf_landscape_and_unknown_paper(self):
+        wide = export_pdf(str(self.dxf), str(self.root / "a4l.pdf"), paper="a4l")
+        width, height = self._mediabox(Path(wide["path"]))
+        self.assertAlmostEqual(width, 297 / 25.4 * 72, delta=1.5)
+        self.assertAlmostEqual(height, 210 / 25.4 * 72, delta=1.5)
+        fallback = export_pdf(str(self.dxf), str(self.root / "banner.pdf"), paper="banner")
+        self.assertEqual(fallback["paper"], "a4")
+
+    def test_prepare_plot_text_decodes_mplus(self):
+        doc = ezdxf.new()
+        msp = doc.modelspace()
+        msp.add_mtext(r"{\fromans.shx|c134;}\M+5A6C4{\fromans.shx|c134;16}")
+        msp.add_text(r"15\M+5A1E3", dxfattribs={"insert": (0, 0)})
+        _prepare_plot_text(doc)
+        texts = [entity.dxf.text for entity in msp if entity.dxftype() in {"TEXT", "MTEXT"}]
+        self.assertIn("δ16", texts)
+        self.assertIn("15°", texts)
+        greek = next(entity for entity in msp if "δ" in str(entity.dxf.text))
+        if Path("/System/Library/Fonts/Supplemental/Arial.ttf").is_file():
+            self.assertEqual(greek.dxf.style, "TUYI_SYMBOL")
 
     def test_export_pdf_unknown_layout_is_400(self):
         dest = self.root / "nope.pdf"

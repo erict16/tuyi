@@ -28,7 +28,7 @@ from backend.mtext_runs import map_translatable
 from backend.styles import register_cjk_font, rewrite_shx_styles
 from backend.table_csv import apply_table_rows, export_table_csv, parse_table_csv
 from backend.table_xlsx import export_table_xlsx, parse_table_payload
-from backend.translator import CADChineseTranslator, output_prefix
+from backend.translator import CADChineseTranslator, decode_oda_mbcs_escapes, output_prefix
 from backend.storage import atomic_output_path
 
 
@@ -732,9 +732,19 @@ def _layout_pages(doc, layout_name: str = ""):
 
 
 PDF_STYLES = {"纯译文", "原译对照", "译原对照"}
-PDF_APPEARANCES = {"Chrome", "彩色"}
+PDF_APPEARANCES = {"Chrome", "彩色", "黑白"}
 CHROME_BACKGROUND = "#212830"
 COLOR_BACKGROUND = "#ffffff"
+
+# Width x height in millimetres. "l" is landscape.
+PAPER_MM = {
+    "a4": (210.0, 297.0),
+    "a4l": (297.0, 210.0),
+    "a3": (297.0, 420.0),
+    "a3l": (420.0, 297.0),
+}
+_LEGACY_FONT = re.compile(r"\\[fF][^;]*;")
+_LEGACY_COLOR = re.compile(r"\\[Cc]\d+;")
 
 
 def normalize_pdf_style(style: str) -> str:
@@ -745,6 +755,63 @@ def normalize_pdf_style(style: str) -> str:
 def normalize_pdf_appearance(appearance: str) -> str:
     text = str(appearance or "").strip()
     return text if text in PDF_APPEARANCES else ""
+
+
+def normalize_paper(paper: str) -> str:
+    key = str(paper or "").strip().lower()
+    return key if key in PAPER_MM else "a4"
+
+
+def paper_inches(paper: str) -> tuple[float, float]:
+    width_mm, height_mm = PAPER_MM[normalize_paper(paper)]
+    return width_mm / 25.4, height_mm / 25.4
+
+
+def _legacy_plot_text(value: str) -> str:
+    """Turn ODA ``\\M+5xxxx`` into characters matplotlib can draw."""
+    raw = str(value or "")
+    decoded = decode_oda_mbcs_escapes(raw)
+    if decoded == raw:
+        return raw
+    cleaned = _LEGACY_FONT.sub("", decoded)
+    cleaned = _LEGACY_COLOR.sub("", cleaned)
+    return cleaned.replace("{", "").replace("}", "").strip()
+
+
+# Noto Sans SC has no Greek delta. Chinese CAD uses δ on hole notes.
+_SYMBOL_STYLE = "TUYI_SYMBOL"
+_SYMBOL_FONT = "Arial.ttf"
+_ARIAL_TTF = Path("/System/Library/Fonts/Supplemental/Arial.ttf")
+_GREEK_DELTA = ("δ", "Δ")
+
+
+def _symbol_style(doc) -> str:
+    if not _ARIAL_TTF.is_file():
+        return ""
+    if _SYMBOL_STYLE not in doc.styles:
+        doc.styles.add(_SYMBOL_STYLE, font=_SYMBOL_FONT)
+    return _SYMBOL_STYLE
+
+
+def _prepare_plot_text(doc) -> None:
+    greek = []
+    for entity in list(doc.entitydb.values()):
+        if entity.dxftype() not in {"TEXT", "MTEXT", "ATTRIB", "ATTDEF"}:
+            continue
+        raw = str(getattr(entity.dxf, "text", "") or "")
+        text = raw
+        if "\\M+" in raw.upper():
+            text = _legacy_plot_text(raw)
+            entity.dxf.text = text
+        if any(char in text for char in _GREEK_DELTA):
+            greek.append(entity)
+    if not greek:
+        return
+    symbol = _symbol_style(doc)
+    if not symbol:
+        return
+    for entity in greek:
+        entity.dxf.style = symbol
 
 
 def _pair_labels(source: str, target: str, style: str) -> tuple[str, str] | None:
@@ -869,9 +936,21 @@ def _page_properties(layout, appearance: str):
     appearance = normalize_pdf_appearance(appearance)
     if appearance == "Chrome":
         props.set_colors(CHROME_BACKGROUND)
-    elif appearance == "彩色":
+    elif appearance in {"彩色", "黑白"}:
         props.set_colors(COLOR_BACKGROUND)
     return props
+
+
+def _plot_config(appearance: str):
+    from ezdxf.addons.drawing.config import BackgroundPolicy, ColorPolicy, Configuration
+
+    if appearance == "黑白":
+        return Configuration(
+            color_policy=ColorPolicy.BLACK,
+            background_policy=BackgroundPolicy.WHITE,
+            min_lineweight=0.15,
+        )
+    return Configuration()
 
 
 def export_pdf(
@@ -882,20 +961,23 @@ def export_pdf(
     style: str = "纯译文",
     items=None,
     appearance: str = "",
+    paper: str = "a4",
 ) -> dict:
-    """DWG → ODA → DXF → PDF via ezdxf drawing (matplotlib). Not AutoCAD plot quality."""
+    """DWG → ODA → DXF → PDF. Fixed sheet, default A4. Not AutoCAD plot quality."""
     dest = Path(output_path) if output_path else Path(default_output_dir()) / f"{Path(path).stem}.pdf"
     ensure_output_dir(str(dest.parent))
     style = normalize_pdf_style(style)
     appearance = normalize_pdf_appearance(appearance)
+    paper = normalize_paper(paper)
     register_cjk_font()
     with open_work_dxf(path) as work_dxf:
         doc = _read_dxf(work_dxf)
         rewrite_shx_styles(doc)
+        _prepare_plot_text(doc)
         if style != "纯译文":
             apply_pdf_style(doc, items or [], style)
         pages = _layout_pages(doc, layout_name)
-        _render_pdf(pages, dest, appearance)
+        _render_pdf(pages, dest, appearance, paper)
     if not dest.is_file() or dest.stat().st_size < 8:
         raise RuntimeError("PDF 导出失败")
     return {
@@ -905,10 +987,33 @@ def export_pdf(
         "cad_path": str(path),
         "style": style,
         "appearance": appearance,
+        "paper": paper,
     }
 
 
-def _render_pdf(layouts, dest: Path, appearance: str = "") -> None:
+def _fit_sheet(ax, layout, page_w: float, page_h: float, facecolor: str) -> None:
+    """Keep the sheet size fixed. finalize() would stretch the page to the drawing."""
+    from ezdxf import bbox as ezbbox
+
+    try:
+        box = ezbbox.extents(layout, fast=True)
+    except Exception:
+        box = None
+    if box is not None and box.has_data:
+        span_x = float(box.size.x) or 1.0
+        span_y = float(box.size.y) or 1.0
+        pad_x = span_x * 0.02
+        pad_y = span_y * 0.02
+        ax.set_xlim(float(box.extmin.x) - pad_x, float(box.extmax.x) + pad_x)
+        ax.set_ylim(float(box.extmin.y) - pad_y, float(box.extmax.y) + pad_y)
+    ax.set_aspect("equal", adjustable="box")
+    figure = ax.get_figure()
+    figure.set_size_inches(page_w, page_h, forward=True)
+    figure.patch.set_facecolor(facecolor)
+    ax.set_facecolor(facecolor)
+
+
+def _render_pdf(layouts, dest: Path, appearance: str = "", paper: str = "a4") -> None:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -916,25 +1021,29 @@ def _render_pdf(layouts, dest: Path, appearance: str = "") -> None:
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
     from ezdxf.addons.drawing import Frontend
-    from ezdxf.addons.drawing.config import Configuration
     from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
     from ezdxf.addons.drawing.properties import RenderContext
 
     dpi = 150
+    page_w, page_h = paper_inches(paper)
+    facecolor = CHROME_BACKGROUND if appearance == "Chrome" else COLOR_BACKGROUND
+    plot = _plot_config(appearance)
     try:
         with atomic_output_path(str(dest)) as temporary_output, PdfPages(temporary_output) as pdf:
             for layout in layouts:
-                fig = plt.figure(dpi=dpi)
-                ax = fig.add_axes((0, 0, 1, 1))
+                fig = plt.figure(figsize=(page_w, page_h), dpi=dpi, facecolor=facecolor)
+                ax = fig.add_axes((0.04, 0.04, 0.92, 0.92))
+                ax.set_facecolor(facecolor)
                 ctx = RenderContext(layout.doc)
                 props = _page_properties(layout, appearance)
-                backend = MatplotlibBackend(ax)
-                Frontend(ctx, backend, Configuration()).draw_layout(
+                backend = MatplotlibBackend(ax, adjust_figure=False)
+                Frontend(ctx, backend, plot).draw_layout(
                     layout,
                     finalize=True,
                     layout_properties=props,
                 )
-                pdf.savefig(fig, dpi=dpi, facecolor=ax.get_facecolor())
+                _fit_sheet(ax, layout, page_w, page_h, facecolor)
+                pdf.savefig(fig, dpi=dpi, facecolor=facecolor)
                 plt.close(fig)
     except (ValueError, RuntimeError):
         raise

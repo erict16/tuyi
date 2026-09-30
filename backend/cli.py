@@ -100,14 +100,22 @@ def translate_one(
         )
 
 
-def export_one(path: str, *, output_dir: str, output_name: str, appearance: str, style: str) -> dict:
+def export_one(
+    path: str,
+    *,
+    output_dir: str,
+    output_name: str,
+    appearance: str,
+    style: str,
+    paper: str = "a4",
+) -> dict:
     from backend.api import service
     from backend.app_meta import resolve_output_dir
     from backend.drawings import export_pdf
 
     appearance = str(appearance or "").strip() or "Chrome"
-    if appearance not in {"Chrome", "彩色"}:
-        raise ValueError("打印色彩只能是 Chrome 或 彩色")
+    if appearance not in {"Chrome", "彩色", "黑白"}:
+        raise ValueError("打印色彩只能是 Chrome、彩色或 黑白")
     config = service.load_config()
     directory = resolve_output_dir(output_dir or config.get("output_dir") or "")
     name = output_name
@@ -119,7 +127,7 @@ def export_one(path: str, *, output_dir: str, output_name: str, appearance: str,
             dest = str(Path(directory) / Path(name).name)
     else:
         dest = str(Path(directory) / f"{Path(path).stem}.pdf")
-    return export_pdf(path, dest, style=style, appearance=appearance)
+    return export_pdf(path, dest, style=style, appearance=appearance, paper=paper)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -149,7 +157,8 @@ def build_parser() -> argparse.ArgumentParser:
     pdf.add_argument("inputs", nargs="+", help="DWG / DXF path")
     pdf.add_argument("-o", "--output", default="", help="output PDF (single input only)")
     pdf.add_argument("--output-dir", default="")
-    pdf.add_argument("--appearance", default="Chrome", help="Chrome（默认，深色）或 彩色（白纸）")
+    pdf.add_argument("--appearance", default="Chrome", help="Chrome（默认，深色）、彩色（白纸）或 黑白")
+    pdf.add_argument("--paper", default="a4", help="a4、a4l、a3、a3l，默认 A4 竖向")
     pdf.add_argument("--style", default="纯译文", help="纯译文 / 原译对照 / 译原对照")
     return parser
 
@@ -186,9 +195,11 @@ def main(argv: list[str] | None = None) -> int:
                     output_name=output_name,
                     appearance=args.appearance,
                     style=args.style,
+                    paper=args.paper,
                 )
                 print(result["path"])
                 print(f"appearance: {result.get('appearance') or 'Chrome'}")
+                print(f"paper: {result.get('paper') or 'a4'}")
                 print(f"pages: {result['pages']}")
                 continue
             result = translate_one(
