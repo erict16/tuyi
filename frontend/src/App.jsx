@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, Settings, Share } from "lucide-react";
+import { ArrowRight, BookOpen, FileText, Languages, Settings, Share } from "lucide-react";
 import "./App.css";
 
 const LANGS = [
@@ -1270,6 +1270,11 @@ export default function App() {
             onDragLeave={() => setDropOver(false)}
             onDrop={onRailDrop}
           >
+            <div className="brand" translate="no">
+              <img src="./favicon.png" alt="" width="20" height="20" />
+              <span>图译</span>
+              <em>Tuyi</em>
+            </div>
             <button
               type="button"
               className={`drop${dropOver ? " over" : ""}`}
@@ -1338,7 +1343,7 @@ export default function App() {
           {view === "work" && (
             <section className="stage" id="main">
               {files.length > 0 && (
-                <div className="status" aria-live="polite">{status}</div>
+                <div className={`status${/已写出新文件/.test(status) ? " ok" : ""}`} aria-live="polite">{status}</div>
               )}
               {current ? (
                 <>
@@ -1381,7 +1386,7 @@ export default function App() {
                               />
                             </td>
                             <td className="src">{asText(row.source)}</td>
-                            <td>
+                            <td className={asText(row.target).trim() ? "tgt filled" : "tgt"}>
                               <input
                                 type="text"
                                 value={asText(row.target)}
@@ -1401,7 +1406,18 @@ export default function App() {
                 </>
               ) : (
                 <div className="empty">
-                  <p>还没打开图纸，点左边添加</p>
+                  <div className="empty-card">
+                    <span className="empty-ico" aria-hidden="true"><Languages size={26} strokeWidth={1.6} /></span>
+                    <p>还没打开图纸，点左边添加</p>
+                    <span>DWG、DXF 都可以。原图不动，另存一份新文件。</span>
+                    <div className="empty-steps">
+                      <b><FileText size={13} strokeWidth={1.6} aria-hidden="true" />添加图纸</b>
+                      <ArrowRight size={12} strokeWidth={1.6} aria-hidden="true" />
+                      <b>快速翻译</b>
+                      <ArrowRight size={12} strokeWidth={1.6} aria-hidden="true" />
+                      <b>写出新文件</b>
+                    </div>
+                  </div>
                 </div>
               )}
             </section>
@@ -1421,6 +1437,7 @@ export default function App() {
                 )}
               </div>
               <div className="status" aria-live="polite">{status}</div>
+              <div className="batch-body">
               <div className="jobs">
                 {!files.length ? (
                   <div className="empty">
@@ -1501,6 +1518,7 @@ export default function App() {
                 <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(true)}>打印</button>
                 {lastOutput && <p className="note" style={{ paddingLeft: 0 }}>{lastOutput}</p>}
               </aside>
+              </div>
             </section>
           )}
         </div>

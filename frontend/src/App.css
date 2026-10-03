@@ -2,13 +2,13 @@
    Recolor: Converter Pro light/dark. Native titlebar once. */
 :root,
 [data-theme="light"] {
-  --bg: #f4f7fb;
+  --bg: #f3f6fa;
   --elev: #ffffff;
-  --soft: #eef3f9;
-  --border: #d5dee9;
+  --soft: #eef2f8;
+  --border: #dbe3ee;
   --text: #142033;
   --muted: #5b6b82;
-  --accent: #1d7ed8;
+  --accent: #1a73e8;
   --accent-2: #0f9f8a;
   --on-accent: #ffffff;
   --ok: #1a9a5c;
@@ -20,6 +20,7 @@
   --drop: #b7c5d8;
   --row-sel: color-mix(in srgb, var(--accent) 14%, var(--elev));
   --shadow: 0 14px 40px rgba(20, 40, 80, 0.1);
+  --card-shadow: 0 1px 2px rgba(20, 40, 80, 0.05), 0 4px 14px rgba(20, 40, 80, 0.05);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   color-scheme: light;
 }
@@ -43,6 +44,7 @@
   --drop: #6a7f9a;
   --row-sel: color-mix(in srgb, var(--accent) 18%, transparent);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   color-scheme: dark;
 }
@@ -1156,3 +1158,109 @@ td input[type="text"]:focus {
   .spin, .go .spin { animation: none; transform: none; transition: opacity 180ms var(--ease-out); }
   .checking .spin, .go.busy .spin { opacity: 1; }
 }
+
+.brand {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 650;
+}
+.brand img { border-radius: 5px; }
+.brand em { font-style: normal; font-weight: 500; color: var(--muted); }
+
+.rail-go .go {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff), var(--accent));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 4px 12px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.rail-go .go:disabled { box-shadow: none; }
+
+.status {
+  position: relative;
+  padding-left: 18px;
+  box-shadow: var(--card-shadow);
+}
+.status::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.status.ok {
+  border-color: color-mix(in srgb, var(--ok) 40%, var(--border));
+  background: color-mix(in srgb, var(--ok) 7%, var(--elev));
+}
+.status.ok::before { background: var(--ok); }
+
+.win[data-view="work"] .table {
+  margin-top: 10px;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+td.tgt.filled input[type="text"] {
+  color: color-mix(in srgb, var(--accent) 70%, var(--text));
+  font-weight: 600;
+}
+td.tgt.filled { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+
+.empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 360px;
+}
+.empty-ico {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 4px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--elev));
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+}
+.empty .empty-card > span:not(.empty-ico) { margin-top: 0; }
+.empty-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  color: var(--muted);
+}
+.empty-steps b {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--soft) 80%, var(--bg));
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.batch-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.batch-body .jobs { min-width: 0; }
+.job {
+  grid-template-columns: minmax(0, 1fr) 120px minmax(80px, 160px) 72px auto;
+  box-shadow: var(--card-shadow);
+}
+.job > span:first-child { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.insp .tbtn { margin: 0 4px 4px 0; border: 1px solid var(--border); }
