@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, BookOpen, FileText, Languages, Settings, Share } from "lucide-react";
+import { BookOpen, Settings, Share } from "lucide-react";
 import "./App.css";
 
 const LANGS = [
@@ -1270,11 +1270,6 @@ export default function App() {
             onDragLeave={() => setDropOver(false)}
             onDrop={onRailDrop}
           >
-            <div className="brand" translate="no">
-              <img src="./favicon.png" alt="" width="20" height="20" />
-              <span>图译</span>
-              <em>Tuyi</em>
-            </div>
             <button
               type="button"
               className={`drop${dropOver ? " over" : ""}`}
@@ -1284,6 +1279,7 @@ export default function App() {
               <h2>添加图纸</h2>
               <p className="long">DWG、DXF，一次可多张</p>
             </button>
+            {files.length === 0 && <p className="queue-empty">打开的图纸排在这里</p>}
             {files.length > 0 && (
               <div className="queue">
                 {files.map((file) => (
@@ -1298,7 +1294,7 @@ export default function App() {
                   >
                     <span className="name" title={file.name}>{file.name}</span>
                     <span className="meta">{file.ext}</span>
-                    <span className={`st ${file.path === current ? "st-ok" : "st-idle"}`}>{file.path === current ? "当前" : "排队"}</span>
+                    <span className={`st ${file.path === current ? (translating ? "st-run" : "st-ok") : "st-idle"}`}>{file.path === current ? (translating ? "正在译" : "当前") : "排队"}</span>
                     <button
                       type="button"
                       className="del"
@@ -1347,7 +1343,7 @@ export default function App() {
               )}
               {current ? (
                 <>
-                  <div className="table">
+                  <div className={`table${translating ? " busy" : ""}`} aria-busy={translating}>
                     <table>
                       <thead>
                         <tr>
@@ -1386,10 +1382,11 @@ export default function App() {
                               />
                             </td>
                             <td className="src">{asText(row.source)}</td>
-                            <td className={asText(row.target).trim() ? "tgt filled" : "tgt"}>
+                            <td>
                               <input
                                 type="text"
                                 value={asText(row.target)}
+                                placeholder={translating && row.selected !== false ? "正在译…" : ""}
                                 onChange={(event) => {
                                   const value = event.target.value;
                                   setRows((prev) => prev.map((item) => (item.id === row.id ? { ...item, target: value, via: "edit" } : item)));
@@ -1405,19 +1402,23 @@ export default function App() {
                   </div>
                 </>
               ) : (
-                <div className="empty">
-                  <div className="empty-card">
-                    <span className="empty-ico" aria-hidden="true"><Languages size={26} strokeWidth={1.6} /></span>
-                    <p>还没打开图纸，点左边添加</p>
-                    <span>DWG、DXF 都可以。原图不动，另存一份新文件。</span>
-                    <div className="empty-steps">
-                      <b><FileText size={13} strokeWidth={1.6} aria-hidden="true" />添加图纸</b>
-                      <ArrowRight size={12} strokeWidth={1.6} aria-hidden="true" />
-                      <b>快速翻译</b>
-                      <ArrowRight size={12} strokeWidth={1.6} aria-hidden="true" />
-                      <b>写出新文件</b>
-                    </div>
-                  </div>
+                <div
+                  className="empty start"
+                  onDragEnter={(event) => { event.preventDefault(); setDropOver(true); }}
+                  onDragOver={(event) => { event.preventDefault(); setDropOver(true); }}
+                  onDragLeave={() => setDropOver(false)}
+                  onDrop={onRailDrop}
+                >
+                  <button type="button" className={`drop-hero${dropOver ? " over" : ""}`} onClick={openDrawings}>
+                    <span className="plus" aria-hidden="true">+</span>
+                    <strong>把 DWG / DXF 拖到这里</strong>
+                    <span>或点这里选图纸，一次可以多张</span>
+                  </button>
+                  <ol className="empty-steps">
+                    <li><b>1</b>添加图纸</li>
+                    <li><b>2</b>点「快速翻译」</li>
+                    <li><b>3</b>另存新文件，原图不动</li>
+                  </ol>
                 </div>
               )}
             </section>
