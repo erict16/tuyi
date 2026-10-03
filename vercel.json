@@ -1,6 +1,9 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/landing/index.html" }
+    { "source": "/", "destination": "/landing/index.html" },
+    { "source": "/en", "destination": "/landing/en.html" },
+    { "source": "/shots/:path*", "destination": "/landing/shots/:path*" },
+    { "source": "/:file(robots\\.txt|sitemap\\.xml|llms\\.txt)", "destination": "/landing/:file" }
   ]
 }
