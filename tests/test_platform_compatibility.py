@@ -27,8 +27,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         paths = [
             root / "AGENTS.md",
             root / "README.md",
-            root / "landing" / "index.html",
-            root / "landing" / "en.html",
+            root / "README.en.md",
         ]
         for path in paths:
             text = path.read_text(encoding="utf-8")
@@ -251,13 +250,11 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("ODA File Converter", html)
         self.assertIn("跳到下载", html)
         self.assertIn("拖进应用程序", html)
-        self.assertIn('data-tab="glossary"', html)
         self.assertIn("shots/glossary.png", html)
-        self.assertIn("常见问题", html)
-        self.assertNotIn(">FAQ</", html)
-        self.assertIn('id="cli"', html)
-        self.assertIn("命令行 / CLI", html)
-        self.assertIn("python -m tuyi translate", html)
+        self.assertIn('id="hero-dl"', html)
+        for name in ("WorkBuddy", "ChatGPT", "Claude"):
+            self.assertIn(name, html)
+        self.assertIn("README.md#", html)
         self.assertIn("data-mac-hint", html)
         self.assertIn("data-mac-label", html)
         self.assertIn("grid-area: 1 / 1", html)
@@ -266,11 +263,20 @@ class PlatformCompatibilityTests(unittest.TestCase):
         en = (Path(__file__).resolve().parents[1] / "landing" / "en.html").read_text(encoding="utf-8")
         self.assertIn('rel="icon" href="shots/mark.png"', en)
         self.assertIn('rel="apple-touch-icon" href="shots/apple-touch-icon.png"', en)
-        self.assertIn('id="cli"', en)
-        self.assertIn("Command line / CLI", en)
-        self.assertIn("python -m tuyi translate", en)
+        self.assertIn('id="hero-dl"', en)
+        self.assertIn("Run anyway", en)
+        self.assertIn("README.en.md#", en)
         self.assertIn("data-mac-hint", en)
         self.assertIn("grid-area: 1 / 1", en)
+        import re
+
+        for page in (html, en):
+            body = re.sub(r"<script.*?</script>|<style.*?</style>|<head>.*?</head>", "", page, flags=re.S)
+            visible = re.sub(r"<[^>]+>", " ", body)
+            for banned in ("<pre", "<code", "font-mono", "python -m tuyi", "tuyi-cli", "FAQ", "常见问题", "FAQPage"):
+                self.assertNotIn(banned, page, banned)
+            for word in ("CLI", "命令行", "command line", "Command line"):
+                self.assertNotIn(word, visible, word)
         from PIL import Image
 
         for name in ("mark.png", "apple-touch-icon.png"):

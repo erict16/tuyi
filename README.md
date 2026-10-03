@@ -138,6 +138,20 @@ python -m tuyi translate <图纸.dwg 或 .dxf，可以多张> --output-dir <输�
 
 `python -m tuyi` 在源码目录里跑。Windows 安装目录里，`tuyi-cli.exe` 在 `Tuyi.exe` 旁边；Mac 在 `Tuyi.app/Contents/MacOS/tuyi-cli`。DWG 一样要本机装 ODA。`python -m tuyi --help` 看全部参数。
 
+| 参数 | 说明 |
+| --- | --- |
+| `translate --mode` | `zh_to_en`（默认）、`en_to_zh`、`zh_to_fr`，或 `源_to_目标` 如 `zh-Hans_to_ja` |
+| `-o` / `--output` | 只译一张时，写到这个文件 |
+| `--output-dir` | 写到这个文件夹，多张也行 |
+| `translate --glossary` | `all`（默认）、`switch` 开关、`transformer` 变压器、`off`，或你自己的术语 JSON |
+| `translate --provider` | `deepl` / `azure` / `ollama` / `openai`，密钥用桌面版设置里存的 |
+| `translate --style` | `纯译文` / `原译对照` / `译原对照` |
+| `translate --translate-filename` | 文件名里的中文也译 |
+| `pdf --appearance` | `Chrome`（默认，深色）、`彩色`（白纸）、`黑白` |
+| `pdf --paper` | `a4`（默认竖向）、`a4l`、`a3`、`a3l` |
+
+ODA File Converter 要在 `PATH` 里，或设 `CAD_ODA_EXEC`。
+
 ## 协议
 
 MIT。请自由地使用和参与开源。好用的话点一下右上角 Star。
