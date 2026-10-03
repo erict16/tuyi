@@ -52,7 +52,7 @@
         "operatingSystem": "Windows 10, Windows 11, macOS",
         "license": "https://github.com/erict16/tuyi/blob/main/LICENSE",
         "downloadUrl": "https://github.com/erict16/tuyi/releases/latest",
-        "softwareVersion": "0.1.10",
+        "softwareVersion": "0.1.11",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@type": "Person", "name": "Eric Tan", "url": "https://github.com/erict16" }
       },
@@ -121,12 +121,12 @@
   </script>
   <script>
     const FALLBACK = {
-      win: "https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_Setup.exe",
-      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_macOS_x86_64.dmg",
+      win: "https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe",
+      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg",
+      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg",
     };
     window.DL = { ...FALLBACK };
-    window.DL_META = { version: "v0.1.10", winSize: "约 64 MB" };
+    window.DL_META = { version: "v0.1.11", winSize: "约 64 MB" };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -474,7 +474,7 @@ python -m tuyi translate &lt;图纸.dwg 或 .dxf，可以多张&gt; --output-dir
     <section id="download" class="scroll-mt-20 bg-mist py-24">
       <div class="mx-auto max-w-5xl px-4">
         <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">下载图译</h2>
-        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.10 · 不收费 · 安装包未签名</p>
+        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.11 · 不收费 · 安装包未签名</p>
         <p id="dl-os" class="mt-1 hidden text-center text-sm font-medium text-accent"></p>
 
         <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2">
@@ -483,7 +483,7 @@ python -m tuyi translate &lt;图纸.dwg 或 .dxf，可以多张&gt; --output-dir
             <p class="mt-2 text-sm text-slate-600">Windows 10 或 11，<strong class="font-semibold text-ink">64 位</strong>。不要 32 位，不要 7 / 8。</p>
             <p class="mt-1 text-sm text-slate-500">Setup.exe · <span id="win-size">约 64 MB</span> · Win10 要有 WebView2（一般已装）· 自带 <code class="font-mono">tuyi-cli.exe</code></p>
             <div class="dl-foot">
-              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_Setup.exe" rel="noopener">下载 Windows</a>
+              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe" rel="noopener">下载 Windows</a>
               <p class="dl-note mt-3 text-xs leading-5 text-slate-500">第一次会拦：更多信息 → 仍要运行。</p>
             </div>
           </article>
@@ -500,7 +500,7 @@ python -m tuyi translate &lt;图纸.dwg 或 .dxf，可以多张&gt; --output-dir
               <span data-mac-hint="intel" aria-hidden="true">Intel 芯片。苹果菜单 → 关于本机。这份和 Apple 芯片不是同一个文件。</span>
             </p>
             <div class="dl-foot">
-              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_macOS_arm64.dmg" rel="noopener" aria-label="下载 macOS（Apple 芯片）">
+              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg" rel="noopener" aria-label="下载 macOS（Apple 芯片）">
                 <span data-mac-label="arm" data-active>下载 macOS（Apple 芯片）</span>
                 <span data-mac-label="intel" aria-hidden="true">下载 macOS（Intel）</span>
                 <span data-mac-label="arm-missing" aria-hidden="true">Apple 芯片安装包还没放上来</span>
