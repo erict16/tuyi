@@ -130,6 +130,20 @@ It never overwrites the original. If unsure about options, run python -m tuyi tr
 
 Run `python -m tuyi` from the source folder. On Windows, `tuyi-cli.exe` sits next to `Tuyi.exe`; on Mac it is `Tuyi.app/Contents/MacOS/tuyi-cli`. DWG still needs ODA on the machine. See `python -m tuyi --help`.
 
+| Option | Meaning |
+| --- | --- |
+| `translate --mode` | `zh_to_en` (default), `en_to_zh`, `zh_to_fr`, or `source_to_target` such as `zh-Hans_to_ja` |
+| `-o` / `--output` | Single drawing only: write to this file |
+| `--output-dir` | Write into this folder; works for several drawings |
+| `translate --glossary` | `all` (default), `switch`, `transformer`, `off`, or your own term JSON |
+| `translate --provider` | `deepl` / `azure` / `ollama` / `openai`; keys come from the desktop settings |
+| `translate --style` | `纯译文` / `原译对照` / `译原对照` |
+| `translate --translate-filename` | Also translate Chinese in the file name |
+| `pdf --appearance` | `Chrome` (default, dark), `彩色` (white paper), `黑白` |
+| `pdf --paper` | `a4` (default, portrait), `a4l`, `a3`, `a3l` |
+
+ODA File Converter must be on `PATH`, or set `CAD_ODA_EXEC`.
+
 ## License
 
 MIT. If it helps, star the repo.
