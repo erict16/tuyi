@@ -1,8 +1,16 @@
 # 图译 Tuyi
 
-> Open-source DWG / DXF translator. Translate text inside CAD drawings. No AutoCAD. Windows and Mac. MIT.
+> Let your AI assistant translate DWG / DXF drawings. Tuyi's CLI runs hands-free (no dialogs, no prompts), so Claude Code, Cursor, Codex, Grok or a script can translate CAD drawings end to end. No AutoCAD. Windows and Mac desktop app included.
 
 图译 opens a DWG or DXF, translates titles, notes, attributes, dimensions, and table text, then writes a new file. The original drawing is not modified.
+
+## CLI for AI assistants and scripts
+
+- Translate: `python -m tuyi translate drawing.dxf [more.dxf ...] --output-dir out --mode zh_to_en` (run from the Tuyi source folder).
+- PDF: `python -m tuyi pdf out/*.dxf --output-dir out [--paper a4|a4l|a3|a3l] [--appearance Chrome|彩色|黑白]`.
+- Output per drawing: new file path, `extracted: N`, `translated: N`. Errors go to stderr with exit code 1; usage errors exit 2.
+- Other options: `-o`, `--provider deepl|azure|ollama|openai`, `--glossary all|switch|transformer|off|path.json`, `--style`, `--translate-filename`.
+- Frozen packs ship `tuyi-cli.exe` beside `Tuyi.exe` (Windows) and `Tuyi.app/Contents/MacOS/tuyi-cli` (Mac).
 
 ## Links
 
@@ -10,11 +18,10 @@
 - Home (English): https://erict16.github.io/tuyi/en.html
 - Source: https://github.com/erict16/tuyi
 - Releases: https://github.com/erict16/tuyi/releases/latest
-- License: https://github.com/erict16/tuyi/blob/main/LICENSE
+- License (MIT): https://github.com/erict16/tuyi/blob/main/LICENSE
 
 ## Notes
 
 - DXF works after install. DWG needs ODA File Converter on the same machine; Tuyi does not bundle it.
-- Translation keys are yours (DeepL, Azure, Ollama, or an OpenAI-compatible endpoint). Tuyi does not create accounts.
+- Translation keys are yours (DeepL, Azure, Ollama, or an OpenAI-compatible endpoint), saved in the app's Settings. Built-in glossaries (zh ⇄ en, zh ⇄ fr) hit offline. Tuyi does not create accounts.
 - Default direction is Chinese to English.
-- CLI: `python -m tuyi translate INPUT`. Frozen packs ship `tuyi-cli` beside `Tuyi`.

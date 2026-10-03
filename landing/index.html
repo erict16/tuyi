@@ -4,18 +4,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#e8e8ed" />
+  <meta name="theme-color" content="#f5f7fb" />
   <meta name="color-scheme" content="light" />
-  <title>图译 Tuyi：开源 DWG / DXF 图纸翻译</title>
-  <meta name="description" content="打开 DWG / DXF，翻译图纸上的标题、注释、标注和表格。写出新文件，原图不动。不用 AutoCAD。Windows 和 Mac，MIT 开源。" />
+  <title>图译 Tuyi：让 AI 助手翻译 DWG / DXF 图纸</title>
+  <meta name="description" content="一条命令打开 DWG / DXF，翻译标题、注释、属性、标注和表格，写出新文件。全程不用人点，Claude Code、Cursor、Codex、Grok 或脚本都能跑。也有 Windows 和 Mac 桌面版。不用 AutoCAD。" />
   <meta name="author" content="Eric Tan" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://erict16.github.io/tuyi/" />
   <link rel="alternate" hreflang="zh-Hans" href="https://erict16.github.io/tuyi/" />
   <link rel="alternate" hreflang="en" href="https://erict16.github.io/tuyi/en.html" />
   <link rel="alternate" hreflang="x-default" href="https://erict16.github.io/tuyi/en.html" />
-  <meta property="og:title" content="图译 Tuyi：开源 DWG / DXF 图纸翻译" />
-  <meta property="og:description" content="打开图纸，译文字，写出新文件。原图不动。不用 AutoCAD。Windows 和 Mac。" />
+  <meta property="og:title" content="图译 Tuyi：让 AI 助手翻译 DWG / DXF 图纸" />
+  <meta property="og:description" content="一条命令译完一张图，写出新文件。不用人点，AI 助手和脚本都能跑。原图不动。不用 AutoCAD。" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://erict16.github.io/tuyi/" />
   <meta property="og:site_name" content="图译 Tuyi" />
@@ -24,15 +24,18 @@
   <meta property="og:image" content="https://erict16.github.io/tuyi/shots/og.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="图译 Tuyi：开源 DWG / DXF 图纸翻译" />
+  <meta property="og:image:alt" content="图译 Tuyi：让 AI 助手翻译 DWG / DXF 图纸" />
+  <meta property="og:video" content="https://erict16.github.io/tuyi/shots/hero.mp4" />
+  <meta property="og:video:type" content="video/mp4" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="图译 Tuyi：开源 DWG / DXF 图纸翻译" />
-  <meta name="twitter:description" content="打开 DWG / DXF，翻译图纸上的字，写出新文件。不用 AutoCAD。" />
+  <meta name="twitter:title" content="图译 Tuyi：让 AI 助手翻译 DWG / DXF 图纸" />
+  <meta name="twitter:description" content="一条命令译完一张图，写出新文件。不用人点。不用 AutoCAD。" />
   <meta name="twitter:image" content="https://erict16.github.io/tuyi/shots/og.png" />
   <link rel="icon" href="shots/mark.png" type="image/png" />
   <link rel="apple-touch-icon" href="shots/apple-touch-icon.png" />
   <link rel="preconnect" href="https://cdn.tailwindcss.com" />
   <link rel="preconnect" href="https://api.github.com" />
+  <link rel="preload" as="image" href="shots/hero-poster.jpg" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -44,14 +47,23 @@
         "url": "https://erict16.github.io/tuyi/",
         "image": "https://erict16.github.io/tuyi/shots/og.png",
         "screenshot": "https://erict16.github.io/tuyi/shots/home.png",
-        "description": "打开 DWG / DXF，翻译图纸上的标题、注释、标注和表格。写出新文件，原图不动。不用 AutoCAD。",
+        "description": "DWG / DXF 图纸翻译。命令行全程不用人点，AI 助手和脚本都能跑；也有桌面版。翻译标题、注释、属性、标注和表格，写出新文件，原图不动。不用 AutoCAD。",
         "applicationCategory": "DesignApplication",
         "operatingSystem": "Windows 10, Windows 11, macOS",
         "license": "https://github.com/erict16/tuyi/blob/main/LICENSE",
         "downloadUrl": "https://github.com/erict16/tuyi/releases/latest",
-        "softwareVersion": "0.1.9",
+        "softwareVersion": "0.1.10",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@type": "Person", "name": "Eric Tan", "url": "https://github.com/erict16" }
+      },
+      {
+        "@type": "VideoObject",
+        "name": "图译：打开 floor_plan.dxf，快速翻译，写出新文件",
+        "description": "桌面版真实录屏：添加一张 DXF，词汇库命中 6 句，写出英文版新文件。",
+        "thumbnailUrl": "https://erict16.github.io/tuyi/shots/hero-poster.jpg",
+        "contentUrl": "https://erict16.github.io/tuyi/shots/hero.mp4",
+        "uploadDate": "2026-10-03",
+        "duration": "PT9S"
       },
       {
         "@type": "WebSite",
@@ -62,6 +74,16 @@
       {
         "@type": "FAQPage",
         "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "AI 助手怎么用图译？",
+            "acceptedAnswer": { "@type": "Answer", "text": "让它在终端里跑 python -m tuyi translate 图纸.dxf。没有对话框，不等人点。成功打印新文件路径和句数，失败写到 stderr、退出码不是 0。Claude Code、Cursor、Codex、Grok 这类能跑命令的助手都行。" }
+          },
+          {
+            "@type": "Question",
+            "name": "命令行要密钥吗？",
+            "acceptedAnswer": { "@type": "Answer", "text": "中 ⇄ 英、中 ⇄ 法先走内置词库，命中的不联网。没命中的句子用你在桌面版设置里存的 DeepL / Azure / Ollama / 自定义接口，也可以加 --provider 指定。" }
+          },
           {
             "@type": "Question",
             "name": "Windows 哪个版本能用？",
@@ -90,7 +112,7 @@
           {
             "@type": "Question",
             "name": "收费吗？有授权码吗？",
-            "acceptedAnswer": { "@type": "Answer", "text": "没有。MIT 开源。翻译用的密钥是你自己的 DeepL / Azure / Ollama / 自定义接口。图译不建账号，默认也不往外打电话，除非你点检查更新。" }
+            "acceptedAnswer": { "@type": "Answer", "text": "不收费，没有授权码。翻译用的密钥是你自己的 DeepL / Azure / Ollama / 自定义接口。图译不建账号，默认也不往外打电话，除非你点检查更新。" }
           }
         ]
       }
@@ -99,12 +121,12 @@
   </script>
   <script>
     const FALLBACK = {
-      win: "https://github.com/erict16/tuyi/releases/download/v0.1.9/Tuyi_v0.1.9_Setup.exe",
-      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.9/Tuyi_v0.1.9_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.9/Tuyi_v0.1.9_macOS_x86_64.dmg",
+      win: "https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_Setup.exe",
+      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_macOS_arm64.dmg",
+      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_macOS_x86_64.dmg",
     };
     window.DL = { ...FALLBACK };
-    window.DL_META = { version: "v0.1.9", winSize: "约 64 MB" };
+    window.DL_META = { version: "v0.1.10", winSize: "约 64 MB" };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -114,11 +136,12 @@
           colors: {
             accent: "#007aff",
             ink: "#1d1d1f",
-            mist: "#e8e8ed",
+            mist: "#eef1f6",
             navy: "#0b1120",
           },
           fontFamily: {
-            sans: ["-apple-system", "SF Pro Text", "SF Pro Display", "Helvetica Neue", "system-ui", "sans-serif"],
+            sans: ["-apple-system", "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "system-ui", "sans-serif"],
+            mono: ["SF Mono", "ui-monospace", "Menlo", "Consolas", "monospace"],
           },
         },
       },
@@ -127,6 +150,25 @@
   <style>
     html { color-scheme: light; scroll-behavior: smooth; }
     .text-pretty { text-wrap: pretty; }
+    .text-balance { text-wrap: balance; }
+    .hero-grid {
+      background-color: #f5f7fb;
+      background-image:
+        radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0, 122, 255, 0.12), transparent 70%),
+        linear-gradient(rgba(11, 17, 32, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11, 17, 32, 0.045) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+    .term { background: #0b1120; color: #e2e8f0; }
+    .term .p { color: #64748b; user-select: none; }
+    .term .c { color: #7dd3fc; }
+    .term .o { color: #94a3b8; }
+    .term .ok { color: #6ee7b7; }
+    .term .dim { color: #64748b; }
+    .win-frame { background: #fff; }
+    .win-bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25); }
+    .copy-btn[data-copied="true"] .copy-a { display: none; }
+    .copy-btn:not([data-copied="true"]) .copy-b { display: none; }
     .chip[aria-checked="true"] { background: #1d1d1f; color: #fff; }
     .dl-card { display: flex; flex-direction: column; height: 100%; }
     .dl-foot { margin-top: auto; padding-top: 1.5rem; }
@@ -138,32 +180,33 @@
     #btn-mac > [data-mac-label] { grid-area: 1 / 1; }
     #btn-mac > [data-mac-label]:not([data-active]) { visibility: hidden; }
     .dl-card[data-current="true"] { box-shadow: 0 0 0 2px #007aff; }
-    .dl-link {
-      transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), filter 160ms ease;
+    .dl-link, .lift {
+      transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), filter 160ms ease, box-shadow 160ms ease;
     }
-    .dl-link:active { transform: scale(0.97); }
+    .dl-link:active, .lift:active { transform: scale(0.97); }
     @media (hover: hover) and (pointer: fine) {
-      .dl-link:hover { filter: brightness(1.04); }
+      .dl-link:hover, .lift:hover { filter: brightness(1.04); }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .dl-link { transition: none; }
-      .dl-link:active { transform: none; }
+      .dl-link, .lift { transition: none; }
+      .dl-link:active, .lift:active { transform: none; }
     }
   </style>
 </head>
 <body class="bg-white text-ink antialiased">
   <a class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-ink focus:shadow" href="#download">跳到下载</a>
 
-  <header class="sticky top-0 z-20 border-b border-black/5 bg-white/80 backdrop-blur">
+  <header class="sticky top-0 z-30 border-b border-black/5 bg-white/80 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
       <a href="./" class="flex items-center gap-2 font-semibold" translate="no">
         <img src="shots/mark.png" alt="" width="28" height="28" class="rounded-md" />
         图译 Tuyi
       </a>
-      <nav class="hidden items-center gap-8 text-sm text-slate-600 sm:flex" aria-label="页面">
-        <a href="#how" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">怎么用</a>
-        <a href="#features" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">功能</a>
+      <nav class="hidden items-center gap-7 text-sm text-slate-600 md:flex" aria-label="页面">
+        <a href="#agents" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">AI 助手</a>
+        <a href="#cli" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">命令行</a>
+        <a href="#how" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">桌面版</a>
         <a href="#download" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">下载</a>
         <a href="#faq" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">常见问题</a>
       </nav>
@@ -175,41 +218,217 @@
   </header>
 
   <main>
-    <section class="bg-mist">
-      <div class="mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:pb-20 sm:pt-20">
-        <p class="text-sm font-medium text-slate-500">桌面软件 · 不用 AutoCAD</p>
-        <h1 class="mt-2 text-pretty text-4xl font-semibold tracking-tight sm:text-5xl">图译 Tuyi</h1>
-        <p class="mt-3 text-xl font-medium text-ink sm:text-2xl">强大且开源的 DWG/DXF 翻译工具</p>
-        <p class="mx-auto mt-4 max-w-xl text-lg text-slate-600">打开 DWG 或 DXF，图译列出文字。你改译文，它在旁边另存一份。原图不动。</p>
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a href="#download" class="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">下载图译</a>
-          <a href="#how" class="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink ring-1 ring-black/10 hover:bg-mist focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">先看怎么用</a>
+    <section class="hero-grid overflow-hidden">
+      <div class="mx-auto max-w-6xl px-4 pb-20 pt-14 text-center sm:pt-20">
+        <p class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-black/5">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+          命令行 · 全程不用人点 · 不用 AutoCAD
+        </p>
+        <h1 class="mt-5 text-pretty text-lg font-semibold tracking-tight text-slate-500 sm:text-xl">图译 Tuyi</h1>
+        <p class="mx-auto mt-2 max-w-3xl text-balance text-4xl font-semibold tracking-tight text-ink sm:text-6xl">让 AI 助手替你翻译图纸</p>
+        <p class="mx-auto mt-5 max-w-2xl text-pretty text-lg text-slate-600">一条命令打开 DWG / DXF，译标题、注释、属性、标注和表格，写出新文件。没有对话框，不等人点。Claude Code、Cursor、Codex、Grok 或你自己的脚本，都能从头跑到尾。</p>
+
+        <div class="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl bg-navy p-2 pl-4 text-left shadow-lg ring-1 ring-black/10">
+          <code class="term min-w-0 flex-1 overflow-x-auto whitespace-nowrap bg-transparent font-mono text-[12px] leading-8 sm:text-sm"><span class="p">$ </span><span class="c">python -m tuyi translate</span> drawing.dwg</code>
+          <button type="button" class="copy-btn lift shrink-0 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-copy="python -m tuyi translate drawing.dwg">
+            <span class="copy-a">复制</span><span class="copy-b">已复制</span>
+          </button>
         </div>
-        <p class="mt-4 text-sm text-slate-500">Windows 10 / 11（64 位）· Mac Apple 芯片 · 中译英默认</p>
-        <div class="mx-auto mt-12 max-w-5xl">
-          <img src="shots/home.png" alt="图译：左边添加图纸，底下点翻译" width="1280" height="800" fetchpriority="high" class="rounded-2xl shadow-xl ring-1 ring-black/10" />
+
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <a href="#agents" class="lift rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">看 AI 怎么用</a>
+          <a href="#download" class="lift rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink ring-1 ring-black/10 hover:bg-mist focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">下载桌面版</a>
+        </div>
+        <p class="mt-4 text-sm text-slate-500">命令行和桌面版同一条写回 · Windows 10 / 11（64 位）· Mac · 中译英默认</p>
+
+        <div class="relative mx-auto mt-14 max-w-5xl">
+          <figure class="win-frame overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/10">
+            <div class="win-bar flex h-9 items-center gap-2 border-b border-black/5 bg-[#f6f7f9] px-4" aria-hidden="true">
+              <i class="bg-[#ff5f57]"></i><i class="bg-[#febc2e]"></i><i class="bg-[#28c840]"></i>
+              <span class="flex-1 text-center text-xs font-medium text-slate-500">图译</span>
+              <span class="w-12"></span>
+            </div>
+            <video id="hero-video" class="block aspect-[16/10] w-full bg-[#f3f6fa]" width="1280" height="800" autoplay muted loop playsinline preload="auto" poster="shots/hero-poster.jpg" aria-label="真实录屏：在图译里添加 floor_plan.dxf，点快速翻译，写出英文版新文件">
+              <source src="shots/hero.webm" type="video/webm" />
+              <source src="shots/hero.mp4" type="video/mp4" />
+              <img src="shots/hero-poster.jpg" alt="图译译完 floor_plan.dxf：6 句写成英文，另存新文件" width="1280" height="800" />
+            </video>
+          </figure>
+          <figcaption class="mt-4 text-sm text-slate-500">真实录屏：桌面版打开 <code class="font-mono text-ink">floor_plan.dxf</code>，词汇库命中 6 句，写出英文版新文件。</figcaption>
+
+          <div class="term absolute -bottom-10 -left-6 hidden w-[25rem] rounded-2xl p-4 text-left font-mono text-[12.5px] leading-6 shadow-2xl ring-1 ring-white/10 lg:block" aria-hidden="true">
+            <div class="mb-2 flex gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span></div>
+            <div><span class="p">$ </span><span class="c">python -m tuyi translate</span> floor_plan.dxf</div>
+            <div class="o">…/en_floor_plan_11h37_03-10-26.dxf</div>
+            <div class="o">extracted: 6</div>
+            <div class="ok">translated: 6</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="how" class="scroll-mt-20 bg-white py-20">
+    <section id="agents" class="scroll-mt-20 bg-white py-24">
+      <div class="mx-auto max-w-6xl px-4">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="text-sm font-semibold text-accent">交给 AI 助手</p>
+          <h2 class="mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">说一句话，一整个文件夹的图纸就译好了</h2>
+          <p class="mt-4 text-pretty text-lg text-slate-600">图译的命令行没有窗口、没有提问。AI 助手照着你的话跑命令，读输出，再告诉你结果。人不用守在电脑前。</p>
+          <ul class="mt-6 flex flex-wrap justify-center gap-2 text-sm font-semibold text-slate-700" aria-label="能用的 AI 助手">
+            <li class="rounded-full bg-mist px-3 py-1">Claude Code</li>
+            <li class="rounded-full bg-mist px-3 py-1">Cursor</li>
+            <li class="rounded-full bg-mist px-3 py-1">Codex</li>
+            <li class="rounded-full bg-mist px-3 py-1">Grok</li>
+            <li class="rounded-full bg-mist px-3 py-1 font-medium text-slate-500">任何能跑终端命令的助手</li>
+          </ul>
+        </div>
+
+        <div class="mt-14 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:items-start">
+          <figure class="overflow-hidden rounded-3xl bg-navy shadow-xl ring-1 ring-black/10">
+            <div class="flex items-center gap-2 border-b border-white/10 px-5 py-3 text-xs font-medium text-slate-400">
+              <span class="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true"></span>
+              AI 助手 · 终端
+            </div>
+            <div class="space-y-4 p-5 text-sm leading-6">
+              <div class="flex justify-end">
+                <p class="max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-white">把 drawings 文件夹里的图纸都译成英文，再各导出一份 PDF。</p>
+              </div>
+              <p class="text-slate-300">好的，用图译的命令行。先翻译，再出 PDF。</p>
+              <pre class="term whitespace-pre-wrap [overflow-wrap:anywhere] rounded-xl px-4 py-3 font-mono text-[12.5px] leading-6 ring-1 ring-white/10"><code><span class="p">$ </span><span class="c">python -m tuyi translate</span> drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
+<span class="o">/home/tuyi/project/out/en_floor_plan_11h37_03-10-26.dxf</span>
+<span class="o">extracted: 6</span>
+<span class="ok">translated: 6</span>
+<span class="o">/home/tuyi/project/out/en_dims_tables_11h37_03-10-26.dxf</span>
+<span class="o">extracted: 4</span>
+<span class="ok">translated: 4</span>
+
+<span class="p">$ </span><span class="c">python -m tuyi pdf</span> out/*.dxf --output-dir out --appearance 黑白
+<span class="o">out/en_dims_tables_11h37_03-10-26.pdf</span>
+<span class="o">appearance: 黑白</span>
+<span class="o">paper: a4</span>
+<span class="ok">pages: 1</span>
+<span class="o">out/en_floor_plan_11h37_03-10-26.pdf</span>
+<span class="o">appearance: 黑白</span>
+<span class="o">paper: a4</span>
+<span class="ok">pages: 2</span></code></pre>
+              <p class="text-slate-300">两张图都译完了：floor_plan 6 句、dims_tables 4 句，都是词汇库命中，没联网。新的 DXF 和 PDF 在 <code class="font-mono text-sky-300">out/</code>，原图没动。</p>
+            </div>
+            <figcaption class="border-t border-white/10 px-5 py-3 text-xs text-slate-500">命令和输出都是真跑的，用的是仓库里的两张测试图纸。</figcaption>
+          </figure>
+
+          <div>
+            <h3 class="text-xl font-semibold tracking-tight">为什么 AI 用得顺</h3>
+            <dl class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div class="rounded-2xl bg-mist p-5">
+                <dt class="font-semibold">不弹窗，不提问</dt>
+                <dd class="mt-1.5 text-sm text-slate-600">没有对话框，也不等确认。跑完自己退出。</dd>
+              </div>
+              <div class="rounded-2xl bg-mist p-5">
+                <dt class="font-semibold">输出一看就懂</dt>
+                <dd class="mt-1.5 text-sm text-slate-600">每张图三行：新文件路径、<code class="font-mono">extracted</code> 句数、<code class="font-mono">translated</code> 句数。</dd>
+              </div>
+              <div class="rounded-2xl bg-mist p-5">
+                <dt class="font-semibold">出错说得清</dt>
+                <dd class="mt-1.5 text-sm text-slate-600">错误写到 stderr，退出码 1；参数不对退出码 2。助手知道哪里没成。</dd>
+              </div>
+              <div class="rounded-2xl bg-mist p-5">
+                <dt class="font-semibold">原图不动</dt>
+                <dd class="mt-1.5 text-sm text-slate-600">总是另存新文件，不会覆盖原图。放心让它批量跑。</dd>
+              </div>
+              <div class="rounded-2xl bg-mist p-5">
+                <dt class="font-semibold">词库先命中</dt>
+                <dd class="mt-1.5 text-sm text-slate-600">中 ⇄ 英、中 ⇄ 法有内置词库，命中的不联网。其余走你在设置里存的 DeepL / Azure / Ollama / 自定义接口。</dd>
+              </div>
+              <div class="rounded-2xl bg-mist p-5">
+                <dt class="font-semibold">一次多张</dt>
+                <dd class="mt-1.5 text-sm text-slate-600">图纸路径一起传，加 <code class="font-mono">--output-dir</code>。PDF 也一样。</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="mx-auto mt-16 max-w-4xl rounded-3xl bg-mist p-6 ring-1 ring-black/5 sm:p-8">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-semibold">把这段贴给你的 AI 助手</h3>
+              <p class="mt-1 text-sm text-slate-600">放进对话里，或写进项目的 <code class="font-mono">AGENTS.md</code> / <code class="font-mono">CLAUDE.md</code> / Cursor 规则。</p>
+            </div>
+            <button type="button" class="copy-btn lift rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-copy-target="agent-prompt">
+              <span class="copy-a">复制</span><span class="copy-b">已复制</span>
+            </button>
+          </div>
+          <pre id="agent-prompt" class="mt-5 overflow-x-auto whitespace-pre-wrap rounded-2xl bg-white px-5 py-4 font-mono text-[13px] leading-6 text-ink ring-1 ring-black/5">翻译 CAD 图纸用图译命令行（在图译源码目录里运行；Windows 安装版用 tuyi-cli.exe）：
+python -m tuyi translate &lt;图纸.dwg 或 .dxf，可以多张&gt; --output-dir &lt;输出文件夹&gt; --mode zh_to_en
+成功时每张图打印新文件路径、extracted、translated。失败看 stderr，退出码不是 0。
+要 PDF：python -m tuyi pdf &lt;译好的图纸&gt; --output-dir &lt;输出文件夹&gt;
+不会覆盖原图。不确定参数先跑 python -m tuyi translate --help。</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="cli" class="scroll-mt-20 bg-navy py-24 text-white">
+      <div class="mx-auto max-w-6xl px-4">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold text-sky-300">参考</p>
+          <h2 class="mt-2 text-pretty text-3xl font-semibold tracking-tight">命令行 / CLI</h2>
+          <p class="mt-3 text-slate-300">不打开窗口也能译，和桌面版同一条写回。不收费。</p>
+        </div>
+        <div class="mt-10 grid gap-6 lg:grid-cols-2">
+          <div class="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
+            <h3 class="font-mono text-base font-semibold text-sky-300">tuyi translate</h3>
+            <p class="mt-1 text-sm text-slate-400">打开 → 提取 → 词库先命中 → 翻译 → 写出新文件</p>
+            <pre class="term mt-4 whitespace-pre-wrap [overflow-wrap:anywhere] rounded-xl px-4 py-3 font-mono text-[12.5px] leading-6 ring-1 ring-white/10"><code><span class="p">$ </span><span class="c">python -m tuyi translate</span> drawing.dxf
+<span class="p">$ </span><span class="c">python -m tuyi translate</span> drawing.dwg -o out.dwg --mode zh_to_en
+<span class="p">$ </span><span class="c">python -m tuyi translate</span> a.dxf b.dxf --output-dir out --glossary switch</code></pre>
+            <dl class="mt-5 space-y-2.5 text-sm">
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--mode</dt><dd class="text-slate-400"><code class="font-mono">zh_to_en</code>（默认）、<code class="font-mono">en_to_zh</code>、<code class="font-mono">zh_to_fr</code>，或 <code class="font-mono">源_to_目标</code> 如 <code class="font-mono">zh-Hans_to_ja</code></dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">-o / --output-dir</dt><dd class="text-slate-400">单张写到指定文件；多张用输出文件夹</dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--glossary</dt><dd class="text-slate-400"><code class="font-mono">all</code>（默认）、<code class="font-mono">switch</code> 开关、<code class="font-mono">transformer</code> 变压器、<code class="font-mono">off</code>，或你自己的术语 JSON</dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--provider</dt><dd class="text-slate-400"><code class="font-mono">deepl</code> / <code class="font-mono">azure</code> / <code class="font-mono">ollama</code> / <code class="font-mono">openai</code>，密钥用桌面版设置里存的</dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--style</dt><dd class="text-slate-400">纯译文 / 原译对照 / 译原对照</dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--translate-filename</dt><dd class="text-slate-400">文件名里的中文也译</dd></div>
+            </dl>
+          </div>
+          <div class="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
+            <h3 class="font-mono text-base font-semibold text-sky-300">tuyi pdf</h3>
+            <p class="mt-1 text-sm text-slate-400">把图纸导出成 PDF，译好的或原图都行</p>
+            <pre class="term mt-4 whitespace-pre-wrap [overflow-wrap:anywhere] rounded-xl px-4 py-3 font-mono text-[12.5px] leading-6 ring-1 ring-white/10"><code><span class="p">$ </span><span class="c">python -m tuyi pdf</span> out/en_floor_plan.dxf --paper a3l --appearance 彩色</code></pre>
+            <dl class="mt-5 space-y-2.5 text-sm">
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--appearance</dt><dd class="text-slate-400">Chrome（默认，深色）、彩色（白纸）、黑白</dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--paper</dt><dd class="text-slate-400"><code class="font-mono">a4</code>（默认竖向）、<code class="font-mono">a4l</code>、<code class="font-mono">a3</code>、<code class="font-mono">a3l</code></dd></div>
+              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">-o / --output-dir</dt><dd class="text-slate-400">PDF 写到哪里</dd></div>
+            </dl>
+            <div class="mt-6 rounded-2xl bg-white/5 p-4 text-sm text-slate-300 ring-1 ring-white/10">
+              <p><strong class="font-semibold text-white">在哪跑：</strong>源码目录里 <code class="font-mono text-sky-300">python -m tuyi</code>。Windows 安装目录里，<code class="font-mono text-sky-300">tuyi-cli.exe</code> 在 <code class="font-mono">Tuyi.exe</code> 旁边。Mac 在 <code class="font-mono">Tuyi.app/Contents/MacOS/tuyi-cli</code>。</p>
+              <p class="mt-2">DXF 直接译。DWG 要本机装 ODA File Converter（在 PATH 里，或设 <code class="font-mono">CAD_ODA_EXEC</code>）。</p>
+            </div>
+          </div>
+        </div>
+        <p class="mt-8 text-sm text-slate-400">
+          全部参数：<code class="rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-slate-200">python -m tuyi --help</code>
+          · 详见 <a class="font-semibold text-sky-300 underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/blob/main/README.md">README</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="how" class="scroll-mt-20 bg-white py-24">
       <div class="mx-auto max-w-5xl px-4">
-        <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">三步</h2>
-        <ol class="mt-10 grid gap-8 sm:grid-cols-3">
-          <li>
-            <p class="text-sm font-semibold text-accent">1</p>
-            <h3 class="mt-1 text-lg font-semibold">添加图纸</h3>
+        <p class="text-center text-sm font-semibold text-accent">桌面版</p>
+        <h2 class="mt-2 text-pretty text-center text-3xl font-semibold tracking-tight">想自己看着译？三步</h2>
+        <ol class="mt-12 grid gap-6 sm:grid-cols-3">
+          <li class="rounded-3xl bg-mist p-6">
+            <p class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-semibold text-white">1</p>
+            <h3 class="mt-4 text-lg font-semibold">添加图纸</h3>
             <p class="mt-2 text-slate-600">点左边加号，或把 DWG / DXF 拖进去。一次可以多张。原文件只读，不改。</p>
           </li>
-          <li>
-            <p class="text-sm font-semibold text-accent">2</p>
-            <h3 class="mt-1 text-lg font-semibold">译文字</h3>
+          <li class="rounded-3xl bg-mist p-6">
+            <p class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-semibold text-white">2</p>
+            <h3 class="mt-4 text-lg font-semibold">译文字</h3>
             <p class="mt-2 text-slate-600">词汇库先命中。其余走你自己的 DeepL / Azure / Ollama / 自己配接口。可以手改。</p>
           </li>
-          <li>
-            <p class="text-sm font-semibold text-accent">3</p>
-            <h3 class="mt-1 text-lg font-semibold">写出新文件</h3>
-            <p class="mt-2 text-slate-600">点翻译就会另存一份。默认在「文档 / Tuyi output」。</p>
+          <li class="rounded-3xl bg-mist p-6">
+            <p class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-semibold text-white">3</p>
+            <h3 class="mt-4 text-lg font-semibold">写出新文件</h3>
+            <p class="mt-2 text-slate-600">点快速翻译就会另存一份。默认在「下载」文件夹，设置里可以换。</p>
           </li>
         </ol>
         <p class="mx-auto mt-10 max-w-2xl rounded-2xl bg-mist px-5 py-4 text-sm text-slate-700">
@@ -220,48 +439,51 @@
       </div>
     </section>
 
-    <section id="features" class="scroll-mt-20 bg-mist py-20">
+    <section id="features" class="scroll-mt-20 bg-mist py-24">
       <div class="mx-auto max-w-6xl px-4">
         <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">译的是 CAD 里的字，不是把图当图片扫</h2>
-        <p class="mx-auto mt-3 max-w-2xl text-center text-slate-600">标题、注释、属性、标注、表格。中、英、日、韩、德、法。网上翻译、自己配接口、或不联网。</p>
+        <p class="mx-auto mt-3 max-w-2xl text-center text-slate-600">标题、注释、属性、标注、表格。中、英、日、韩、德、法等。网上翻译、自己配接口、或不联网。</p>
         <div class="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="界面预览">
           <button type="button" data-tab="home" aria-selected="true" class="tab on rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">主界面</button>
           <button type="button" data-tab="glossary" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">词汇库</button>
           <button type="button" data-tab="settings" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">设置</button>
           <button type="button" data-tab="dark" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">深色</button>
         </div>
-        <img id="feature-shot" src="shots/home.png" alt="图译主界面：左边添加图纸" width="1280" height="800" loading="lazy" class="mt-8 rounded-2xl bg-white shadow-xl ring-1 ring-black/10" />
+        <div class="mx-auto mt-8 max-w-5xl overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/10">
+          <img id="feature-shot" src="shots/home.png" alt="图译主界面：译完一张图" width="1280" height="800" loading="lazy" class="block w-full" />
+        </div>
       </div>
     </section>
 
-    <section class="bg-white py-20">
-      <div class="mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-2 lg:items-center">
+    <section class="bg-white py-24">
+      <div class="mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-[1fr_1.3fr] lg:items-center">
         <div>
           <h2 class="text-pretty text-3xl font-semibold tracking-tight">一批图，一张表，一次写回</h2>
-          <p class="mt-4 max-w-prose text-slate-600">常规处理改单张。批量导出按队列跑。人工改过的译文可以导出 CSV / Excel，再导入写回。</p>
-          <ul class="mt-6 space-y-2 text-slate-700">
-            <li>默认中 → 英，工具栏换方向</li>
-            <li>过滤数字、重复、已经是外文的</li>
-            <li>有新版本时，软件里检查更新</li>
+          <p class="mt-4 max-w-prose text-slate-600">常规处理改单张。一起译按队列跑。人工改过的译文可以导出 CSV / Excel，再导入写回。</p>
+          <ul class="mt-6 space-y-3 text-slate-700">
+            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>默认中 → 英，底栏换方向</li>
+            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>过滤数字、重复、已经是外文的</li>
+            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>导出 PDF：A4 / A3，黑白、彩色或深色</li>
+            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>有新版本时，软件里检查更新</li>
           </ul>
         </div>
-        <img src="shots/export.png" alt="批量导出队列" width="1280" height="800" loading="lazy" class="rounded-2xl shadow-lg ring-1 ring-black/10" />
+        <img src="shots/export.png" alt="一起译：两张图排队，右边选图上怎么写、放到哪里" width="1280" height="800" loading="lazy" class="rounded-2xl shadow-xl ring-1 ring-black/10" />
       </div>
     </section>
 
-    <section id="download" class="scroll-mt-20 bg-mist py-20">
+    <section id="download" class="scroll-mt-20 bg-mist py-24">
       <div class="mx-auto max-w-5xl px-4">
         <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">下载图译</h2>
-        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.9 · MIT 开源 · 安装包未签名</p>
+        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.10 · 不收费 · 安装包未签名</p>
         <p id="dl-os" class="mt-1 hidden text-center text-sm font-medium text-accent"></p>
 
         <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2">
           <article class="dl-card flex h-full flex-col rounded-3xl bg-white p-7 text-left shadow-sm ring-1 ring-black/5" data-os="win">
             <h3 class="text-xl font-semibold">Windows</h3>
             <p class="mt-2 text-sm text-slate-600">Windows 10 或 11，<strong class="font-semibold text-ink">64 位</strong>。不要 32 位，不要 7 / 8。</p>
-            <p class="mt-1 text-sm text-slate-500">Setup.exe · <span id="win-size">约 64 MB</span> · Win10 要有 WebView2（一般已装）</p>
+            <p class="mt-1 text-sm text-slate-500">Setup.exe · <span id="win-size">约 64 MB</span> · Win10 要有 WebView2（一般已装）· 自带 <code class="font-mono">tuyi-cli.exe</code></p>
             <div class="dl-foot">
-              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.9/Tuyi_v0.1.9_Setup.exe" rel="noopener">下载 Windows</a>
+              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_Setup.exe" rel="noopener">下载 Windows</a>
               <p class="dl-note mt-3 text-xs leading-5 text-slate-500">第一次会拦：更多信息 → 仍要运行。</p>
             </div>
           </article>
@@ -278,7 +500,7 @@
               <span data-mac-hint="intel" aria-hidden="true">Intel 芯片。苹果菜单 → 关于本机。这份和 Apple 芯片不是同一个文件。</span>
             </p>
             <div class="dl-foot">
-              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.9/Tuyi_v0.1.9_macOS_arm64.dmg" rel="noopener" aria-label="下载 macOS（Apple 芯片）">
+              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.10/Tuyi_v0.1.10_macOS_arm64.dmg" rel="noopener" aria-label="下载 macOS（Apple 芯片）">
                 <span data-mac-label="arm" data-active>下载 macOS（Apple 芯片）</span>
                 <span data-mac-label="intel" aria-hidden="true">下载 macOS（Intel）</span>
                 <span data-mac-label="arm-missing" aria-hidden="true">Apple 芯片安装包还没放上来</span>
@@ -297,10 +519,18 @@
       </div>
     </section>
 
-    <section id="faq" class="scroll-mt-20 bg-mist py-20">
+    <section id="faq" class="scroll-mt-20 bg-white py-24">
       <div class="mx-auto max-w-3xl px-4">
         <h2 class="text-3xl font-semibold tracking-tight">常见问题</h2>
         <dl class="mt-10 divide-y divide-black/10">
+          <div class="py-5">
+            <dt class="font-semibold">AI 助手怎么用图译？</dt>
+            <dd class="mt-2 text-slate-600">让它在终端里跑 <code class="font-mono text-ink">python -m tuyi translate 图纸.dxf</code>。没有对话框，不等人点。成功打印新文件路径和句数，失败写到 stderr、退出码不是 0。Claude Code、Cursor、Codex、Grok 这类能跑命令的助手都行。</dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-semibold">命令行要密钥吗？</dt>
+            <dd class="mt-2 text-slate-600">中 ⇄ 英、中 ⇄ 法先走内置词库，命中的不联网。没命中的句子用你在桌面版设置里存的 DeepL / Azure / Ollama / 自定义接口，也可以加 <code class="font-mono text-ink">--provider</code> 指定。</dd>
+          </div>
           <div class="py-5">
             <dt class="font-semibold">Windows 哪个版本能用？</dt>
             <dd class="mt-2 text-slate-600">Windows 10 或 11，64 位。32 位不行，Windows 7 / 8 不行。Win10 如果提示缺少 WebView2，装微软的 Edge WebView2 运行时。</dd>
@@ -323,29 +553,16 @@
           </div>
           <div class="py-5">
             <dt class="font-semibold">收费吗？有授权码吗？</dt>
-            <dd class="mt-2 text-slate-600">没有。MIT 开源。翻译用的密钥是你自己的 DeepL / Azure / Ollama / 自定义接口。图译不建账号，默认也不往外打电话，除非你点检查更新。</dd>
+            <dd class="mt-2 text-slate-600">不收费，没有授权码。翻译用的密钥是你自己的 DeepL / Azure / Ollama / 自定义接口。图译不建账号，默认也不往外打电话，除非你点检查更新。</dd>
           </div>
         </dl>
       </div>
     </section>
-
-    <section id="cli" class="scroll-mt-20 bg-white py-16">
-      <div class="mx-auto max-w-3xl px-4 text-center">
-        <h2 class="text-pretty text-3xl font-semibold tracking-tight">命令行 / CLI</h2>
-        <p class="mt-3 text-slate-600">不打开窗口也能译，和软件里同一条写回。免费。</p>
-        <pre class="mt-8 overflow-x-auto rounded-2xl bg-mist px-5 py-4 text-left font-mono text-sm leading-6 text-ink ring-1 ring-black/5"><code>python -m tuyi translate drawing.dxf
-python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en</code></pre>
-        <p class="mt-4 text-sm text-slate-500">
-          详见 <a class="font-semibold text-accent underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/blob/main/README.md">README</a>
-          · <code class="rounded-md bg-mist px-1.5 py-0.5 font-mono text-ink">python -m tuyi --help</code>
-        </p>
-      </div>
-    </section>
   </main>
 
-  <footer class="border-t border-black/5 py-5">
+  <footer class="border-t border-black/5 py-6">
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-sm text-slate-500">
-      <span translate="no">图译 Tuyi · MIT</span>
+      <span translate="no">图译 Tuyi · <a class="hover:text-ink" href="https://github.com/erict16/tuyi/blob/main/LICENSE">MIT 协议</a></span>
       <div class="flex items-center gap-4">
         <a href="https://github.com/erict16/tuyi" class="text-slate-500 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="GitHub">
           <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
@@ -357,8 +574,9 @@ python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en</code></pre>
   </footer>
 
   <script>
+    const COPY_DONE = "已复制";
     const shot = { home: "shots/home.png", glossary: "shots/glossary.png", settings: "shots/settings.png", dark: "shots/dark.png" };
-    const alts = { home: "图译主界面：左边添加图纸", glossary: "词汇库：自己的词先命中", settings: "设置：网上翻译或自己配接口", dark: "图译深色模式" };
+    const alts = { home: "图译主界面：译完一张图", glossary: "词汇库：自己的词先命中", settings: "设置：网上翻译或自己配接口", dark: "图译深色模式" };
     const img = document.getElementById("feature-shot");
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -375,6 +593,36 @@ python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en</code></pre>
       });
     });
     document.querySelector('.tab[data-tab="home"]').setAttribute("aria-selected", "true");
+
+    const heroVideo = document.getElementById("hero-video");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function syncHeroMotion() {
+      if (!heroVideo) return;
+      if (reduceMotion.matches) {
+        heroVideo.removeAttribute("autoplay");
+        heroVideo.pause();
+      } else {
+        heroVideo.play().catch(() => {});
+      }
+    }
+    syncHeroMotion();
+    reduceMotion.addEventListener?.("change", syncHeroMotion);
+
+    document.querySelectorAll(".copy-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const target = btn.dataset.copyTarget ? document.getElementById(btn.dataset.copyTarget) : null;
+        const text = target ? target.textContent : btn.dataset.copy || "";
+        try {
+          await navigator.clipboard.writeText(text.trim());
+          btn.dataset.copied = "true";
+          btn.setAttribute("aria-label", COPY_DONE);
+          setTimeout(() => {
+            btn.dataset.copied = "false";
+            btn.removeAttribute("aria-label");
+          }, 1600);
+        } catch (_) {}
+      });
+    });
 
     const msg = document.getElementById("dl-msg");
     const btnMac = document.getElementById("btn-mac");
@@ -480,7 +728,7 @@ python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en</code></pre>
         if (data.tag_name) {
           window.DL_META.version = data.tag_name;
           const ver = document.getElementById("dl-ver");
-          if (ver) ver.textContent = `${data.tag_name} · MIT 开源 · 安装包未签名`;
+          if (ver) ver.textContent = `${data.tag_name} · 不收费 · 安装包未签名`;
         }
         if (winBytes) {
           const size = document.getElementById("win-size");
