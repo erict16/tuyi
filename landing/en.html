@@ -6,16 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#f5f7fb" />
   <meta name="color-scheme" content="light" />
-  <title>图译 Tuyi: let your AI assistant translate DWG / DXF drawings</title>
-  <meta name="description" content="One command opens a DWG / DXF, translates titles, notes, attributes, dimensions, and tables, and writes a new file. No clicks needed, so Claude Code, Cursor, Codex, Grok, or a script can run it. Desktop app for Windows and Mac too. No AutoCAD." />
+  <title>图译 Tuyi: translate the text on DWG / DXF drawings</title>
+  <meta name="description" content="Tuyi translates the Chinese text on DWG / DXF drawings into English and saves it as a new file. The original stays as it is, and you do not need AutoCAD. Use it yourself or let an AI assistant like WorkBuddy, ChatGPT or Claude run it. Free for Windows and Mac." />
   <meta name="author" content="Eric Tan" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://erict16.github.io/tuyi/en.html" />
   <link rel="alternate" hreflang="zh-Hans" href="https://erict16.github.io/tuyi/" />
   <link rel="alternate" hreflang="en" href="https://erict16.github.io/tuyi/en.html" />
   <link rel="alternate" hreflang="x-default" href="https://erict16.github.io/tuyi/en.html" />
-  <meta property="og:title" content="图译 Tuyi: let your AI assistant translate DWG / DXF drawings" />
-  <meta property="og:description" content="One command translates a drawing and writes a new file. Hands-free, so AI assistants and scripts can run it. The original stays put. No AutoCAD." />
+  <meta property="og:title" content="图译 Tuyi: translate the text on DWG / DXF drawings" />
+  <meta property="og:description" content="The translation goes back onto the drawing as a new file. The original stays as it is. No AutoCAD needed, and your AI assistant can run it for you." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://erict16.github.io/tuyi/en.html" />
   <meta property="og:site_name" content="图译 Tuyi" />
@@ -24,12 +24,12 @@
   <meta property="og:image" content="https://erict16.github.io/tuyi/shots/og.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="图译 Tuyi: let your AI assistant translate DWG / DXF drawings" />
+  <meta property="og:image:alt" content="图译 Tuyi: translate the Chinese text on DWG / DXF drawings into English" />
   <meta property="og:video" content="https://erict16.github.io/tuyi/shots/hero.mp4" />
   <meta property="og:video:type" content="video/mp4" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="图译 Tuyi: let your AI assistant translate DWG / DXF drawings" />
-  <meta name="twitter:description" content="One command translates a drawing and writes a new file. Hands-free. No AutoCAD." />
+  <meta name="twitter:title" content="图译 Tuyi: translate the text on DWG / DXF drawings" />
+  <meta name="twitter:description" content="The translation goes back onto the drawing as a new file. The original stays as it is. No AutoCAD needed." />
   <meta name="twitter:image" content="https://erict16.github.io/tuyi/shots/og.png" />
   <link rel="icon" href="shots/mark.png" type="image/png" />
   <link rel="apple-touch-icon" href="shots/apple-touch-icon.png" />
@@ -47,7 +47,7 @@
         "url": "https://erict16.github.io/tuyi/en.html",
         "image": "https://erict16.github.io/tuyi/shots/og.png",
         "screenshot": "https://erict16.github.io/tuyi/shots/home.png",
-        "description": "DWG / DXF drawing translator. The CLI runs hands-free, so AI assistants and scripts can use it; there is a desktop app too. Translates titles, notes, attributes, dimensions, and tables, writes a new file, and leaves the original alone. No AutoCAD.",
+        "description": "Translates the Chinese text on DWG / DXF drawings into English and saves a new file. The original stays as it is. No AutoCAD needed. An AI assistant can run it for you.",
         "applicationCategory": "DesignApplication",
         "operatingSystem": "Windows 10, Windows 11, macOS",
         "license": "https://github.com/erict16/tuyi/blob/main/LICENSE",
@@ -58,8 +58,8 @@
       },
       {
         "@type": "VideoObject",
-        "name": "Tuyi: open floor_plan.dxf, translate, write a new file",
-        "description": "Real screen recording of the desktop app: add a DXF, 6 lines hit the glossary, an English copy is written.",
+        "name": "Tuyi: add floor_plan.dxf, translate, save the English copy",
+        "description": "Real recording of the desktop app: add a DXF, 6 lines match the glossary, a new English file is written.",
         "thumbnailUrl": "https://erict16.github.io/tuyi/shots/hero-poster.jpg",
         "contentUrl": "https://erict16.github.io/tuyi/shots/hero.mp4",
         "uploadDate": "2026-10-03",
@@ -70,51 +70,6 @@
         "name": "图译 Tuyi",
         "url": "https://erict16.github.io/tuyi/",
         "inLanguage": ["zh-Hans", "en"]
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "How does an AI assistant use Tuyi?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Have it run python -m tuyi translate drawing.dxf in a terminal. No dialogs, no waiting for clicks. Success prints the new file path and line counts; failures go to stderr with a non-zero exit code. Any assistant that can run commands works: Claude Code, Cursor, Codex, Grok." }
-          },
-          {
-            "@type": "Question",
-            "name": "Does the CLI need an API key?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Chinese ⇄ English and Chinese ⇄ French hit the built-in glossary first, offline. Lines it misses use the DeepL / Azure / Ollama / custom endpoint saved in the desktop app settings, or pick one with --provider." }
-          },
-          {
-            "@type": "Question",
-            "name": "Which Windows versions work?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Windows 10 or 11, 64-bit. Not 32-bit, not Windows 7 / 8. On Windows 10, install Edge WebView2 if the app asks for it." }
-          },
-          {
-            "@type": "Question",
-            "name": "Which Mac download do I need?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Apple menu, About This Mac. If it says Apple M1 / M2 / M3 / M4, get Apple silicon. If it says Intel, get Intel. They are not interchangeable. If the Intel build is missing, the button says so." }
-          },
-          {
-            "@type": "Question",
-            "name": "Do I need AutoCAD?",
-            "acceptedAnswer": { "@type": "Answer", "text": "No. Tuyi is a standalone app. DXF opens directly. DWG uses ODA File Converter on your machine." }
-          },
-          {
-            "@type": "Question",
-            "name": "Is ODA bundled?",
-            "acceptedAnswer": { "@type": "Answer", "text": "No, and it will not be. The license does not allow shipping it with the app. Install ODA File Converter yourself. DXF-only work does not need it." }
-          },
-          {
-            "@type": "Question",
-            "name": "It will not open the first time?",
-            "acceptedAnswer": { "@type": "Answer", "text": "That is expected. The installer is not code-signed yet. Mac: right-click the icon, Open. Windows: More info, Run anyway." }
-          },
-          {
-            "@type": "Question",
-            "name": "Does it cost money? Is there a license key?",
-            "acceptedAnswer": { "@type": "Answer", "text": "No cost, no license key. Translation keys are yours: DeepL, Azure, Ollama, or a custom endpoint. Tuyi does not create accounts. It does not call out unless you check for updates." }
-          }
-        ]
       }
     ]
   }
@@ -141,7 +96,6 @@
           },
           fontFamily: {
             sans: ["-apple-system", "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "system-ui", "sans-serif"],
-            mono: ["SF Mono", "ui-monospace", "Menlo", "Consolas", "monospace"],
           },
         },
       },
@@ -151,28 +105,16 @@
     html { color-scheme: light; scroll-behavior: smooth; }
     .text-pretty { text-wrap: pretty; }
     .text-balance { text-wrap: balance; }
-    .hero-grid {
+    .hero-bg {
       background-color: #f5f7fb;
-      background-image:
-        radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0, 122, 255, 0.12), transparent 70%),
-        linear-gradient(rgba(11, 17, 32, 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(11, 17, 32, 0.045) 1px, transparent 1px);
-      background-size: 100% 100%, 32px 32px, 32px 32px;
+      background-image: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0, 122, 255, 0.10), transparent 70%);
     }
-    .term { background: #0b1120; color: #e2e8f0; }
-    .term .p { color: #64748b; user-select: none; }
-    .term .c { color: #7dd3fc; }
-    .term .o { color: #94a3b8; }
-    .term .ok { color: #6ee7b7; }
-    .term .dim { color: #64748b; }
-    .win-frame { background: #fff; }
     .win-bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25); }
     .copy-btn[data-copied="true"] .copy-a { display: none; }
     .copy-btn:not([data-copied="true"]) .copy-b { display: none; }
     .chip[aria-checked="true"] { background: #1d1d1f; color: #fff; }
     .dl-card { display: flex; flex-direction: column; height: 100%; }
-    .dl-foot { margin-top: auto; padding-top: 1.5rem; }
-    .dl-note { min-height: 3.6em; }
+    .dl-foot { margin-top: auto; padding-top: 1.25rem; }
     .mac-hint { display: grid; align-items: start; }
     .mac-hint > [data-mac-hint] { grid-area: 1 / 1; }
     .mac-hint > [data-mac-hint]:not([data-active]) { visibility: hidden; }
@@ -197,402 +139,168 @@
 <body class="bg-white text-ink antialiased">
   <a class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-ink focus:shadow" href="#download">Skip to download</a>
 
-  <header class="sticky top-0 z-30 border-b border-black/5 bg-white/80 backdrop-blur">
-    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+  <header class="sticky top-0 z-30 border-b border-black/5 bg-white/85 backdrop-blur">
+    <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
       <a href="./" class="flex items-center gap-2 font-semibold" translate="no">
         <img src="shots/mark.png" alt="" width="28" height="28" class="rounded-md" />
         图译 Tuyi
       </a>
-      <nav class="hidden items-center gap-7 text-sm text-slate-600 md:flex" aria-label="Page">
-        <a href="#agents" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">AI assistants</a>
-        <a href="#cli" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">CLI</a>
-        <a href="#how" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Desktop app</a>
-        <a href="#download" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Download</a>
-        <a href="#faq" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">FAQ</a>
-      </nav>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-4">
         <a href="./" lang="zh-Hans" class="text-sm text-slate-600 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">中文</a>
-        <a href="#download" class="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Download</a>
+        <a href="#download" class="lift rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Download</a>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="hero-grid overflow-hidden">
-      <div class="mx-auto max-w-6xl px-4 pb-20 pt-14 text-center sm:pt-20">
-        <p class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-black/5">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
-          CLI · hands-free · no AutoCAD
-        </p>
-        <h1 class="mt-5 text-pretty text-lg font-semibold tracking-tight text-slate-500 sm:text-xl">图译 Tuyi</h1>
-        <p class="mx-auto mt-2 max-w-3xl text-balance text-4xl font-semibold tracking-tight text-ink sm:text-6xl">Let your AI assistant translate the drawings</p>
-        <p class="mx-auto mt-5 max-w-2xl text-pretty text-lg text-slate-600">One command opens a DWG or DXF, translates titles, notes, attributes, dimensions, and tables, and writes a new file. No dialogs, no clicks. Claude Code, Cursor, Codex, Grok, or your own script can run it end to end.</p>
+    <section class="hero-bg overflow-hidden">
+      <div class="mx-auto max-w-5xl px-4 pb-16 pt-14 text-center sm:pt-20">
+        <h1 class="text-lg font-semibold text-slate-500" translate="no">图译 Tuyi</h1>
+        <p class="mx-auto mt-2 max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl">Translate the Chinese on your DWG / DXF drawings into English</p>
+        <p class="mx-auto mt-4 max-w-xl text-pretty text-lg text-slate-600">The translation goes back onto the drawing as a new file. The original stays as it is, and you don't need AutoCAD.</p>
 
-        <div class="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl bg-navy p-2 pl-4 text-left shadow-lg ring-1 ring-black/10">
-          <code class="term min-w-0 flex-1 overflow-x-auto whitespace-nowrap bg-transparent font-mono text-[12px] leading-8 sm:text-sm"><span class="p">$ </span><span class="c">python -m tuyi translate</span> drawing.dwg</code>
-          <button type="button" class="copy-btn lift shrink-0 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-copy="python -m tuyi translate drawing.dwg">
-            <span class="copy-a">Copy</span><span class="copy-b">Copied</span>
-          </button>
+        <div class="mt-8 flex flex-col items-center gap-3">
+          <a id="hero-dl" href="#download" class="lift inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-7 py-3 text-base font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">Download Tuyi</a>
+          <p class="text-sm text-slate-500">Free. For Windows 10 / 11 (64-bit) and Mac. <a href="#download" class="font-medium text-accent underline-offset-2 hover:underline">Other versions</a></p>
         </div>
 
-        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <a href="#agents" class="lift rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">See it with an AI assistant</a>
-          <a href="#download" class="lift rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink ring-1 ring-black/10 hover:bg-mist focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Download the desktop app</a>
-        </div>
-        <p class="mt-4 text-sm text-slate-500">Same write-back in the CLI and the app · Windows 10 / 11 (64-bit) · Mac · Chinese to English by default</p>
-
-        <div class="relative mx-auto mt-14 max-w-5xl">
-          <figure class="win-frame overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/10">
+        <figure class="mx-auto mt-12 max-w-4xl">
+          <div class="overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
             <div class="win-bar flex h-9 items-center gap-2 border-b border-black/5 bg-[#f6f7f9] px-4" aria-hidden="true">
               <i class="bg-[#ff5f57]"></i><i class="bg-[#febc2e]"></i><i class="bg-[#28c840]"></i>
               <span class="flex-1 text-center text-xs font-medium text-slate-500">图译</span>
               <span class="w-12"></span>
             </div>
-            <video id="hero-video" class="block aspect-[16/10] w-full bg-[#f3f6fa]" width="1280" height="800" autoplay muted loop playsinline preload="auto" poster="shots/hero-poster.jpg" aria-label="Real screen recording: add floor_plan.dxf in Tuyi, click Quick translate, an English copy is written">
+            <video id="hero-video" class="block aspect-[16/10] w-full bg-[#f3f6fa]" width="1280" height="800" autoplay muted loop playsinline preload="auto" poster="shots/hero-poster.jpg" aria-label="Real recording: add floor_plan.dxf, click 快速翻译 (quick translate), save the English copy">
               <source src="shots/hero.webm" type="video/webm" />
               <source src="shots/hero.mp4" type="video/mp4" />
-              <img src="shots/hero-poster.jpg" alt="Tuyi after translating floor_plan.dxf: 6 lines in English, saved as a new file" width="1280" height="800" />
+              <img src="shots/hero-poster.jpg" alt="Tuyi finished floor_plan.dxf: 6 lines in English, saved as a new file" width="1280" height="800" />
             </video>
-          </figure>
-          <figcaption class="mt-4 text-sm text-slate-500">Real screen recording: the desktop app opens <code class="font-mono text-ink">floor_plan.dxf</code>, 6 lines hit the glossary, and an English copy is written.</figcaption>
-
-          <div class="term absolute -bottom-10 -left-6 hidden w-[25rem] rounded-2xl p-4 text-left font-mono text-[12.5px] leading-6 shadow-2xl ring-1 ring-white/10 lg:block" aria-hidden="true">
-            <div class="mb-2 flex gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span><span class="h-2.5 w-2.5 rounded-full bg-white/20"></span></div>
-            <div><span class="p">$ </span><span class="c">python -m tuyi translate</span> floor_plan.dxf</div>
-            <div class="o">…/en_floor_plan_11h37_03-10-26.dxf</div>
-            <div class="o">extracted: 6</div>
-            <div class="ok">translated: 6</div>
           </div>
-        </div>
+          <figcaption class="mt-3 text-sm text-slate-500">Real recording. Add a drawing, click 快速翻译 (quick translate), and the English copy lands in Downloads.</figcaption>
+        </figure>
       </div>
     </section>
 
-    <section id="agents" class="scroll-mt-20 bg-white py-24">
-      <div class="mx-auto max-w-6xl px-4">
-        <div class="mx-auto max-w-3xl text-center">
-          <p class="text-sm font-semibold text-accent">Hand it to your AI assistant</p>
-          <h2 class="mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Say one sentence, get a whole folder of drawings translated</h2>
-          <p class="mt-4 text-pretty text-lg text-slate-600">Tuyi's CLI has no window and asks no questions. Your assistant runs the commands, reads the output, and reports back. Nobody has to sit and click.</p>
-          <ul class="mt-6 flex flex-wrap justify-center gap-2 text-sm font-semibold text-slate-700" aria-label="Assistants that work">
-            <li class="rounded-full bg-mist px-3 py-1">Claude Code</li>
-            <li class="rounded-full bg-mist px-3 py-1">Cursor</li>
-            <li class="rounded-full bg-mist px-3 py-1">Codex</li>
-            <li class="rounded-full bg-mist px-3 py-1">Grok</li>
-            <li class="rounded-full bg-mist px-3 py-1 font-medium text-slate-500">Any assistant that can run terminal commands</li>
-          </ul>
+    <section id="ai" class="scroll-mt-16 bg-white py-20">
+      <div class="mx-auto max-w-3xl px-4 text-center">
+        <h2 class="text-balance text-3xl font-semibold tracking-tight">Let your AI assistant run Tuyi for you</h2>
+        <p class="mx-auto mt-4 max-w-2xl text-pretty text-lg text-slate-600">Using WorkBuddy, ChatGPT or Claude? They can run Tuyi for you, no clicking needed. Send it the sentence below and it will translate a whole folder of drawings.</p>
+        <ul class="mt-6 flex flex-wrap justify-center gap-2 text-sm font-semibold text-slate-700" aria-label="AI assistants">
+          <li class="rounded-full bg-mist px-3 py-1">WorkBuddy</li>
+          <li class="rounded-full bg-mist px-3 py-1">ChatGPT</li>
+          <li class="rounded-full bg-mist px-3 py-1">Claude</li>
+        </ul>
+        <div class="mx-auto mt-8 flex max-w-2xl flex-col gap-3 rounded-2xl bg-mist p-4 text-left ring-1 ring-black/5 sm:flex-row sm:items-center">
+          <p id="ai-prompt" class="flex-1 text-pretty text-[15px] leading-7 text-ink">Tuyi is installed on my computer. Please use it to translate the DWG / DXF drawings in my Drawings folder into English, save them as new files, and leave the originals alone.</p>
+          <button type="button" class="copy-btn lift shrink-0 self-end rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:self-auto" data-copy-target="ai-prompt">
+            <span class="copy-a">Copy</span><span class="copy-b">Copied</span>
+          </button>
         </div>
-
-        <div class="mt-14 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:items-start">
-          <figure class="overflow-hidden rounded-3xl bg-navy shadow-xl ring-1 ring-black/10">
-            <div class="flex items-center gap-2 border-b border-white/10 px-5 py-3 text-xs font-medium text-slate-400">
-              <span class="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true"></span>
-              AI assistant · terminal
-            </div>
-            <div class="space-y-4 p-5 text-sm leading-6">
-              <div class="flex justify-end">
-                <p class="max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-white">Translate every drawing in the drawings folder to English, then export a PDF of each.</p>
-              </div>
-              <p class="text-slate-300">Sure. I will use the Tuyi CLI: translate first, then export PDFs.</p>
-              <pre class="term whitespace-pre-wrap [overflow-wrap:anywhere] rounded-xl px-4 py-3 font-mono text-[12.5px] leading-6 ring-1 ring-white/10"><code><span class="p">$ </span><span class="c">python -m tuyi translate</span> drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
-<span class="o">/home/tuyi/project/out/en_floor_plan_11h37_03-10-26.dxf</span>
-<span class="o">extracted: 6</span>
-<span class="ok">translated: 6</span>
-<span class="o">/home/tuyi/project/out/en_dims_tables_11h37_03-10-26.dxf</span>
-<span class="o">extracted: 4</span>
-<span class="ok">translated: 4</span>
-
-<span class="p">$ </span><span class="c">python -m tuyi pdf</span> out/*.dxf --output-dir out --appearance 黑白
-<span class="o">out/en_dims_tables_11h37_03-10-26.pdf</span>
-<span class="o">appearance: 黑白</span>
-<span class="o">paper: a4</span>
-<span class="ok">pages: 1</span>
-<span class="o">out/en_floor_plan_11h37_03-10-26.pdf</span>
-<span class="o">appearance: 黑白</span>
-<span class="o">paper: a4</span>
-<span class="ok">pages: 2</span></code></pre>
-              <p class="text-slate-300">Both drawings are done: 6 lines in floor_plan and 4 in dims_tables, all from the glossary, no network. The new DXF and PDF files are in <code class="font-mono text-sky-300">out/</code>. The originals are untouched.</p>
-            </div>
-            <figcaption class="border-t border-white/10 px-5 py-3 text-xs text-slate-500">Real commands and real output, run on the two test drawings in the repo.</figcaption>
-          </figure>
-
-          <div>
-            <h3 class="text-xl font-semibold tracking-tight">Why it works well for agents</h3>
-            <dl class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <div class="rounded-2xl bg-mist p-5">
-                <dt class="font-semibold">No dialogs, no prompts</dt>
-                <dd class="mt-1.5 text-sm text-slate-600">Nothing to click and nothing to confirm. It exits when done.</dd>
-              </div>
-              <div class="rounded-2xl bg-mist p-5">
-                <dt class="font-semibold">Output that is easy to read</dt>
-                <dd class="mt-1.5 text-sm text-slate-600">Three lines per drawing: the new file path, the <code class="font-mono">extracted</code> count, and the <code class="font-mono">translated</code> count.</dd>
-              </div>
-              <div class="rounded-2xl bg-mist p-5">
-                <dt class="font-semibold">Clear failures</dt>
-                <dd class="mt-1.5 text-sm text-slate-600">Errors go to stderr with exit code 1; bad arguments exit 2. The assistant knows what failed.</dd>
-              </div>
-              <div class="rounded-2xl bg-mist p-5">
-                <dt class="font-semibold">Originals stay put</dt>
-                <dd class="mt-1.5 text-sm text-slate-600">It always writes a new file and never overwrites the source. Safe to run in bulk.</dd>
-              </div>
-              <div class="rounded-2xl bg-mist p-5">
-                <dt class="font-semibold">Glossary first</dt>
-                <dd class="mt-1.5 text-sm text-slate-600">Chinese ⇄ English and Chinese ⇄ French have built-in glossaries that work offline. Everything else uses the DeepL / Azure / Ollama / custom endpoint saved in settings.</dd>
-              </div>
-              <div class="rounded-2xl bg-mist p-5">
-                <dt class="font-semibold">Many drawings at once</dt>
-                <dd class="mt-1.5 text-sm text-slate-600">Pass several paths with <code class="font-mono">--output-dir</code>. PDF export works the same way.</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        <div class="mx-auto mt-16 max-w-4xl rounded-3xl bg-mist p-6 ring-1 ring-black/5 sm:p-8">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 class="text-lg font-semibold">Paste this into your AI assistant</h3>
-              <p class="mt-1 text-sm text-slate-600">Drop it into the chat, or into your project's <code class="font-mono">AGENTS.md</code> / <code class="font-mono">CLAUDE.md</code> / Cursor rules.</p>
-            </div>
-            <button type="button" class="copy-btn lift rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-copy-target="agent-prompt">
-              <span class="copy-a">Copy</span><span class="copy-b">Copied</span>
-            </button>
-          </div>
-          <pre id="agent-prompt" class="mt-5 overflow-x-auto whitespace-pre-wrap rounded-2xl bg-white px-5 py-4 font-mono text-[13px] leading-6 text-ink ring-1 ring-black/5">To translate CAD drawings, use the Tuyi CLI (run it from the Tuyi source folder; the Windows install ships tuyi-cli.exe):
-python -m tuyi translate &lt;drawing.dwg or .dxf, several allowed&gt; --output-dir &lt;output folder&gt; --mode zh_to_en
-On success it prints the new file path, extracted, and translated for each drawing. On failure read stderr; the exit code is non-zero.
-For PDFs: python -m tuyi pdf &lt;translated drawing&gt; --output-dir &lt;output folder&gt;
-It never overwrites the source. If unsure about options, run python -m tuyi translate --help first.</pre>
-        </div>
+        <p class="mt-4 text-sm text-slate-500">The assistant has to be allowed to run programs on your computer. That usually means the desktop app, and it will ask you first.</p>
+        <p class="mt-2 text-sm"><a class="font-medium text-accent underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/blob/main/README.en.md#command-line-let-your-ai-assistant-translate-the-drawings">Notes for developers</a></p>
       </div>
     </section>
 
-    <section id="cli" class="scroll-mt-20 bg-navy py-24 text-white">
-      <div class="mx-auto max-w-6xl px-4">
-        <div class="max-w-2xl">
-          <p class="text-sm font-semibold text-sky-300">Reference</p>
-          <h2 class="mt-2 text-pretty text-3xl font-semibold tracking-tight">Command line / CLI</h2>
-          <p class="mt-3 text-slate-300">Translate without opening a window. Same write-back as the app. Free.</p>
-        </div>
-        <div class="mt-10 grid gap-6 lg:grid-cols-2">
-          <div class="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
-            <h3 class="font-mono text-base font-semibold text-sky-300">tuyi translate</h3>
-            <p class="mt-1 text-sm text-slate-400">open → extract → glossary first → translate → write a new file</p>
-            <pre class="term mt-4 whitespace-pre-wrap [overflow-wrap:anywhere] rounded-xl px-4 py-3 font-mono text-[12.5px] leading-6 ring-1 ring-white/10"><code><span class="p">$ </span><span class="c">python -m tuyi translate</span> drawing.dxf
-<span class="p">$ </span><span class="c">python -m tuyi translate</span> drawing.dwg -o out.dwg --mode zh_to_en
-<span class="p">$ </span><span class="c">python -m tuyi translate</span> a.dxf b.dxf --output-dir out --glossary switch</code></pre>
-            <dl class="mt-5 space-y-2.5 text-sm">
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--mode</dt><dd class="text-slate-400"><code class="font-mono">zh_to_en</code> (default), <code class="font-mono">en_to_zh</code>, <code class="font-mono">zh_to_fr</code>, or <code class="font-mono">source_to_target</code> such as <code class="font-mono">zh-Hans_to_ja</code></dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">-o / --output-dir</dt><dd class="text-slate-400">One drawing to a named file; several to an output folder</dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--glossary</dt><dd class="text-slate-400"><code class="font-mono">all</code> (default), <code class="font-mono">switch</code>, <code class="font-mono">transformer</code>, <code class="font-mono">off</code>, or your own terms JSON</dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--provider</dt><dd class="text-slate-400"><code class="font-mono">deepl</code> / <code class="font-mono">azure</code> / <code class="font-mono">ollama</code> / <code class="font-mono">openai</code>, using the keys saved in the desktop app settings</dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--style</dt><dd class="text-slate-400">纯译文 (translation only) / 原译对照 (source over translation) / 译原对照 (translation over source)</dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--translate-filename</dt><dd class="text-slate-400">Translate Chinese in the file name too</dd></div>
-            </dl>
-          </div>
-          <div class="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
-            <h3 class="font-mono text-base font-semibold text-sky-300">tuyi pdf</h3>
-            <p class="mt-1 text-sm text-slate-400">Export a drawing to PDF, translated or original</p>
-            <pre class="term mt-4 whitespace-pre-wrap [overflow-wrap:anywhere] rounded-xl px-4 py-3 font-mono text-[12.5px] leading-6 ring-1 ring-white/10"><code><span class="p">$ </span><span class="c">python -m tuyi pdf</span> out/en_floor_plan.dxf --paper a3l --appearance 彩色</code></pre>
-            <dl class="mt-5 space-y-2.5 text-sm">
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--appearance</dt><dd class="text-slate-400">Chrome (default, dark), 彩色 (color on white), 黑白 (black and white)</dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">--paper</dt><dd class="text-slate-400"><code class="font-mono">a4</code> (default, portrait), <code class="font-mono">a4l</code>, <code class="font-mono">a3</code>, <code class="font-mono">a3l</code></dd></div>
-              <div class="flex gap-3"><dt class="w-44 shrink-0 font-mono text-slate-200">-o / --output-dir</dt><dd class="text-slate-400">Where the PDF goes</dd></div>
-            </dl>
-            <div class="mt-6 rounded-2xl bg-white/5 p-4 text-sm text-slate-300 ring-1 ring-white/10">
-              <p><strong class="font-semibold text-white">Where to run it:</strong> <code class="font-mono text-sky-300">python -m tuyi</code> from the source folder. On Windows, <code class="font-mono text-sky-300">tuyi-cli.exe</code> sits next to <code class="font-mono">Tuyi.exe</code>. On Mac it is <code class="font-mono">Tuyi.app/Contents/MacOS/tuyi-cli</code>.</p>
-              <p class="mt-2">DXF works as is. DWG needs ODA File Converter on this machine (on PATH, or set <code class="font-mono">CAD_ODA_EXEC</code>).</p>
-            </div>
-          </div>
-        </div>
-        <p class="mt-8 text-sm text-slate-400">
-          All options: <code class="rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-slate-200">python -m tuyi --help</code>
-          · See the <a class="font-semibold text-sky-300 underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/blob/main/README.en.md">README</a>
-        </p>
-      </div>
-    </section>
-
-    <section id="how" class="scroll-mt-20 bg-white py-24">
+    <section class="bg-mist py-20">
       <div class="mx-auto max-w-5xl px-4">
-        <p class="text-center text-sm font-semibold text-accent">Desktop app</p>
-        <h2 class="mt-2 text-pretty text-center text-3xl font-semibold tracking-tight">Prefer to watch it work? Three steps</h2>
-        <ol class="mt-12 grid gap-6 sm:grid-cols-3">
-          <li class="rounded-3xl bg-mist p-6">
-            <p class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-semibold text-white">1</p>
-            <h3 class="mt-4 text-lg font-semibold">Add drawings</h3>
-            <p class="mt-2 text-slate-600">Click the plus on the left, or drop DWG / DXF files. Several at once is fine. The original is read-only.</p>
+        <ul class="grid gap-5 md:grid-cols-3">
+          <li class="overflow-hidden rounded-2xl bg-white ring-1 ring-black/5">
+            <img src="shots/home.png" alt="One drawing done: 6 lines in English, saved as a new file" width="1280" height="800" loading="lazy" class="aspect-[16/10] w-full border-b border-black/5 object-cover object-left-top" />
+            <div class="p-6">
+              <h3 class="font-semibold">The original stays as it is</h3>
+              <p class="mt-1.5 text-slate-600">The translation is written into a new file. Title blocks, notes, block attributes, dimensions and tables all get translated.</p>
+            </div>
           </li>
-          <li class="rounded-3xl bg-mist p-6">
-            <p class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-semibold text-white">2</p>
-            <h3 class="mt-4 text-lg font-semibold">Translate</h3>
-            <p class="mt-2 text-slate-600">Glossary terms hit first. The rest go through your DeepL, Azure, Ollama, or custom endpoint. You can edit by hand.</p>
+          <li class="overflow-hidden rounded-2xl bg-white ring-1 ring-black/5">
+            <img src="shots/glossary.png" alt="Glossary page: built-in terms such as transformer, HV, LV winding" width="1280" height="800" loading="lazy" class="aspect-[16/10] w-full border-b border-black/5 object-cover object-left-top" />
+            <div class="p-6">
+              <h3 class="font-semibold">Trade terms come from a glossary</h3>
+              <p class="mt-1.5 text-slate-600">Common building, switchgear and transformer terms are built in and work offline. You can add your own.</p>
+            </div>
           </li>
-          <li class="rounded-3xl bg-mist p-6">
-            <p class="grid h-8 w-8 place-items-center rounded-full bg-accent text-sm font-semibold text-white">3</p>
-            <h3 class="mt-4 text-lg font-semibold">Save a new file</h3>
-            <p class="mt-2 text-slate-600">Quick translate writes a new copy. It goes to Downloads by default; change it in Settings.</p>
+          <li class="overflow-hidden rounded-2xl bg-white ring-1 ring-black/5">
+            <img src="shots/export.png" alt="Two drawings queued, ready for 一起译 (translate together)" width="1280" height="800" loading="lazy" class="aspect-[16/10] w-full border-b border-black/5 object-cover object-left-top" />
+            <div class="p-6">
+              <h3 class="font-semibold">Many drawings at once</h3>
+              <p class="mt-1.5 text-slate-600">Add several drawings, click 一起译 (translate together), and each one gets its own new file.</p>
+            </div>
           </li>
-        </ol>
-        <p class="mx-auto mt-10 max-w-2xl rounded-2xl bg-mist px-5 py-4 text-sm text-slate-700">
-          DXF works after install. For DWG, install
-          <a class="font-semibold text-accent underline-offset-2 hover:underline" href="https://www.opendesign.com/guestfiles/oda_file_converter">ODA File Converter</a>
-          on this machine. Tuyi does not bundle it.
-        </p>
+        </ul>
+        <p class="mt-8 text-center text-slate-600">Free, no sign-up. Lines the glossary doesn't cover go to your own DeepL or Azure key.</p>
       </div>
     </section>
 
-    <section id="features" class="scroll-mt-20 bg-mist py-24">
-      <div class="mx-auto max-w-6xl px-4">
-        <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">It translates CAD text, not a screenshot of the drawing</h2>
-        <p class="mx-auto mt-3 max-w-2xl text-center text-slate-600">Titles, notes, attributes, dimensions, tables. Chinese, English, Japanese, Korean, German, French, and more. Cloud, your own endpoint, or offline.</p>
-        <div class="mt-10 flex flex-wrap justify-center gap-2" role="tablist" aria-label="App previews">
-          <button type="button" data-tab="home" aria-selected="true" class="tab on rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Home</button>
-          <button type="button" data-tab="glossary" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Glossary</button>
-          <button type="button" data-tab="settings" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Settings</button>
-          <button type="button" data-tab="dark" aria-selected="false" class="tab rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-black/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Dark</button>
-        </div>
-        <div class="mx-auto mt-8 max-w-5xl overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/10">
-          <img id="feature-shot" src="shots/home.png" alt="Tuyi home after translating a drawing" width="1280" height="800" loading="lazy" class="block w-full" />
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-white py-24">
-      <div class="mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-[1fr_1.3fr] lg:items-center">
-        <div>
-          <h2 class="text-pretty text-3xl font-semibold tracking-tight">A batch, a table, one write-back</h2>
-          <p class="mt-4 max-w-prose text-slate-600">Edit one drawing at a time, or translate several as a queue. Hand-edited rows export to CSV / Excel, then import and write back.</p>
-          <ul class="mt-6 space-y-3 text-slate-700">
-            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>Chinese to English by default; change direction in the footer</li>
-            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>Filter numbers, duplicates, and text already in the target language</li>
-            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>PDF export: A4 / A3, black and white, color, or dark</li>
-            <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>Check for updates inside the app</li>
-          </ul>
-        </div>
-        <img src="shots/export.png" alt="Batch: two drawings queued, output options on the right" width="1280" height="800" loading="lazy" class="rounded-2xl shadow-xl ring-1 ring-black/10" />
-      </div>
-    </section>
-
-    <section id="download" class="scroll-mt-20 bg-mist py-24">
-      <div class="mx-auto max-w-5xl px-4">
-        <h2 class="text-pretty text-center text-3xl font-semibold tracking-tight">Download Tuyi</h2>
-        <p id="dl-ver" class="mt-3 text-center text-slate-600">v0.1.11 · free · unsigned installer</p>
+    <section id="download" class="scroll-mt-16 bg-white py-20">
+      <div class="mx-auto max-w-4xl px-4">
+        <h2 class="text-center text-3xl font-semibold tracking-tight">Download</h2>
+        <p id="dl-ver" class="mt-2 text-center text-slate-600">v0.1.11, free</p>
         <p id="dl-os" class="mt-1 hidden text-center text-sm font-medium text-accent"></p>
 
-        <div class="mt-10 grid items-stretch gap-5 sm:grid-cols-2">
-          <article class="dl-card flex h-full flex-col rounded-3xl bg-white p-7 text-left shadow-sm ring-1 ring-black/5" data-os="win">
+        <div class="mt-8 grid items-stretch gap-5 sm:grid-cols-2">
+          <article class="dl-card rounded-3xl bg-mist p-6 text-left" data-os="win">
             <h3 class="text-xl font-semibold">Windows</h3>
-            <p class="mt-2 text-sm text-slate-600">Windows 10 or 11, <strong class="font-semibold text-ink">64-bit</strong>. Not 32-bit, not 7 / 8.</p>
-            <p class="mt-1 text-sm text-slate-500">Setup.exe · <span id="win-size">about 64 MB</span> · Windows 10 needs WebView2 (usually already there) · includes <code class="font-mono">tuyi-cli.exe</code></p>
+            <p class="mt-2 text-sm text-slate-600">Windows 10 or 11, 64-bit. Installer <span id="win-size">about 64 MB</span>.</p>
             <div class="dl-foot">
-              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe" rel="noopener">Download Windows</a>
-              <p class="dl-note mt-3 text-xs leading-5 text-slate-500">SmartScreen will block it the first time: More info, Run anyway.</p>
+              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe" rel="noopener">Download for Windows</a>
+              <p class="mt-3 text-xs leading-5 text-slate-500">The installer isn't signed yet, so Windows will stop it the first time. Click More info, then Run anyway.</p>
             </div>
           </article>
 
-          <article class="dl-card flex h-full flex-col rounded-3xl bg-white p-7 text-left shadow-sm ring-1 ring-black/5" data-os="mac">
+          <article class="dl-card rounded-3xl bg-mist p-6 text-left" data-os="mac">
             <h3 class="text-xl font-semibold">Mac</h3>
-            <p class="mt-2 text-sm text-slate-600">Apple silicon and Intel are different packages. The wrong one will not open.</p>
-            <div class="mt-4 inline-flex rounded-full bg-mist p-1" role="radiogroup" aria-label="Mac chip">
+            <div class="mt-3 inline-flex self-start rounded-full bg-white p-1" role="radiogroup" aria-label="Mac chip">
               <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="true" data-chip="arm">Apple silicon</button>
               <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="false" data-chip="intel">Intel</button>
             </div>
             <p id="mac-hint" class="mac-hint mt-3 text-sm text-slate-600">
-              <span data-mac-hint="arm" data-active>M1 / M2 / M3 / M4. Apple menu, About This Mac, Chip.</span>
-              <span data-mac-hint="intel" aria-hidden="true">Intel. Apple menu, About This Mac. This file is not the Apple silicon one.</span>
+              <span data-mac-hint="arm" data-active>Pick this for M1 to M4. Not sure? Check About This Mac in the Apple menu.</span>
+              <span data-mac-hint="intel" aria-hidden="true">For older Intel Macs. It won't run on Apple silicon, and the other one won't run here.</span>
             </p>
             <div class="dl-foot">
-              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg" rel="noopener" aria-label="Download macOS (Apple silicon)">
-                <span data-mac-label="arm" data-active>Download macOS (Apple silicon)</span>
-                <span data-mac-label="intel" aria-hidden="true">Download macOS (Intel)</span>
-                <span data-mac-label="arm-missing" aria-hidden="true">Apple silicon build is not up yet</span>
-                <span data-mac-label="intel-missing" aria-hidden="true">Intel build is not up yet</span>
+              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg" rel="noopener" aria-label="Download for Mac (Apple silicon)">
+                <span data-mac-label="arm" data-active>Download for Mac (Apple silicon)</span>
+                <span data-mac-label="intel" aria-hidden="true">Download for Mac (Intel)</span>
+                <span data-mac-label="arm-missing" aria-hidden="true">The Apple silicon build isn't up yet</span>
+                <span data-mac-label="intel-missing" aria-hidden="true">The Intel build isn't up yet</span>
               </a>
-              <p class="dl-note mt-3 text-xs leading-5 text-slate-500">Open the DMG and drag 图译 into Applications. First launch: right-click the icon, Open. Or System Settings, Privacy & Security, Open Anyway.</p>
+              <p class="mt-3 text-xs leading-5 text-slate-500">Open the DMG and drag Tuyi into Applications. The first time, right-click the icon and choose Open.</p>
             </div>
           </article>
         </div>
 
-        <p id="dl-msg" class="mt-6 hidden text-center text-sm font-semibold text-ink" role="status" aria-live="polite"></p>
-        <p class="mt-8 text-center text-sm text-slate-500">
-          <a class="underline-offset-2 hover:underline" href="https://github.com/erict16/tuyi/releases">All releases</a>
-          · Your own keys. Tuyi does not create an account
-        </p>
-      </div>
-    </section>
-
-    <section id="faq" class="scroll-mt-20 bg-white py-24">
-      <div class="mx-auto max-w-3xl px-4">
-        <h2 class="text-3xl font-semibold tracking-tight">FAQ</h2>
-        <dl class="mt-10 divide-y divide-black/10">
-          <div class="py-5">
-            <dt class="font-semibold">How does an AI assistant use Tuyi?</dt>
-            <dd class="mt-2 text-slate-600">Have it run <code class="font-mono text-ink">python -m tuyi translate drawing.dxf</code> in a terminal. No dialogs, no waiting for clicks. Success prints the new file path and line counts; failures go to stderr with a non-zero exit code. Any assistant that can run commands works: Claude Code, Cursor, Codex, Grok.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">Does the CLI need an API key?</dt>
-            <dd class="mt-2 text-slate-600">Chinese ⇄ English and Chinese ⇄ French hit the built-in glossary first, offline. Lines it misses use the DeepL / Azure / Ollama / custom endpoint saved in the desktop app settings, or pick one with <code class="font-mono text-ink">--provider</code>.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">Which Windows versions work?</dt>
-            <dd class="mt-2 text-slate-600">Windows 10 or 11, 64-bit. Not 32-bit, not Windows 7 / 8. On Windows 10, install Edge WebView2 if the app asks for it.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">Which Mac download do I need?</dt>
-            <dd class="mt-2 text-slate-600">Apple menu, About This Mac. If it says Apple M1 / M2 / M3 / M4, get Apple silicon. If it says Intel, get Intel. They are not interchangeable. If the Intel build is missing, the button says so.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">Do I need AutoCAD?</dt>
-            <dd class="mt-2 text-slate-600">No. Tuyi is a standalone app. DXF opens directly. DWG uses ODA File Converter on your machine.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">Is ODA bundled?</dt>
-            <dd class="mt-2 text-slate-600">No, and it will not be. The license does not allow shipping it with the app. Install ODA File Converter yourself. DXF-only work does not need it.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">It will not open the first time?</dt>
-            <dd class="mt-2 text-slate-600">That is expected. The installer is not code-signed yet. Mac: right-click the icon, Open. Windows: More info, Run anyway.</dd>
-          </div>
-          <div class="py-5">
-            <dt class="font-semibold">Does it cost money? Is there a license key?</dt>
-            <dd class="mt-2 text-slate-600">No cost, no license key. Translation keys are yours: DeepL, Azure, Ollama, or a custom endpoint. Tuyi does not create accounts. It does not call out unless you check for updates.</dd>
-          </div>
-        </dl>
+        <p id="dl-msg" class="mt-5 hidden text-center text-sm font-semibold text-ink" role="status" aria-live="polite"></p>
+        <p class="mt-6 text-center text-sm text-slate-500">DXF works right after install. For DWG, also install the free <a class="font-medium text-accent underline-offset-2 hover:underline" href="https://www.opendesign.com/guestfiles/oda_file_converter">ODA File Converter</a>.</p>
       </div>
     </section>
   </main>
 
   <footer class="border-t border-black/5 py-6">
-    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-sm text-slate-500">
+    <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 text-sm text-slate-500">
       <span translate="no">图译 Tuyi · <a class="hover:text-ink" href="https://github.com/erict16/tuyi/blob/main/LICENSE">MIT license</a></span>
       <div class="flex items-center gap-4">
+        <a href="https://github.com/erict16/tuyi/releases" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">All releases</a>
+        <a href="https://github.com/erict16/tuyi/blob/main/README.en.md" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">For developers</a>
         <a href="https://github.com/erict16/tuyi" class="text-slate-500 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="GitHub">
           <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
         </a>
-        <a href="https://github.com/erict16/tuyi/blob/main/CONTRIBUTING.md" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Contribute</a>
-        <a href="https://github.com/erict16/tuyi/releases" class="hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">Releases</a>
       </div>
     </div>
   </footer>
 
   <script>
-    const COPY_DONE = "Copied";
-    const shot = { home: "shots/home.png", glossary: "shots/glossary.png", settings: "shots/settings.png", dark: "shots/dark.png" };
-    const alts = { home: "Tuyi home after translating a drawing", glossary: "Glossary: your own terms hit first", settings: "Settings: cloud translation or your own endpoint", dark: "Tuyi dark mode" };
-    const img = document.getElementById("feature-shot");
-    document.querySelectorAll(".tab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach((b) => {
-          b.classList.remove("on", "bg-ink", "text-white");
-          b.classList.add("bg-white", "text-slate-600", "ring-1", "ring-black/10");
-          b.setAttribute("aria-selected", "false");
-        });
-        btn.classList.add("on", "bg-ink", "text-white");
-        btn.classList.remove("bg-white", "text-slate-600", "ring-1", "ring-black/10");
-        btn.setAttribute("aria-selected", "true");
-        img.src = shot[btn.dataset.tab];
-        img.alt = alts[btn.dataset.tab] || "Tuyi";
-      });
-    });
-    document.querySelector('.tab[data-tab="home"]').setAttribute("aria-selected", "true");
+    const T = {
+      copied: "Copied",
+      ver: (tag) => `${tag}, free`,
+      size: (mb) => `about ${mb} MB`,
+      win: "Download for Windows",
+      winMissing: "The Windows build isn't up yet",
+      heroWin: "Download for Windows",
+      heroArm: "Download for Mac (Apple silicon)",
+      heroIntel: "Download for Mac (Intel)",
+      osWin: "You're on Windows. Use the one on the left.",
+      osMac: "You're on a Mac. Use the one on the right, and check the chip.",
+    };
 
     const heroVideo = document.getElementById("hero-video");
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -610,12 +318,11 @@ It never overwrites the source. If unsure about options, run python -m tuyi tran
 
     document.querySelectorAll(".copy-btn").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const target = btn.dataset.copyTarget ? document.getElementById(btn.dataset.copyTarget) : null;
-        const text = target ? target.textContent : btn.dataset.copy || "";
+        const target = document.getElementById(btn.dataset.copyTarget);
         try {
-          await navigator.clipboard.writeText(text.trim());
+          await navigator.clipboard.writeText((target?.textContent || "").trim());
           btn.dataset.copied = "true";
-          btn.setAttribute("aria-label", COPY_DONE);
+          btn.setAttribute("aria-label", T.copied);
           setTimeout(() => {
             btn.dataset.copied = "false";
             btn.removeAttribute("aria-label");
@@ -627,13 +334,8 @@ It never overwrites the source. If unsure about options, run python -m tuyi tran
     const msg = document.getElementById("dl-msg");
     const btnMac = document.getElementById("btn-mac");
     const btnWin = document.getElementById("btn-win");
+    const heroDl = document.getElementById("hero-dl");
     const macHint = document.getElementById("mac-hint");
-    let macChip = "arm";
-
-    function bytesLabel(n) {
-      if (!n) return "";
-      return `about ${Math.round(n / 1024 / 1024)} MB`;
-    }
 
     function setLink(el, url, label, missing) {
       if (url) {
@@ -659,10 +361,8 @@ It never overwrites the source. If unsure about options, run python -m tuyi tran
     }
 
     function applyMacChip(chip) {
-      macChip = chip;
       document.querySelectorAll("[data-chip]").forEach((b) => {
-        const on = b.dataset.chip === chip;
-        b.setAttribute("aria-checked", on ? "true" : "false");
+        b.setAttribute("aria-checked", b.dataset.chip === chip ? "true" : "false");
       });
       showLayer(macHint.querySelectorAll("[data-mac-hint]"), chip, "data-mac-hint");
       const url = chip === "intel" ? window.DL.macIntel : window.DL.macArm;
@@ -708,9 +408,8 @@ It never overwrites the source. If unsure about options, run python -m tuyi tran
         const res = await fetch("https://api.github.com/repos/erict16/tuyi/releases/latest");
         if (!res.ok) return;
         const data = await res.json();
-        const assets = data.assets || [];
         let win = "", macArm = "", macIntel = "", winBytes = 0;
-        for (const asset of assets) {
+        for (const asset of data.assets || []) {
           const name = asset.name || "";
           const url = asset.browser_download_url || "";
           if (/Tuyi_v.+_Setup\.exe$/i.test(name)) {
@@ -727,13 +426,9 @@ It never overwrites the source. If unsure about options, run python -m tuyi tran
         if (macIntel) window.DL.macIntel = macIntel;
         if (data.tag_name) {
           window.DL_META.version = data.tag_name;
-          const ver = document.getElementById("dl-ver");
-          if (ver) ver.textContent = `${data.tag_name} · free · unsigned installer`;
+          document.getElementById("dl-ver").textContent = T.ver(data.tag_name);
         }
-        if (winBytes) {
-          const size = document.getElementById("win-size");
-          if (size) size.textContent = bytesLabel(winBytes);
-        }
+        if (winBytes) document.getElementById("win-size").textContent = T.size(Math.round(winBytes / 1024 / 1024));
       } catch (_) {}
     }
 
@@ -742,25 +437,29 @@ It never overwrites the source. If unsure about options, run python -m tuyi tran
         card.dataset.current = card.dataset.os === os ? "true" : "false";
       });
       const line = document.getElementById("dl-os");
-      if (!line) return;
-      if (os === "win") {
-        line.textContent = "This computer runs Windows. Use the left card.";
-        line.classList.remove("hidden");
-      } else if (os === "mac") {
-        line.textContent = "This computer is a Mac. Use the right card. Check the chip first.";
-        line.classList.remove("hidden");
-      } else {
-        line.classList.add("hidden");
+      if (os === "win") line.textContent = T.osWin;
+      else if (os === "mac") line.textContent = T.osMac;
+      line.classList.toggle("hidden", !os);
+    }
+
+    function setHero(os, chip) {
+      let url = "", label = "";
+      if (os === "win") [url, label] = [window.DL.win, T.heroWin];
+      if (os === "mac") [url, label] = chip === "intel" ? [window.DL.macIntel, T.heroIntel] : [window.DL.macArm, T.heroArm];
+      if (url) {
+        heroDl.href = url;
+        heroDl.textContent = label;
       }
     }
 
     (async () => {
       await hydrateFromGithub();
-      setLink(btnWin, window.DL.win, "Download Windows", "Windows installer is not up yet");
+      setLink(btnWin, window.DL.win, T.win, T.winMissing);
       const os = detectOs();
+      const chip = os === "mac" ? await detectMacChip() : "arm";
       highlightOs(os);
-      if (os === "mac") applyMacChip(await detectMacChip());
-      else applyMacChip("arm");
+      applyMacChip(chip);
+      setHero(os, chip);
     })();
 
     document.querySelectorAll(".dl-link").forEach((el) => {

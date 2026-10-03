@@ -1,6 +1,6 @@
 # 图译 Tuyi
 
-> Let your AI assistant translate DWG / DXF drawings. Tuyi's CLI runs hands-free (no dialogs, no prompts), so Claude Code, Cursor, Codex, Grok or a script can translate CAD drawings end to end. No AutoCAD. Windows and Mac desktop app included.
+> Translate the text on DWG / DXF drawings and save a new file. No AutoCAD. Windows and Mac desktop app. An AI assistant that can run programs on the user's computer (WorkBuddy, ChatGPT or Claude desktop, Claude Code, Cursor, scripts) can run Tuyi hands-free with the commands below: no dialogs, no prompts.
 
 图译 opens a DWG or DXF, translates titles, notes, attributes, dimensions, and table text, then writes a new file. The original drawing is not modified.
 
