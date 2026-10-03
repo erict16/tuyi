@@ -1,50 +1,63 @@
-<h4 align="right"><b>English</b> · <a href="README.md">中文</a></h4>
+<h4 align="right"><a href="README.md">中文</a> · <b>English</b> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a></h4>
 
 <p align="center">
-  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
+  <a href="https://erict16.github.io/tuyi/en.html"><img src="landing/shots/og.png" width="900" alt="图译 Tuyi: translate the Chinese on DWG / DXF drawings into English"></a>
 </p>
 
 <h1 align="center">图译 Tuyi</h1>
-<h3 align="center">A powerful, open-source DWG/DXF translator</h3>
+<h3 align="center">Translate the Chinese on your DWG / DXF drawings into English</h3>
 
 <p align="center">
-  <a href="https://github.com/erict16/tuyi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
+  <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
-  <img alt="MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
-<p align="center">
-  <a href="https://erict16.github.io/tuyi/en.html">Website</a>
-  ·
-  <a href="https://github.com/erict16/tuyi/releases/latest">Download</a>
-</p>
+<p align="center"><img src="docs/icons/app-rounded.png" width="20" alt=""> <a href="https://erict16.github.io/tuyi/en.html">Website</a></p>
 
-Open a DWG or DXF. Translate the text. Get a new file. The original stays put. No AutoCAD. Windows and Mac.
+Tuyi opens a DWG or DXF drawing, translates the text on it, writes the translation back and saves a new file. The original stays as it is, and you don't need AutoCAD. Title blocks, notes, block attributes, dimensions and tables all get translated.
 
-The CLI runs hands-free, so an AI assistant (Claude Code, Cursor, Codex, Grok) or a script can translate drawings for you. See [Command line](#command-line-let-your-ai-assistant-translate-the-drawings).
+## Download (v0.1.11, free)
+
+- **Windows 10 / 11 (64-bit):** [Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
+- **Mac with Apple silicon (M1 to M4):** [Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
+- **Mac with Intel:** [Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+
+Not sure which Mac you have? Check About This Mac in the Apple menu. Newer versions show up on [Releases](https://github.com/erict16/tuyi/releases/latest).
+
+The installers aren't signed yet, so the system will stop them the first time. That's expected. On Windows, click More info, then Run anyway. On Mac, open the DMG, drag Tuyi into Applications, and the first time right-click the icon and choose Open.
+
+DXF works right after install. For DWG, also install the free [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter).
+
+## Let your AI assistant run Tuyi for you
+
+Using WorkBuddy, ChatGPT or Claude? They can run Tuyi for you, no clicking needed. Send it this:
+
+> Tuyi is installed on my computer. Please use it to translate the DWG / DXF drawings in my Drawings folder into English, save them as new files, and leave the originals alone.
+
+The assistant has to be allowed to run programs on your computer. That usually means the desktop app, and it will ask you first.
 
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/app-home.png" alt="Home: add a drawing on the left, translate at the bottom">
+  <img src="docs/screenshots/app-home.png" alt="One drawing done: 6 lines in English, saved as a new file">
 </p>
 
 <table>
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>Glossary</h3>
-      <img src="docs/screenshots/app-glossary.png" alt="Your terms hit first">
+      <img src="docs/screenshots/app-glossary.png" alt="Built-in terms such as transformer, HV, LV winding">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Settings</h3>
-      <img src="docs/screenshots/app-settings.png" alt="Cloud translate or your own endpoint">
+      <img src="docs/screenshots/app-settings.png" alt="Online translation or your own endpoint">
     </td>
   </tr>
   <tr>
     <td align="center" valign="top" width="50%">
       <h3>On the drawing</h3>
-      <img src="docs/screenshots/app-write.png" alt="Keep translation only, or keep both">
+      <img src="docs/screenshots/app-write.png" alt="Keep only the translation, or keep both">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>Dark</h3>
@@ -53,82 +66,35 @@ The CLI runs hands-free, so an AI assistant (Claude Code, Cursor, Codex, Grok) o
   </tr>
 </table>
 
-## Features
-
-- **Strong:** titles, notes, attributes, dimensions, table text. Translate writes a new drawing
-- **Open:** MIT. Your keys stay yours. Tuyi has no accounts
-- **Simple:** drop files on the left, translate at the bottom. Engines live in 设置
-- **Steady:** glossary hits skip the API. Light / dark. Original files stay read-only
-
-## Install
-
-Get the latest build from [GitHub Releases](https://github.com/erict16/tuyi/releases/latest).
-
-- **Windows 10 / 11 (64-bit):** run `Tuyi_*_Setup.exe`. You can pick the folder. 32-bit is not supported.
-- **Mac:** Apple silicon and Intel are **different** DMGs. Drag 图译 into Applications.
-
-The build is not code-signed. First launch will warn you.
-
-- Windows: More info → Run anyway
-- Mac: right-click → Open. Or System Settings → Privacy & Security → Open Anyway
-
-DXF works out of the box. DWG needs [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) on the same computer. Tuyi cannot ship ODA.
-
 ## How to use it
 
-1. Click **添加图纸** or drop a `.dwg` / `.dxf` on the left.
-2. Pick Chinese → English (or another pair).
-3. Click **翻译**. Tuyi writes a new file.
-4. Keys and layout live in **设置**. Your word list is **词汇库**.
+The app is in Chinese for now. The button names are in brackets.
 
-## Command line: let your AI assistant translate the drawings
+1. Click Add drawings (添加图纸) on the left, or drop `.dwg` / `.dxf` files there. You can add several.
+2. Pick the direction at the bottom left. The default is Chinese → English.
+3. Click Quick translate (快速翻译). The new file goes to your Downloads folder. If a line is wrong, fix it and write again.
+4. Your own terms go in Glossary (术语管理). Translation keys and what stays on the drawing are in Settings (设置).
 
-The CLI runs hands-free: no dialogs, no prompts, it exits when done. So an AI assistant that can run terminal commands (Claude Code, Cursor, Codex, Grok) or your own script can translate drawings end to end.
+## Who translates
+
+Terms that match the glossary are used as is, offline. Common building, switchgear and transformer terms are built in, and you can add your own.
+
+Everything else goes to the service you set up in Settings: DeepL, Azure, an OpenAI-compatible endpoint, or Ollama on your own machine (offline). Tuyi has no sign-up and collects no data.
+
+## For developers
+
+### Command line: let your AI assistant translate the drawings
+
+The command line has no dialogs and no prompts, and it exits when done, so AI assistants and scripts can use it. This is what an assistant runs after you send it the sentence above.
 
 ```bash
-python -m tuyi translate drawing.dxf
+python -m tuyi translate drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
+python -m tuyi pdf out/*.dxf --output-dir out --appearance 黑白
 ```
 
-Ask your assistant "translate every drawing in drawings/ to English and export a PDF of each", and it runs:
+Use `python -m tuyi` from the source folder. In an installed copy, `tuyi-cli.exe` sits next to `Tuyi.exe` on Windows, and on Mac it is `Tuyi.app/Contents/MacOS/tuyi-cli`.
 
-```console
-$ python -m tuyi translate drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
-/home/tuyi/project/out/en_floor_plan_11h37_03-10-26.dxf
-extracted: 6
-translated: 6
-/home/tuyi/project/out/en_dims_tables_11h37_03-10-26.dxf
-extracted: 4
-translated: 4
-
-$ python -m tuyi pdf out/*.dxf --output-dir out --appearance 黑白
-out/en_dims_tables_11h37_03-10-26.pdf
-appearance: 黑白
-paper: a4
-pages: 1
-out/en_floor_plan_11h37_03-10-26.pdf
-appearance: 黑白
-paper: a4
-pages: 2
-```
-
-(Real output, using the two drawings in `tests/fixtures`.)
-
-- Three lines per drawing: new file path, `extracted` count, `translated` count. Errors go to stderr with exit code 1; bad arguments exit 2.
-- The original is never overwritten. Tuyi always writes a new file.
-- Built-in glossaries (zh ⇄ en, zh ⇄ fr) hit offline; the rest uses the DeepL / Azure / Ollama / custom endpoint saved in Settings.
-- Common options: `-o`, `--output-dir`, `--mode zh_to_en`, `--provider`, `--glossary`, `--style`; PDF adds `--paper` and `--appearance`.
-
-Paste this into the chat, or into your project's `AGENTS.md` / `CLAUDE.md` / Cursor rules:
-
-```text
-To translate CAD drawings, use the Tuyi CLI (run it from the Tuyi source folder; the Windows install has tuyi-cli.exe):
-python -m tuyi translate <drawing.dwg or .dxf, several allowed> --output-dir <output folder> --mode zh_to_en
-On success it prints the new file path, extracted and translated for each drawing. On failure read stderr; the exit code is not 0.
-For PDF: python -m tuyi pdf <translated drawings> --output-dir <output folder>
-It never overwrites the original. If unsure about options, run python -m tuyi translate --help first.
-```
-
-Run `python -m tuyi` from the source folder. On Windows, `tuyi-cli.exe` sits next to `Tuyi.exe`; on Mac it is `Tuyi.app/Contents/MacOS/tuyi-cli`. DWG still needs ODA on the machine. See `python -m tuyi --help`.
+Each drawing prints three lines: the new file path, the `extracted` count and the `translated` count. Errors go to stderr with exit code 1; bad arguments exit 2. The original is never overwritten.
 
 | Option | Meaning |
 | --- | --- |
@@ -142,8 +108,22 @@ Run `python -m tuyi` from the source folder. On Windows, `tuyi-cli.exe` sits nex
 | `pdf --appearance` | `Chrome` (default, dark), `彩色` (white paper), `黑白` |
 | `pdf --paper` | `a4` (default, portrait), `a4l`, `a3`, `a3l` |
 
-ODA File Converter must be on `PATH`, or set `CAD_ODA_EXEC`.
+DWG needs ODA File Converter on the machine, on `PATH` or set via `CAD_ODA_EXEC`. See `python -m tuyi --help` for everything.
+
+For your project's `AGENTS.md` / `CLAUDE.md` / Cursor rules:
+
+```text
+To translate CAD drawings, use the Tuyi command line (python -m tuyi in the source folder; tuyi-cli in an installed copy):
+python -m tuyi translate <drawing.dwg or .dxf, several allowed> --output-dir <output folder> --mode zh_to_en
+On success it prints the new file path, extracted and translated for each drawing. On failure read stderr; the exit code is not 0.
+For PDF: python -m tuyi pdf <translated drawings> --output-dir <output folder>
+It never overwrites the original. If unsure about options, run python -m tuyi translate --help first.
+```
+
+### Run from source
+
+Dev setup and tests are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT. If it helps, star the repo.
+[MIT](LICENSE). Originally forked from [etianwang/CAD_translator](https://github.com/etianwang/CAD_translator).

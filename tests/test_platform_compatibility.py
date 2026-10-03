@@ -176,10 +176,19 @@ class PlatformCompatibilityTests(unittest.TestCase):
         readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
         self.assertIn("docs/icons/app-rounded.png", readme)
         self.assertIn("<table>", readme)
-        self.assertIn("<h3>词汇库</h3>", readme)
+        self.assertIn("<h3>术语管理</h3>", readme)
         self.assertIn("<h3>深色</h3>", readme)
         self.assertIn("<h1 align=\"center\">图译 Tuyi</h1>", readme)
-        self.assertIn("<h3 align=\"center\">强大且开源的 DWG/DXF 翻译工具</h3>", readme)
+        self.assertIn("<h3 align=\"center\">把 DWG / DXF 图纸上的中文译成英文</h3>", readme)
+        self.assertNotIn("开源", readme)
+        root = Path(__file__).resolve().parents[1]
+        for name in ("README.md", "README.en.md", "README.ja.md", "README.ko.md", "README.es.md"):
+            text = (root / name).read_text(encoding="utf-8")
+            self.assertTrue(text.split("<h1")[0].count('src="landing/shots/og.png"') == 1, name)
+            for who in ("WorkBuddy", "ChatGPT", "Claude", "_Setup.exe", "macOS_arm64.dmg", "macOS_x86_64.dmg"):
+                self.assertIn(who, text, f"{name}: {who}")
+            self.assertNotIn("open source", text.lower(), name)
+            self.assertNotIn("open-source", text.lower(), name)
         self.assertIn("docs/screenshots/app-glossary.png", readme)
         self.assertIn("docs/screenshots/app-write.png", readme)
         self.assertIn("docs/screenshots/app-settings.png", readme)
