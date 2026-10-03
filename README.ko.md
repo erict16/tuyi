@@ -1,88 +1,65 @@
+<h4 align="right"><a href="README.md">中文</a> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a> · <b>한국어</b> · <a href="README.es.md">Español</a></h4>
+
 <p align="center">
-  <img src="docs/icons/app-rounded.png" width="128" alt="Tuyi">
+  <a href="https://erict16.github.io/tuyi/en.html"><img src="landing/shots/og.png" width="900" alt="图译 Tuyi: DWG / DXF 도면의 중국어를 영어로 번역"></a>
 </p>
 
-<h1 align="center">图译 Tuyi - DWG / DXF 도면 번역</h1>
+<h1 align="center">图译 Tuyi</h1>
+<h3 align="center">DWG / DXF 도면의 중국어를 영어로 번역합니다</h3>
 
 <p align="center">
-  <a href="README.en.md">English</a> ·
-  <a href="README.md">中文</a> ·
-  <a href="README.ja.md">日本語</a> ·
-  <b>한국어</b> ·
-  <a href="README.es.md">Español</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/erict16/tuyi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
+  <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
-  <img alt="macOS Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-orange?style=flat-square">
-  <img alt="MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
 </p>
+
+Tuyi는 DWG / DXF 도면을 열어 글자를 번역하고, 도면에 다시 써서 새 파일로 저장합니다. 원본 도면은 그대로이고 AutoCAD도 필요 없습니다. 표제란, 주석, 블록 속성, 치수, 표 안의 글자도 번역합니다.
+
+## 다운로드 (v0.1.11, 무료)
+
+- **Windows 10 / 11 (64비트)**: [Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
+- **Mac (Apple 실리콘, M1~M4)**: [Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
+- **Mac (Intel)**: [Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+
+어떤 Mac인지 모르겠다면 Apple 메뉴의 "이 Mac에 관하여"에서 확인하세요. 새 버전은 [Releases](https://github.com/erict16/tuyi/releases/latest)에 올라옵니다.
+
+설치 파일은 아직 서명되지 않아서 처음에는 시스템이 막습니다. 정상입니다. Windows는 "추가 정보" → "실행"을 누르세요. Mac은 DMG를 열어 Tuyi를 응용 프로그램으로 끌어 놓고, 처음 열 때 아이콘을 오른쪽 클릭해 "열기"를 고르세요.
+
+DXF는 설치하면 바로 됩니다. DWG는 무료 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)도 설치해야 합니다.
+
+## AI 비서에게 맡기기
+
+WorkBuddy, ChatGPT, Claude를 쓰고 있나요? Tuyi를 대신 실행해 주니 클릭할 필요가 없습니다. 이 한 문장을 보내면 됩니다.
+
+> 내 컴퓨터에 图译(Tuyi)가 설치되어 있어요. 그걸로 "도면" 폴더의 DWG / DXF를 영어로 번역해서 새 파일로 저장해 주세요. 원본은 바꾸지 마세요.
+
+비서가 내 컴퓨터에서 프로그램을 실행할 수 있어야 합니다. 보통 데스크톱 앱이고, 실행 전에 먼저 물어봅니다.
+
+## 화면
 
 <p align="center">
-  <img src="docs/screenshots/regular.png" width="920" alt="Tuyi: 왼쪽이 원문, 오른쪽이 번역">
+  <img src="docs/screenshots/app-home.png" alt="도면 한 장 번역 완료: 6줄이 영어로, 새 파일로 저장">
 </p>
 
-Tuyi는 **Windows**와 **macOS**용 데스크톱 앱입니다. CAD 도면을 열면 도면 위 글자가 표로 나옵니다. 번역한 뒤 돌려쓰면 **새** 도면이 생깁니다. 원본 파일은 그대로 둡니다.
+## 사용법
 
-AutoCAD는 필요 없습니다.
+화면은 아직 중국어입니다. 버튼 이름은 괄호 안에 적었습니다.
 
-해외 고객에게 도면을 넘길 때, 또는 영어 도면을 중국어로 바꿀 때 씁니다. 도면 이름, 주석, 속성, 치수, 표 안의 글자가 대상입니다. 기본은 중국어 → 영어입니다. 방향은 바꿀 수 있습니다.
+1. 왼쪽 "도면 추가"(添加图纸)를 누르거나 `.dwg` / `.dxf`를 끌어 놓습니다. 여러 장을 넣을 수 있습니다.
+2. 왼쪽 아래에서 번역 방향을 고릅니다. 기본은 중국어 → 영어입니다.
+3. "빠른 번역"(快速翻译)을 누릅니다. 새 파일은 다운로드 폴더에 생깁니다.
+4. 내 용어는 "용어 관리"(术语管理), 번역 서비스 설정은 "설정"(设置)에 있습니다.
 
-## 설치
+용어집에 맞는 단어는 그대로 쓰고 인터넷에 연결하지 않습니다. 나머지는 설정에 넣은 DeepL, Azure, OpenAI 호환 API, 또는 내 컴퓨터의 Ollama로 번역합니다. 가입이 필요 없고 데이터를 모으지 않습니다.
 
-[Releases](https://github.com/erict16/tuyi/releases)에서 받습니다.
-
-- **Windows:** 10 또는 11, 64비트. Setup exe를 실행합니다. 32비트는 안 됩니다.
-- **Mac:** Apple 실리콘(M1 이후)이 하나의 DMG입니다. Intel Mac은 다른 파일입니다. 같은 설치 파일이 아닙니다. 열어서 图译을 Applications로 드래그하세요.
-
-지금 설치 파일은 코드 서명이 없습니다. 처음 열면 운영체제가 막습니다. 정상입니다.
-
-- **Windows:** 추가 정보 → 실행.
-- **Mac:** 앱을 우클릭한 다음 열기. 또는 시스템 설정 → 개인 정보 보호 및 보안 → 확인 후 열기.
-
-## 쓰는 법
-
-1. `.dwg` 또는 `.dxf`를 엽니다.
-2. 번역을 누릅니다. 원문 | 번역 | 레이어 표가 나옵니다.
-3. 틀린 줄은 그 자리에서 고칩니다.
-4. 돌려씁니다. 새 파일은 다운로드 폴더에 저장됩니다. 다른 폴더도 고를 수 있습니다.
-
-폴더 단위로 한꺼번에 내보낼 수도 있습니다.
-
-## DWG는 프로그램이 하나 더 필요합니다
-
-**DXF:** 열고 번역하면 됩니다. 다른 프로그램은 필요 없습니다.
-
-**DWG:** 같은 컴퓨터에 먼저 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)를 설치하세요. Tuyi는 PATH에서 찾습니다. `CAD_ODA_EXEC`로 위치를 지정해도 됩니다. ODA를 Tuyi 설치 파일에 넣을 수는 없습니다. 그쪽 라이선스가 막습니다.
-
-## 번역은 누가 하나
-
-Tuyi 자체 클라우드 계정은 없습니다. 아래 중 하나를 직접 넣습니다.
-
-- 가지고 있는 용어집 (딱 맞는 단어는 API로 안 보냄)
-- [Azure Translator](https://azure.microsoft.com/products/ai-services/ai-translator)
-- [DeepL](https://www.deepl.com)
-- 이 컴퓨터의 [Ollama](https://ollama.com)
-- 직접 돌리는 OpenAI 호환 API
-
-키는 이 컴퓨터에만 남습니다. Tuyi는 밖으로 사용 기록을 보내지 않습니다. 공짜입니다 (MIT).
-
-## 명령줄
-
-창에서 하는 일과 같습니다.
+## 개발자용
 
 ```bash
-python -m tuyi translate drawing.dxf
-python -m tuyi translate drawing.dwg -o out.dwg --mode zh_to_en
+python -m tuyi translate drawing.dxf --output-dir out --mode zh_to_en
 ```
 
-Windows에서는 `Tuyi.exe` 옆에 `tuyi-cli.exe`가 있습니다.
-
-## 소스에서 실행
-
-개발과 테스트는 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다. PR을 환영합니다. `main`에 들어가기 전에 Eric이 봅니다.
+설치본에서는 Windows는 `Tuyi.exe` 옆의 `tuyi-cli.exe`, Mac은 `Tuyi.app/Contents/MacOS/tuyi-cli`입니다. 옵션 목록은 [README.en.md](README.en.md#command-line-let-your-ai-assistant-translate-the-drawings), 개발 환경은 [CONTRIBUTING.md](CONTRIBUTING.md)를 보세요.
 
 ## 라이선스
 
-MIT. [etianwang/CAD_translator](https://github.com/etianwang/CAD_translator)의 포크입니다.
+[MIT](LICENSE). 원래 [etianwang/CAD_translator](https://github.com/etianwang/CAD_translator)에서 포크했습니다.

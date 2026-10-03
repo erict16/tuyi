@@ -1,40 +1,53 @@
-<h4 align="right"><a href="README.en.md">English</a> · <b>中文</b></h4>
+<h4 align="right"><b>中文</b> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a></h4>
 
 <p align="center">
-  <img src="docs/icons/app-rounded.png" width="128" alt="图译">
+  <a href="https://erict16.github.io/tuyi/"><img src="landing/shots/og.png" width="900" alt="图译 Tuyi：把 DWG / DXF 图纸上的中文译成英文"></a>
 </p>
 
 <h1 align="center">图译 Tuyi</h1>
-<h3 align="center">强大且开源的 DWG/DXF 翻译工具</h3>
+<h3 align="center">把 DWG / DXF 图纸上的中文译成英文</h3>
 
 <p align="center">
-  <a href="https://github.com/erict16/tuyi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
+  <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
-  <img alt="MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square">
 </p>
 
-<p align="center">
-  <a href="https://erict16.github.io/tuyi/">官网</a>
-  ·
-  <a href="https://github.com/erict16/tuyi/releases/latest">下载</a>
-</p>
+<p align="center"><img src="docs/icons/app-rounded.png" width="20" alt=""> <a href="https://erict16.github.io/tuyi/">官网</a></p>
 
-打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
+图译打开 DWG / DXF 图纸，把上面的字译好，写回图纸，另存一份新文件。原图不动，也不用装 AutoCAD。标题栏、注释、块属性、标注、表格里的字都会译。
 
-命令行全程不用人点，AI 助手（Claude Code、Cursor、Codex、Grok）或脚本能替你把图纸译完。见下面的「命令行」。
+## 下载（v0.1.11，免费）
+
+- **Windows 10 / 11（64 位）**：[Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
+- **Mac，Apple 芯片（M1 到 M4）**：[Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
+- **Mac，Intel**：[Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+
+不确定 Mac 是哪种芯片，看苹果菜单里的「关于本机」。以后的版本都在 [Releases](https://github.com/erict16/tuyi/releases/latest)。
+
+安装包还没签名，第一次打开系统会拦，这是正常的。Windows 点「更多信息」，再点「仍要运行」。Mac 打开 DMG，把图译拖进应用程序，第一次打开时右键图标，选「打开」。
+
+DXF 装上就能译。译 DWG 还要装免费的 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)。
+
+## 让 AI 助手替你运行图译
+
+在用 WorkBuddy、ChatGPT 或 Claude？它们可以替你运行图译，不用你点。把这句话发给它：
+
+> 我电脑上装了图译（Tuyi）。请用它把「图纸」文件夹里的 DWG / DXF 译成英文，另存新文件，原图不要改。
+
+助手要能在你的电脑上运行程序，一般是桌面版，而且会先问你同不同意。
 
 ## 界面
 
 <p align="center">
-  <img src="docs/screenshots/app-home.png" alt="主界面：左边加图纸，底下点翻译">
+  <img src="docs/screenshots/app-home.png" alt="译完一张图：6 句写成英文，另存成新文件">
 </p>
 
 <table>
   <tr>
     <td align="center" valign="top" width="50%">
-      <h3>词汇库</h3>
-      <img src="docs/screenshots/app-glossary.png" alt="自己的词先命中">
+      <h3>术语管理</h3>
+      <img src="docs/screenshots/app-glossary.png" alt="内置的变压器、高压、低压绕组等译法">
     </td>
     <td align="center" valign="top" width="50%">
       <h3>设置</h3>
@@ -53,90 +66,33 @@
   </tr>
 </table>
 
-## 特点
-
-- **强**：标题、注释、属性、标注、表格里的字都能译。点翻译就写出新图
-- **开**：MIT 开源。密钥用你自己的，图译不建账号、不回传
-- **简**：左边拖进去，底下点翻译。网上翻译、自己配接口，都在设置里
-- **稳**：词汇库对上的词不走接口。浅色 / 深色。原文件只读
-
-## 安装
-
-从 [GitHub Releases](https://github.com/erict16/tuyi/releases/latest) 下载最新安装包。
-
-1. **Windows 10 / 11（64 位）**：跑 `Tuyi_*_Setup.exe`，文件夹可以自己选。32 位不行。
-2. **Mac**：Apple 芯片和 Intel **不是**同一个 DMG。打开后把「图译」拖进应用程序。
-
-安装包还没买代码签名，第一次打开系统会拦，这是正常的。
-
-- Windows：更多信息 → 仍要运行
-- Mac：右键 → 打开。或 系统设置 → 隐私与安全性 → 仍要打开
-
-只译 DXF，装上就能用。要译 DWG，本机自己装 [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)。图译不把它打进安装包。
-
 ## 怎么用
 
-1. 点左边 **添加图纸**，或把 `.dwg` / `.dxf` 拖进去。一次可以多张
-2. 上面选中 → 英（或别的方向）
-3. 点 **翻译**。会写出新文件。某一行不对，可以先改
-4. 密钥、「图上只留译文还是都留」在 **设置**。自己的词在 **词汇库**
+1. 点左边「添加图纸」，或把 `.dwg` / `.dxf` 拖进来。一次可以加好几张。
+2. 左下角选翻译方向，默认中 → 英。
+3. 点「快速翻译」。译好的新文件放在下载文件夹。哪一行不对，改了再写一次就行。
+4. 自己的专业词放在「术语管理」。翻译接口、图上留什么字在「设置」。
 
 ## 谁来译
 
-图译自己没有网号。在设置里选：
+术语库对上的词直接用，不联网。内置建筑、开关、变压器常用词，也能加你自己的。
 
-- **网上翻译**：DeepL 或 Azure（用你的密钥）
-- **自己配接口**：兼容 OpenAI 的网址
-- **不联网**：本机 Ollama（在「高级翻译设置」里）
+没对上的句子，用你自己在「设置」里填的接口：DeepL、Azure，兼容 OpenAI 的接口，或者本机的 Ollama（不联网）。图译不用注册，不收集数据。
 
-## 命令行：让 AI 助手替你翻译图纸
+## 给开发者
 
-命令行全程不用人点：不弹窗、不提问，跑完自己退出。所以 Claude Code、Cursor、Codex、Grok 这类能跑终端命令的 AI 助手，或者你自己的脚本，都能从头到尾把图纸译完。
+### 命令行：让 AI 助手替你翻译图纸
+
+命令行不弹窗、不提问，跑完自己退出，所以 AI 助手和脚本都能用。上面那句话发给助手后，它跑的就是这个。
 
 ```bash
-python -m tuyi translate drawing.dxf
+python -m tuyi translate drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
+python -m tuyi pdf out/*.dxf --output-dir out --appearance 黑白
 ```
 
-你对助手说「把 drawings 里的图纸都译成英文，再各导出一份 PDF」，它会跑：
+在源码目录里用 `python -m tuyi`。装好的版本里，Windows 的 `tuyi-cli.exe` 在 `Tuyi.exe` 旁边，Mac 的在 `Tuyi.app/Contents/MacOS/tuyi-cli`。
 
-```console
-$ python -m tuyi translate drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
-/home/tuyi/project/out/en_floor_plan_11h37_03-10-26.dxf
-extracted: 6
-translated: 6
-/home/tuyi/project/out/en_dims_tables_11h37_03-10-26.dxf
-extracted: 4
-translated: 4
-
-$ python -m tuyi pdf out/*.dxf --output-dir out --appearance 黑白
-out/en_dims_tables_11h37_03-10-26.pdf
-appearance: 黑白
-paper: a4
-pages: 1
-out/en_floor_plan_11h37_03-10-26.pdf
-appearance: 黑白
-paper: a4
-pages: 2
-```
-
-（真跑的输出，图纸是 `tests/fixtures` 里的两张。）
-
-- 每张图三行：新文件路径、`extracted` 句数、`translated` 句数。错误写到 stderr，退出码 1；参数不对退出码 2
-- 原图不动，总是另存新文件
-- 内置词库（中 ⇄ 英、中 ⇄ 法）命中的不联网；其余走设置里存的 DeepL / Azure / Ollama / 自定义接口
-- 常用参数：`-o`、`--output-dir`、`--mode zh_to_en`、`--provider`、`--glossary`、`--style`；PDF 有 `--paper`、`--appearance`
-
-把这段贴给助手，或写进项目的 `AGENTS.md` / `CLAUDE.md` / Cursor 规则：
-
-```text
-翻译 CAD 图纸用图译命令行（在图译源码目录里运行；Windows 安装版用 tuyi-cli.exe）：
-python -m tuyi translate <图纸.dwg 或 .dxf，可以多张> --output-dir <输出文件夹> --mode zh_to_en
-成功时每张图打印新文件路径、extracted、translated。失败看 stderr，退出码不是 0。
-要 PDF：python -m tuyi pdf <译好的图纸> --output-dir <输出文件夹>
-不会覆盖原图。不确定参数先跑 python -m tuyi translate --help。
-```
-
-`python -m tuyi` 在源码目录里跑。Windows 安装目录里，`tuyi-cli.exe` 在 `Tuyi.exe` 旁边；Mac 在 `Tuyi.app/Contents/MacOS/tuyi-cli`。DWG 一样要本机装 ODA。`python -m tuyi --help` 看全部参数。
+每张图打印三行：新文件路径、`extracted` 句数、`translated` 句数。出错写到 stderr，退出码 1；参数不对退出码 2。原图不会被覆盖。
 
 | 参数 | 说明 |
 | --- | --- |
@@ -150,8 +106,22 @@ python -m tuyi translate <图纸.dwg 或 .dxf，可以多张> --output-dir <输�
 | `pdf --appearance` | `Chrome`（默认，深色）、`彩色`（白纸）、`黑白` |
 | `pdf --paper` | `a4`（默认竖向）、`a4l`、`a3`、`a3l` |
 
-ODA File Converter 要在 `PATH` 里，或设 `CAD_ODA_EXEC`。
+DWG 要本机装 ODA File Converter，放在 `PATH` 里，或设 `CAD_ODA_EXEC`。全部参数看 `python -m tuyi --help`。
+
+想写进项目的 `AGENTS.md` / `CLAUDE.md` / Cursor 规则，可以贴这段：
+
+```text
+翻译 CAD 图纸用图译命令行（源码目录里用 python -m tuyi；安装版用 tuyi-cli）：
+python -m tuyi translate <图纸.dwg 或 .dxf，可以多张> --output-dir <输出文件夹> --mode zh_to_en
+成功时每张图打印新文件路径、extracted、translated。失败看 stderr，退出码不是 0。
+要 PDF：python -m tuyi pdf <译好的图纸> --output-dir <输出文件夹>
+不会覆盖原图。不确定参数先跑 python -m tuyi translate --help。
+```
+
+### 从源码运行
+
+开发环境和测试见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 协议
 
-MIT。请自由地使用和参与开源。好用的话点一下右上角 Star。
+[MIT](LICENSE)。最早从 [etianwang/CAD_translator](https://github.com/etianwang/CAD_translator) 分出来。
