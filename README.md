@@ -22,6 +22,8 @@
 
 打开 DWG / DXF，译图纸上的字，另存一份新文件。原图不动。不用 AutoCAD。Windows 和 Mac 都能用。
 
+命令行全程不用人点，AI 助手（Claude Code、Cursor、Codex、Grok）或脚本能替你把图纸译完。见下面的「命令行」。
+
 ## 界面
 
 <p align="center">
@@ -87,15 +89,54 @@
 - **自己配接口**：兼容 OpenAI 的网址
 - **不联网**：本机 Ollama（在「高级翻译设置」里）
 
-## 命令行
+## 命令行：让 AI 助手替你翻译图纸
 
-不打开窗口也能译：
+命令行全程不用人点：不弹窗、不提问，跑完自己退出。所以 Claude Code、Cursor、Codex、Grok 这类能跑终端命令的 AI 助手，或者你自己的脚本，都能从头到尾把图纸译完。
 
 ```bash
 python -m tuyi translate drawing.dxf
 ```
 
-Windows 安装目录里，`tuyi-cli.exe` 在 `Tuyi.exe` 旁边。`python -m tuyi --help` 看参数。
+你对助手说「把 drawings 里的图纸都译成英文，再各导出一份 PDF」，它会跑：
+
+```console
+$ python -m tuyi translate drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
+/home/tuyi/project/out/en_floor_plan_11h37_03-10-26.dxf
+extracted: 6
+translated: 6
+/home/tuyi/project/out/en_dims_tables_11h37_03-10-26.dxf
+extracted: 4
+translated: 4
+
+$ python -m tuyi pdf out/*.dxf --output-dir out --appearance 黑白
+out/en_dims_tables_11h37_03-10-26.pdf
+appearance: 黑白
+paper: a4
+pages: 1
+out/en_floor_plan_11h37_03-10-26.pdf
+appearance: 黑白
+paper: a4
+pages: 2
+```
+
+（真跑的输出，图纸是 `tests/fixtures` 里的两张。）
+
+- 每张图三行：新文件路径、`extracted` 句数、`translated` 句数。错误写到 stderr，退出码 1；参数不对退出码 2
+- 原图不动，总是另存新文件
+- 内置词库（中 ⇄ 英、中 ⇄ 法）命中的不联网；其余走设置里存的 DeepL / Azure / Ollama / 自定义接口
+- 常用参数：`-o`、`--output-dir`、`--mode zh_to_en`、`--provider`、`--glossary`、`--style`；PDF 有 `--paper`、`--appearance`
+
+把这段贴给助手，或写进项目的 `AGENTS.md` / `CLAUDE.md` / Cursor 规则：
+
+```text
+翻译 CAD 图纸用图译命令行（在图译源码目录里运行；Windows 安装版用 tuyi-cli.exe）：
+python -m tuyi translate <图纸.dwg 或 .dxf，可以多张> --output-dir <输出文件夹> --mode zh_to_en
+成功时每张图打印新文件路径、extracted、translated。失败看 stderr，退出码不是 0。
+要 PDF：python -m tuyi pdf <译好的图纸> --output-dir <输出文件夹>
+不会覆盖原图。不确定参数先跑 python -m tuyi translate --help。
+```
+
+`python -m tuyi` 在源码目录里跑。Windows 安装目录里，`tuyi-cli.exe` 在 `Tuyi.exe` 旁边；Mac 在 `Tuyi.app/Contents/MacOS/tuyi-cli`。DWG 一样要本机装 ODA。`python -m tuyi --help` 看全部参数。
 
 ## 协议
 

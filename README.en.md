@@ -22,6 +22,8 @@
 
 Open a DWG or DXF. Translate the text. Get a new file. The original stays put. No AutoCAD. Windows and Mac.
 
+The CLI runs hands-free, so an AI assistant (Claude Code, Cursor, Codex, Grok) or a script can translate drawings for you. See [Command line](#command-line-let-your-ai-assistant-translate-the-drawings).
+
 ## Screenshots
 
 <p align="center">
@@ -79,15 +81,54 @@ DXF works out of the box. DWG needs [ODA File Converter](https://www.opendesign.
 3. Click **翻译**. Tuyi writes a new file.
 4. Keys and layout live in **设置**. Your word list is **词汇库**.
 
-## Command line
+## Command line: let your AI assistant translate the drawings
 
-Same write-back as the app, without the window:
+The CLI runs hands-free: no dialogs, no prompts, it exits when done. So an AI assistant that can run terminal commands (Claude Code, Cursor, Codex, Grok) or your own script can translate drawings end to end.
 
 ```bash
 python -m tuyi translate drawing.dxf
 ```
 
-On Windows, `tuyi-cli.exe` sits next to `Tuyi.exe`. See `python -m tuyi --help`.
+Ask your assistant "translate every drawing in drawings/ to English and export a PDF of each", and it runs:
+
+```console
+$ python -m tuyi translate drawings/floor_plan.dxf drawings/dims_tables.dxf --output-dir out --mode zh_to_en
+/home/tuyi/project/out/en_floor_plan_11h37_03-10-26.dxf
+extracted: 6
+translated: 6
+/home/tuyi/project/out/en_dims_tables_11h37_03-10-26.dxf
+extracted: 4
+translated: 4
+
+$ python -m tuyi pdf out/*.dxf --output-dir out --appearance 黑白
+out/en_dims_tables_11h37_03-10-26.pdf
+appearance: 黑白
+paper: a4
+pages: 1
+out/en_floor_plan_11h37_03-10-26.pdf
+appearance: 黑白
+paper: a4
+pages: 2
+```
+
+(Real output, using the two drawings in `tests/fixtures`.)
+
+- Three lines per drawing: new file path, `extracted` count, `translated` count. Errors go to stderr with exit code 1; bad arguments exit 2.
+- The original is never overwritten. Tuyi always writes a new file.
+- Built-in glossaries (zh ⇄ en, zh ⇄ fr) hit offline; the rest uses the DeepL / Azure / Ollama / custom endpoint saved in Settings.
+- Common options: `-o`, `--output-dir`, `--mode zh_to_en`, `--provider`, `--glossary`, `--style`; PDF adds `--paper` and `--appearance`.
+
+Paste this into the chat, or into your project's `AGENTS.md` / `CLAUDE.md` / Cursor rules:
+
+```text
+To translate CAD drawings, use the Tuyi CLI (run it from the Tuyi source folder; the Windows install has tuyi-cli.exe):
+python -m tuyi translate <drawing.dwg or .dxf, several allowed> --output-dir <output folder> --mode zh_to_en
+On success it prints the new file path, extracted and translated for each drawing. On failure read stderr; the exit code is not 0.
+For PDF: python -m tuyi pdf <translated drawings> --output-dir <output folder>
+It never overwrites the original. If unsure about options, run python -m tuyi translate --help first.
+```
+
+Run `python -m tuyi` from the source folder. On Windows, `tuyi-cli.exe` sits next to `Tuyi.exe`; on Mac it is `Tuyi.app/Contents/MacOS/tuyi-cli`. DWG still needs ODA on the machine. See `python -m tuyi --help`.
 
 ## License
 
