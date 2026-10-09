@@ -25,6 +25,7 @@ from backend.cad import (
 )
 from backend.languages import split_mode
 from backend.mtext_runs import map_translatable
+from backend.sheet_pdf import paperspace_has_entities, render_sheet_pages, sheet_frames
 from backend.styles import register_cjk_font, rewrite_shx_styles
 from backend.table_csv import apply_table_rows, export_table_csv, parse_table_csv
 from backend.table_xlsx import export_table_xlsx, parse_table_payload
@@ -883,7 +884,7 @@ def export_pdf(
     items=None,
     appearance: str = "",
 ) -> dict:
-    """DWG → ODA → DXF → PDF via ezdxf drawing (matplotlib). Not AutoCAD plot quality."""
+    """DWG → ODA → DXF → PDF. Stacked model-space sheets plot one A4 page each."""
     dest = Path(output_path) if output_path else Path(default_output_dir()) / f"{Path(path).stem}.pdf"
     ensure_output_dir(str(dest.parent))
     style = normalize_pdf_style(style)
@@ -891,16 +892,23 @@ def export_pdf(
     register_cjk_font()
     with open_work_dxf(path) as work_dxf:
         doc = _read_dxf(work_dxf)
-        rewrite_shx_styles(doc)
         if style != "纯译文":
             apply_pdf_style(doc, items or [], style)
-        pages = _layout_pages(doc, layout_name)
-        _render_pdf(pages, dest, appearance)
+        frames = []
+        if not layout_name and not paperspace_has_entities(doc):
+            frames = sheet_frames(doc)
+        if len(frames) >= 2:
+            page_count = render_sheet_pages(doc, frames, dest, appearance)
+        else:
+            rewrite_shx_styles(doc)
+            pages = _layout_pages(doc, layout_name)
+            _render_pdf(pages, dest, appearance)
+            page_count = len(pages)
     if not dest.is_file() or dest.stat().st_size < 8:
         raise RuntimeError("PDF 导出失败")
     return {
         "path": str(dest),
-        "pages": len(pages),
+        "pages": page_count,
         "bytes": dest.stat().st_size,
         "cad_path": str(path),
         "style": style,
