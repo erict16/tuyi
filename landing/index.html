@@ -52,7 +52,7 @@
         "operatingSystem": "Windows 10, Windows 11, macOS",
         "license": "https://github.com/erict16/tuyi/blob/main/LICENSE",
         "downloadUrl": "https://github.com/erict16/tuyi/releases/latest",
-        "softwareVersion": "0.1.11",
+        "softwareVersion": "0.1.12",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": { "@type": "Person", "name": "Eric Tan", "url": "https://github.com/erict16" }
       },
@@ -76,12 +76,12 @@
   </script>
   <script>
     const FALLBACK = {
-      win: "https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe",
-      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg",
+      win: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe",
+      macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg",
+      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_x86_64.dmg",
     };
     window.DL = { ...FALLBACK };
-    window.DL_META = { version: "v0.1.11", winSize: "约 64 MB" };
+    window.DL_META = { version: "v0.1.12", winSize: "约 64 MB" };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -234,7 +234,7 @@
     <section id="download" class="scroll-mt-16 bg-white py-20">
       <div class="mx-auto max-w-4xl px-4">
         <h2 class="text-center text-3xl font-semibold tracking-tight">下载</h2>
-        <p id="dl-ver" class="mt-2 text-center text-slate-600">v0.1.11，免费</p>
+        <p id="dl-ver" class="mt-2 text-center text-slate-600">v0.1.12，免费</p>
         <p id="dl-os" class="mt-1 hidden text-center text-sm font-medium text-accent"></p>
 
         <div class="mt-8 grid items-stretch gap-5 sm:grid-cols-2">
@@ -242,7 +242,7 @@
             <h3 class="text-xl font-semibold">Windows</h3>
             <p class="mt-2 text-sm text-slate-600">Windows 10 或 11，64 位。安装包 <span id="win-size">约 64 MB</span>。</p>
             <div class="dl-foot">
-              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe" rel="noopener">下载 Windows 版</a>
+              <a id="btn-win" class="dl-link inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-accent px-5 py-3 text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe" rel="noopener">下载 Windows 版</a>
               <p class="mt-3 text-xs leading-5 text-slate-500">安装包还没签名，第一次打开会被拦。点「更多信息」，再点「仍要运行」。</p>
             </div>
           </article>
@@ -258,7 +258,7 @@
               <span data-mac-hint="intel" aria-hidden="true">老一点的 Intel Mac 选这个。和 Apple 芯片的不能混用。</span>
             </p>
             <div class="dl-foot">
-              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg" rel="noopener" aria-label="下载 Mac 版（Apple 芯片）">
+              <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg" rel="noopener" aria-label="下载 Mac 版（Apple 芯片）">
                 <span data-mac-label="arm" data-active>下载 Mac 版（Apple 芯片）</span>
                 <span data-mac-label="intel" aria-hidden="true">下载 Mac 版（Intel）</span>
                 <span data-mac-label="arm-missing" aria-hidden="true">Apple 芯片安装包还没放上来</span>

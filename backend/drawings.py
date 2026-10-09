@@ -25,6 +25,7 @@ from backend.cad import (
 )
 from backend.languages import split_mode
 from backend.mtext_runs import map_translatable
+from backend.sheet_pdf import frame_document, paperspace_has_entities, register_cad_fonts, sheet_frames
 from backend.styles import register_cjk_font, rewrite_shx_styles
 from backend.table_csv import apply_table_rows, export_table_csv, parse_table_csv
 from backend.table_xlsx import export_table_xlsx, parse_table_payload
@@ -767,6 +768,18 @@ def paper_inches(paper: str) -> tuple[float, float]:
     return width_mm / 25.4, height_mm / 25.4
 
 
+def _sheet_paper(paper: str, frames) -> str:
+    """A landscape stack prints on the landscape sheet of the chosen size."""
+    key = normalize_paper(paper)
+    if not frames:
+        return key
+    width = frames[0][2] - frames[0][0]
+    height = frames[0][3] - frames[0][1]
+    if width <= height:
+        return key
+    return {"a4": "a4l", "a3": "a3l"}.get(key, key)
+
+
 def _legacy_plot_text(value: str) -> str:
     """Turn ODA ``\\M+5xxxx`` into characters matplotlib can draw."""
     raw = str(value or "")
@@ -963,7 +976,7 @@ def export_pdf(
     appearance: str = "",
     paper: str = "a4",
 ) -> dict:
-    """DWG → ODA → DXF → PDF. Fixed sheet, default A4. Not AutoCAD plot quality."""
+    """DWG → ODA → DXF → PDF. Stacked model-space sheets plot one page each."""
     dest = Path(output_path) if output_path else Path(default_output_dir()) / f"{Path(path).stem}.pdf"
     ensure_output_dir(str(dest.parent))
     style = normalize_pdf_style(style)
@@ -972,17 +985,28 @@ def export_pdf(
     register_cjk_font()
     with open_work_dxf(path) as work_dxf:
         doc = _read_dxf(work_dxf)
-        rewrite_shx_styles(doc)
-        _prepare_plot_text(doc)
-        if style != "纯译文":
-            apply_pdf_style(doc, items or [], style)
-        pages = _layout_pages(doc, layout_name)
-        _render_pdf(pages, dest, appearance, paper)
+        frames = []
+        if not layout_name and not paperspace_has_entities(doc):
+            frames = sheet_frames(doc)
+        if len(frames) >= 2:
+            paper = _sheet_paper(paper, frames)
+            _prepare_plot_text(doc)
+            if style != "纯译文":
+                apply_pdf_style(doc, items or [], style)
+            page_count = _render_sheet_pdf(doc, frames, dest, appearance, paper)
+        else:
+            rewrite_shx_styles(doc)
+            _prepare_plot_text(doc)
+            if style != "纯译文":
+                apply_pdf_style(doc, items or [], style)
+            pages = _layout_pages(doc, layout_name)
+            _render_pdf(pages, dest, appearance, paper)
+            page_count = len(pages)
     if not dest.is_file() or dest.stat().st_size < 8:
         raise RuntimeError("PDF 导出失败")
     return {
         "path": str(dest),
-        "pages": len(pages),
+        "pages": page_count,
         "bytes": dest.stat().st_size,
         "cad_path": str(path),
         "style": style,
@@ -1011,6 +1035,57 @@ def _fit_sheet(ax, layout, page_w: float, page_h: float, facecolor: str) -> None
     figure.set_size_inches(page_w, page_h, forward=True)
     figure.patch.set_facecolor(facecolor)
     ax.set_facecolor(facecolor)
+
+
+def _fit_frame(ax, frame, page_w: float, page_h: float, facecolor: str) -> None:
+    xmin, ymin, xmax, ymax = frame
+    span_x = (xmax - xmin) or 1.0
+    span_y = (ymax - ymin) or 1.0
+    ax.set_aspect("auto")
+    ax.autoscale(False)
+    ax.set_xlim(xmin - span_x * 0.02, xmax + span_x * 0.02)
+    ax.set_ylim(ymin - span_y * 0.02, ymax + span_y * 0.02)
+    ax.set_aspect("equal", adjustable="box")
+    figure = ax.get_figure()
+    figure.set_size_inches(page_w, page_h, forward=True)
+    figure.patch.set_facecolor(facecolor)
+    ax.set_facecolor(facecolor)
+
+
+def _render_sheet_pdf(doc, frames, dest: Path, appearance: str, paper: str) -> int:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    register_cad_fonts()
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
+    from ezdxf.addons.drawing import Frontend
+    from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+    from ezdxf.addons.drawing.properties import RenderContext
+
+    page_w, page_h = paper_inches(paper)
+    facecolor = CHROME_BACKGROUND if appearance == "Chrome" else COLOR_BACKGROUND
+    plot = _plot_config(appearance)
+    try:
+        with atomic_output_path(str(dest)) as temporary_output, PdfPages(temporary_output) as pdf:
+            for frame in frames:
+                page_doc = frame_document(doc, frame)
+                layout = page_doc.modelspace() if page_doc is not None else doc.modelspace()
+                fig = plt.figure(figsize=(page_w, page_h), dpi=72, facecolor=facecolor)
+                ax = fig.add_axes((0.04, 0.04, 0.92, 0.92))
+                ax.set_facecolor(facecolor)
+                ctx = RenderContext(layout.doc)
+                props = _page_properties(layout, appearance)
+                backend = MatplotlibBackend(ax, adjust_figure=False)
+                Frontend(ctx, backend, plot).draw_layout(layout, finalize=True, layout_properties=props)
+                _fit_frame(ax, frame, page_w, page_h, facecolor)
+                pdf.savefig(fig, facecolor=facecolor)
+                plt.close(fig)
+    except (ValueError, RuntimeError):
+        raise
+    except OSError:
+        raise ValueError("文件保存失败") from None
+    return len(frames)
 
 
 def _render_pdf(layouts, dest: Path, appearance: str = "", paper: str = "a4") -> None:
