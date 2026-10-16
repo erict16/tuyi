@@ -42,6 +42,15 @@ def _emit_result(result: dict) -> None:
     print(result["path"])
     print(f"extracted: {result['extracted']}")
     print(f"translated: {result['translated']}")
+    skipped = result.get("skipped", 0)
+    if skipped:
+        print(f"skipped: {skipped}", file=sys.stderr)
+    if not result.get("has_engine", True) and skipped:
+        provider = result.get("provider") or "deepl"
+        hint = "在图译「设置」里填 DeepL Key，或设置环境变量 DEEPL_API_KEY"
+        if provider == "azure":
+            hint = "在图译「设置」里填 Azure Key"
+        print(f"警告：{skipped} 条文本未翻译，没有配置 MT 引擎。{hint}。", file=sys.stderr)
 
 
 def _glossary_args(glossary: str, saved_project: str) -> tuple[str, str]:
