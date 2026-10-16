@@ -460,8 +460,9 @@ class CADChineseTranslator:
             if not ollama_reachable(ollama_host):
                 self.mt_provider = None
             return
-        if deepl_key.strip():
-            self.configure_deepl(deepl_key)
+        effective_key = deepl_key.strip() or os.environ.get("DEEPL_API_KEY", "")
+        if effective_key:
+            self.configure_deepl(effective_key)
         else:
             self.translation_provider = "deepl"
 
