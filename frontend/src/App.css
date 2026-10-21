@@ -201,6 +201,7 @@ h1, h2, h3, h4, p { margin: 0; }
 .go:hover { background: var(--accent-hover); }
 .go:active { transform: scale(0.98); }
 .go:disabled { opacity: 0.45; pointer-events: none; }
+.go.busy:disabled, .go.secondary:disabled { opacity: 1; }
 .go.inline { width: auto; height: 32px; padding: 0 14px; font-size: 13px; border-radius: 8px; }
 .go .spin {
   display: none;
@@ -345,7 +346,7 @@ h1, h2, h3, h4, p { margin: 0; }
   gap: 16px;
   flex-wrap: wrap;
 }
-.work-title { min-width: 0; }
+.work-title { flex: 1; min-width: 0; }
 .work-title h1 {
   font-size: 18px;
   font-weight: 650;
@@ -353,7 +354,6 @@ h1, h2, h3, h4, p { margin: 0; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 52vw;
 }
 .work-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; color: var(--muted); font-size: 12px; min-height: 18px; }
 .work-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); }
@@ -506,8 +506,6 @@ td.dst .via {
 .via-glossary { color: var(--ok) !important; }
 .via-edit { color: var(--accent) !important; }
 .via-needs_engine { color: var(--warn) !important; }
-td.kind { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kind-type { margin-left: 6px; font-size: 10.5px; font-weight: 600; color: var(--faint); letter-spacing: 0.02em; }
 .empty-row { text-align: center !important; color: var(--muted); height: 72px !important; }
 
 .tag {
@@ -686,54 +684,9 @@ td.kind { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: h
 .linkish { color: var(--accent); font-weight: 600; font-size: 12px; }
 .linkish:disabled { color: var(--muted); }
 
-/* ---------- batch ---------- */
-.batch-body { flex: 1; min-height: 0; display: flex; gap: 16px; }
-.jobs {
-  list-style: none;
-  margin: 0;
-  padding: 6px;
-  flex: 1;
-  min-width: 0;
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--elev);
-  box-shadow: var(--shadow-sm);
-  align-content: start;
-}
-.job {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px 74px 92px;
-  align-items: center;
-  gap: 12px;
-  min-height: 42px;
-  padding: 4px 8px 4px 12px;
-  border-radius: 8px;
-}
-.job:hover { background: var(--row-hover); }
-.job-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-.job-actions { display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
-.job-msg { grid-column: 1 / -1; color: var(--danger); font-size: 12px; margin-top: -4px; padding-bottom: 4px; }
+/* ---------- progress bar ---------- */
 .bar { height: 6px; border-radius: 3px; background: var(--soft); overflow: hidden; display: block; }
 .bar i { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 300ms var(--ease-out); }
-.job-ok .bar i { background: var(--ok); }
-.job-bad .bar i { background: var(--danger); }
-.chip { justify-self: start; height: 20px; padding: 0 8px; border-radius: 10px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; background: var(--soft); color: var(--muted); }
-.chip-ok { background: var(--ok-soft); color: var(--ok); }
-.chip-run { background: var(--accent-soft); color: var(--accent); }
-.chip-bad { background: var(--danger-soft); color: var(--danger); }
-
-.insp {
-  width: 300px;
-  flex: none;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 4px 2px 4px 0;
-}
-.insp section { padding: 12px 14px; border-radius: 12px; background: var(--elev); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
-.insp h3 { font-size: 12px; font-weight: 650; color: var(--muted); margin-bottom: 2px; }
 
 /* ---------- pages (settings, glossary, update) ---------- */
 .page {
@@ -929,8 +882,6 @@ td.kind { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: h
 
 /* ---------- small windows ---------- */
 @media (max-width: 1100px) {
-  .insp { width: 260px; }
-  .job { grid-template-columns: minmax(0, 1fr) 90px 70px 80px; }
   .search { width: 160px; }
   .engine-cards { grid-template-columns: 1fr; }
   .check-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

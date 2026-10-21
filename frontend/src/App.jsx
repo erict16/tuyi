@@ -92,7 +92,7 @@ export default function App() {
   const [oda, setOda] = useState({ installed: false, path: "" });
   const [terms, setTerms] = useState([]);
   const [runAll, setRunAll] = useState(null);
-  const [table, setTable] = useState(null);
+  const [stopping, setStopping] = useState(false);
 
   const [appVersion, setAppVersion] = useState("");
   const [updateMsg, setUpdateMsg] = useState("");
@@ -105,6 +105,7 @@ export default function App() {
   const cadInput = useRef(null);
   const glossaryInput = useRef(null);
   const tableInput = useRef(null);
+  const tablePick = useRef(null);
   const sheets = useRef(new Map());
   const extractSeq = useRef(0);
   const extractSnap = useRef("");
@@ -314,6 +315,11 @@ export default function App() {
 
   // ---------- pages ----------
   function goPage(next) {
+    if (locked) {
+      // Leaving mid-run would hide 停止 and could re-read a drawing under the run.
+      toast("等译完再去设置。", "warn");
+      return;
+    }
     if (view === "work") pageReturn.current = view;
     if (next === "settings" && view !== "settings") extractSnap.current = extractKey(params);
     setView(next);
@@ -491,6 +497,7 @@ export default function App() {
       return;
     }
     const index = files.findIndex((file) => file.path === path);
+    const removed = { file: files[index], index, rows: sheets.current.get(path), state: fileState[path] };
     const next = files.filter((file) => file.path !== path);
     setFiles(next);
     sheets.current.delete(path);
@@ -499,6 +506,27 @@ export default function App() {
       const copy = { ...prev };
       delete copy[path];
       return copy;
+    });
+    let undone = false;
+    toast(`去掉了 ${removed.file?.name || ""}`, "info", {
+      ttl: 6000,
+      action: {
+        label: "撤销",
+        onClick: () => {
+          undone = true;
+          setFiles((prev) => {
+            if (prev.some((file) => file.path === path)) return prev;
+            const copy = [...prev];
+            copy.splice(Math.min(removed.index, copy.length), 0, removed.file);
+            return copy;
+          });
+          if (removed.rows) sheets.current.set(path, removed.rows);
+          if (removed.state) patchFile(path, removed.state);
+          selectFile(path);
+          if (removed.rows) setRows(removed.rows);
+          else extractFile(path);
+        },
+      },
     });
     if (current === path) {
       const neighbour = next[Math.min(index, next.length - 1)];
@@ -510,11 +538,10 @@ export default function App() {
         setRows([]);
       }
     }
-    try {
-      await api("/api/drawings/close", { json: { path } });
-    } catch {
-      /* already gone */
-    }
+    // A dropped drawing's temp copy is deleted on close, so wait out the undo.
+    setTimeout(() => {
+      if (!undone) api("/api/drawings/close", { json: { path } }).catch(() => {});
+    }, 6500);
   }
 
   // ---------- translate + write ----------
@@ -525,7 +552,7 @@ export default function App() {
     if (!shown.length) {
       const anySource = filterRows(list, { numbers: true, dupes: false, nonsource: true }, sourceLang).length > 0;
       if (anySource) {
-        say(path, "info", "要译的字都被「先别译」藏起来了。在 ⋯ 菜单里改。");
+        say(path, "info", "要译的字都被「先别译」藏起来了，在设置里改。");
       } else {
         patchFile(path, { status: "skip" });
         say(path, "info", `这张图没有${langLabel(sourceLang)}，不用译。`);
@@ -631,7 +658,17 @@ export default function App() {
     }
     setBusy("translate");
     try {
-      await translateFile(current, rows);
+      let list = rows;
+      if (fileState[current]?.status === "error" || !sheets.current.has(current) || stale.current.has(current)) {
+        try {
+          list = await readRows(current, { keep: sheets.current.get(current) });
+          showRows(current, list);
+        } catch (error) {
+          readFailed(current, error);
+          return;
+        }
+      }
+      await translateFile(current, list);
     } finally {
       setBusy("");
     }
@@ -639,11 +676,14 @@ export default function App() {
 
   async function translateAll() {
     stopAll.current = false;
+    setStopping(false);
     setBusy("translate");
     const queue = [...files];
     const done = [];
     const failed = [];
     let stopped = false;
+    let needsEngine = false;
+    let lastOut = "";
     try {
       for (let index = 0; index < queue.length; index += 1) {
         if (stopAll.current) {
@@ -666,18 +706,28 @@ export default function App() {
         }
         showRows(file.path, list);
         const result = await translateFile(file.path, list);
-        if (result.state === "written") done.push(file.name);
-        else if (result.state !== "empty") failed.push(file.name);
+        if (result.state === "written") {
+          done.push(file.name);
+          lastOut = result.path;
+        } else if (result.state === "needs_engine") {
+          // Same missing key for every drawing: say it once and stop.
+          needsEngine = true;
+          break;
+        } else if (result.state !== "empty") failed.push(file.name);
       }
     } finally {
       setBusy("");
       setRunAll(null);
+      setStopping(false);
     }
-    if (stopped) toast(`已停止，写好 ${done.length} 张。`, "warn");
-    else if (failed.length) toast(`写好 ${done.length} 张，${failed.length} 张没写成。点左边的图纸看原因。`, "warn", { ttl: 9000 });
-    else if (done.length) toast(done.length > 1 ? `${done.length} 张都写好了。` : "写好了。", "ok", {
-      action: { label: "在文件夹中显示", onClick: () => reveal(fileState[queue[queue.length - 1].path]?.output || "") },
+    const showFolder = lastOut ? { action: { label: "在文件夹中显示", onClick: () => reveal(lastOut) } } : {};
+    if (needsEngine) toast(`术语表译不完，要填翻译密钥才能继续。已写好 ${done.length} 张。`, "warn", {
+      ttl: 0,
+      action: { label: "去填密钥", onClick: () => toggleSettings("tr") },
     });
+    else if (stopped) toast(`已停止，写好 ${done.length} 张。`, "warn", showFolder);
+    else if (failed.length) toast(`写好 ${done.length} 张，${failed.length} 张没写成。点左边的图纸看原因。`, "warn", { ttl: 9000, ...showFolder });
+    else if (done.length) toast(done.length > 1 ? `${done.length} 张都写好了。` : "写好了。", "ok", showFolder);
   }
 
   async function writeBack() {
@@ -760,69 +810,75 @@ export default function App() {
     }
   }
 
-  async function applyTable(next) {
-    setTable(next);
-    let items = rows;
-    if (!items.length && current) items = await extractFile(current);
-    if (!items.length) {
-      say("", "info", "先打开图纸。");
-      return;
-    }
-    const data = await api("/api/drawings/import-table", {
-      json: { csv: next.csv, xlsx_b64: next.xlsx_b64, items, file: selected?.name || "" },
-    });
-    updateRows(() => syncDuplicates(Array.isArray(data.items) ? data.items : []));
-    say(current, "ok", `表格填入 ${asCount(data.applied)} 条。可以改译文再写出新文件。`);
-  }
-
-  async function importTable() {
+  // Pick a table file (CSV or Excel); resolves null when cancelled.
+  function pickTable() {
     const native = py();
     if (native?.pick_table_file) {
-      const picked = await native.pick_table_file();
-      if (!picked?.path) return;
-      if (picked.error) {
-        toast(picked.error, "error");
-        return;
-      }
-      try {
-        await applyTable({ name: fileName(picked.path), csv: picked.text || "", xlsx_b64: picked.xlsx_b64 || "" });
-      } catch (error) {
-        toast(error.message, "error");
-      }
-      return;
+      return native.pick_table_file().then((picked) => {
+        if (!picked?.path) return null;
+        if (picked.error) throw new Error(picked.error);
+        return { name: fileName(picked.path), csv: picked.text || "", xlsx_b64: picked.xlsx_b64 || "" };
+      });
     }
-    tableInput.current?.click();
+    return new Promise((resolve) => {
+      tablePick.current = resolve;
+      tableInput.current?.click();
+    });
   }
 
   async function onTablePicked(event) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
+    const resolve = tablePick.current;
+    tablePick.current = null;
+    if (!resolve) return;
+    if (!file) {
+      resolve(null);
+      return;
+    }
     try {
-      if (/\.xlsx$/i.test(file.name)) {
-        await applyTable({ name: file.name, csv: "", xlsx_b64: bytesToB64(await file.arrayBuffer()) });
-      } else {
-        const csv = await file.text();
-        if (!csv.trim()) {
-          toast("表格是空的", "warn");
-          return;
-        }
-        await applyTable({ name: file.name, csv, xlsx_b64: "" });
+      if (/\.xlsx$/i.test(file.name)) resolve({ name: file.name, csv: "", xlsx_b64: bytesToB64(await file.arrayBuffer()) });
+      else resolve({ name: file.name, csv: await file.text(), xlsx_b64: "" });
+    } catch {
+      resolve(null);
+    }
+  }
+
+  // Fill this drawing's 译文 from a table someone filled in.
+  async function importTable() {
+    if (!current || locked) return;
+    try {
+      const table = await pickTable();
+      if (!table) return;
+      if (!table.csv.trim() && !table.xlsx_b64) {
+        toast("表格是空的", "warn");
+        return;
       }
+      if (!rows.length) {
+        say(current, "info", "这张图没读出文字，没法用表格填。");
+        return;
+      }
+      const data = await api("/api/drawings/import-table", {
+        json: { csv: table.csv, xlsx_b64: table.xlsx_b64, items: rows, file: selected?.name || "" },
+      });
+      updateRows(() => syncDuplicates(Array.isArray(data.items) ? data.items : []));
+      say(current, "ok", `表格填入 ${asCount(data.applied)} 条。可以改译文再写出新文件。`);
     } catch (error) {
       toast(error.message, "error");
     }
   }
 
+  // One table for many drawings: rows are matched by the file name in the table.
   async function writeBackAll() {
-    if (!files.length) {
-      say("", "info", "先打开图纸。");
+    if (!files.length || locked) return;
+    let table;
+    try {
+      table = await pickTable();
+    } catch (error) {
+      toast(error.message, "error");
       return;
     }
-    if (!table) {
-      await importTable();
-      return;
-    }
+    if (!table) return;
     setBusy("table");
     try {
       const data = await api("/api/batch/import", {
@@ -837,13 +893,13 @@ export default function App() {
         },
       });
       (data.results || []).forEach((item) => {
-        const match = files.find((file) => file.name === item.file);
-        if (item.written && item.path && match) patchFile(match.path, { status: "written", output: item.path });
+        // The API reports file names; skip names shared by two open drawings.
+        const matches = files.filter((file) => file.name === item.file);
+        if (item.written && item.path && matches.length === 1) patchFile(matches[0].path, { status: "written", output: item.path });
       });
       const last = [...(data.results || [])].reverse().find((item) => item.written && item.path);
-      say(current || "", "ok", `已写回 ${asCount(data.written)} 条，共 ${asCount(data.files)} 张图。`, last?.path ? {
-        path: last.path,
-        actions: [{ label: "在文件夹中显示", onClick: () => reveal(last.path) }],
+      toast(`按表格写好 ${(data.results || []).filter((item) => item.written).length} 张，共写了 ${asCount(data.written)} 句。`, "ok", last?.path ? {
+        action: { label: "在文件夹中显示", onClick: () => reveal(last.path) },
       } : {});
     } catch (error) {
       toast(error.message, "error");
@@ -1030,6 +1086,17 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // A file dropped outside the work view must not navigate the web view to it.
+  useEffect(() => {
+    const guard = (event) => event.preventDefault();
+    window.addEventListener("dragover", guard);
+    window.addEventListener("drop", guard);
+    return () => {
+      window.removeEventListener("dragover", guard);
+      window.removeEventListener("drop", guard);
+    };
+  }, []);
+
   const dragHasFiles = (event) => [...(event.dataTransfer?.types || [])].includes("Files");
 
   function onDragEnter(event) {
@@ -1111,7 +1178,11 @@ export default function App() {
               onPick={pickDrawing}
               onRemove={removeDrawing}
               onTranslate={runTranslate}
-              onStop={() => { stopAll.current = true; }}
+              stopping={stopping}
+              onStop={() => {
+                stopAll.current = true;
+                setStopping(true);
+              }}
             />
           </div>
           <div
@@ -1143,11 +1214,10 @@ export default function App() {
               stats={stats}
               counts={counts}
               filters={filters}
-              onFilter={setFilter}
               query={query}
               onQuery={setQuery}
               notice={notice}
-              onCloseNotice={() => say(current, "", "")}
+              onCloseNotice={() => say(curState.notice ? current : "", "", "")}
               loading={busy === "extract"}
               translating={translating}
               locked={locked}

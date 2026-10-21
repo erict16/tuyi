@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import App from "./App";
 import { PREFS_KEY } from "./lib/constants";
 import { fakeBackend, fakeNative } from "./test/fakeBackend";
@@ -10,6 +10,11 @@ async function openFloorPlan(user, backend) {
   await screen.findByRole("heading", { name: "floor.dxf" });
   await waitFor(() => expect(backend.called("POST", "/api/drawings/extract")).toHaveLength(1));
   await screen.findByText("天花图");
+}
+
+async function openAdvanced(user) {
+  await user.click(screen.getByRole("button", { name: /设置/ }));
+  await user.click(screen.getByText("高级翻译设置"));
 }
 
 function dstInputs() {
@@ -161,7 +166,7 @@ describe("work view", () => {
     await screen.findByRole("heading", { name: "floor.dxf" });
     await user.click(screen.getByRole("button", { name: "从队列去掉 floor.dxf" }));
     await screen.findByRole("heading", { name: "second.dxf" });
-    expect(backend.last("POST", "/api/drawings/close").body).toEqual({ path: "/d/floor.dxf" });
+    expect(backend.called("POST", "/api/drawings/close")).toHaveLength(0);
     expect(screen.getAllByRole("option")).toHaveLength(1);
   });
 
@@ -175,17 +180,17 @@ describe("work view", () => {
     expect(within(screen.getByRole("listbox")).getByText("出错了")).toBeInTheDocument();
   });
 
-  it("filter menu brings numbers back without re-reading the drawing", async () => {
+  it("先别译 settings bring numbers back without re-reading the drawing", async () => {
     const backend = fakeBackend();
     fakeNative();
     const user = userEvent.setup();
     render(<App />);
     await openFloorPlan(user, backend);
-    await user.click(screen.getByRole("button", { name: "更多" }));
-    await user.click(screen.getByRole("checkbox", { name: /^数字、尺寸/ }));
-    expect(screen.queryByText("1200")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("checkbox", { name: /^已经是外文的/ }));
-    expect(screen.getByText("1200")).toBeInTheDocument();
+    await openAdvanced(user);
+    await user.click(screen.getByRole("checkbox", { name: "数字、尺寸先别译" }));
+    await user.click(screen.getByRole("checkbox", { name: "已经是外文的先别译" }));
+    await user.click(screen.getByRole("button", { name: "返回" }));
+    expect(await screen.findByText("1200")).toBeInTheDocument();
     expect(backend.called("POST", "/api/drawings/extract")).toHaveLength(1);
     expect(JSON.parse(localStorage.getItem(PREFS_KEY)).filters.numbers).toBe(false);
   });
@@ -505,9 +510,9 @@ describe("review regressions", () => {
     const user = userEvent.setup();
     render(<App />);
     await openFloorPlan(user, backend);
-    await user.click(screen.getByRole("button", { name: "更多" }));
-    await user.click(screen.getByRole("checkbox", { name: /^重复的句子/ }));
-    await user.keyboard("{Escape}");
+    await openAdvanced(user);
+    await user.click(screen.getByRole("checkbox", { name: "重复的句子先别译" }));
+    await user.click(screen.getByRole("button", { name: "返回" }));
     const ticks = screen.getAllByRole("checkbox", { name: /翻译这一句：平面布置图/ });
     expect(ticks).toHaveLength(2);
     expect(ticks[1]).toBeChecked();
@@ -519,17 +524,22 @@ describe("review regressions", () => {
     expect(items.find((item) => item.handle === "A1")).toMatchObject({ excluded: false, target: "floor plan" });
   });
 
-  it("Enter on a file's 去掉 button removes it instead of opening it", async () => {
+  it("Enter on a file's 去掉 button removes it, and 撤销 brings it back with its edits", async () => {
     const backend = fakeBackend();
     fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: /添加图纸/ }));
-    await screen.findByRole("heading", { name: "floor.dxf" });
-    screen.getByRole("button", { name: "从队列去掉 second.dxf" }).focus();
+    await screen.findByText("天花图");
+    await user.type(dstInputs()[1], "RCP");
+    screen.getByRole("button", { name: "从队列去掉 floor.dxf" }).focus();
     await user.keyboard("{Enter}");
     await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(1));
-    expect(backend.last("POST", "/api/drawings/close").body).toEqual({ path: "/d/second.dxf" });
+    // The dropped copy is only closed after the undo window.
+    expect(backend.called("POST", "/api/drawings/close")).toHaveLength(0);
+    await user.click(await screen.findByRole("button", { name: "撤销" }));
+    expect(screen.getAllByRole("option")).toHaveLength(2);
+    expect(await screen.findByDisplayValue("RCP")).toBeInTheDocument();
   });
 });
 
@@ -554,3 +564,79 @@ describe("drawings with nothing to translate", () => {
     expect(backend.called("POST", "/api/drawings/writeback")).toHaveLength(1);
   });
 });
+
+describe("review round 2", () => {
+  it("a missing key stops 翻译全部 after the first drawing with one notice", async () => {
+    const backend = fakeBackend({
+      "POST /api/drawings/translate": (body) => ({ items: body.items.map((item) => ({ ...item, target: "", via: "needs_engine" })), glossary: 0, mt: 0, skipped: body.items.length, has_engine: false }),
+    });
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: /翻译全部 2 张/ }));
+    await screen.findByText(/要填翻译密钥才能继续/);
+    expect(backend.called("POST", "/api/drawings/translate")).toHaveLength(1);
+  });
+
+  it("settings cannot be opened in the middle of a run", async () => {
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    fakeBackend({
+      "POST /api/drawings/translate": async (body) => {
+        await gate;
+        return { items: body.items.map((item) => ({ ...item, target: "x", via: "glossary" })), glossary: body.items.length, mt: 0, skipped: 0, has_engine: false };
+      },
+    });
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: /翻译全部 2 张/ }));
+    await screen.findByText(/正在译第 1 \/ 2 张/);
+    await user.click(screen.getByRole("button", { name: /设置/ }));
+    expect(await screen.findByText("等译完再去设置。")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "停止" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "停止" }));
+    expect(screen.getByRole("button", { name: "译完这张就停…" })).toBeDisabled();
+    release();
+    await screen.findByText(/已停止，写好 1 张/);
+  });
+
+  it("按表格写出全部 picks a table and writes in one go", async () => {
+    const backend = fakeBackend({
+      "POST /api/batch/import": () => ({ results: [{ file: "floor.dxf", written: 3, path: "/out/en_floor.dxf" }, { file: "second.dxf", written: 1, path: "/out/en_second.dxf" }], written: 4, files: 2 }),
+    });
+    const native = fakeNative({
+      pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }),
+      pick_table_file: vi.fn(async () => ({ path: "/t/filled.csv", text: "file,source,target\n" })),
+    });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: "更多" }));
+    await user.click(screen.getByRole("menuitem", { name: /按表格写出全部/ }));
+    await screen.findByText(/按表格写好 2 张/);
+    expect(native.pick_table_file).toHaveBeenCalledTimes(1);
+    expect(backend.last("POST", "/api/batch/import").body.files).toEqual(["/d/floor.dxf", "/d/second.dxf"]);
+    expect(within(screen.getByRole("listbox")).getAllByText("已写出")).toHaveLength(2);
+  });
+
+  it("the final 在文件夹中显示 reveals the file just written", async () => {
+    fakeBackend();
+    const native = fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: /翻译全部 2 张/ }));
+    await screen.findByText("2 张都写好了。");
+    const toastBox = screen.getByText("2 张都写好了。").closest(".toast");
+    await user.click(within(toastBox).getByRole("button", { name: "在文件夹中显示" }));
+    expect(native.reveal_file).toHaveBeenLastCalledWith("/out/en_floor_1200.dxf");
+  });
+});
+

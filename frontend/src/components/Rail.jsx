@@ -30,6 +30,7 @@ export default function Rail({
   locked,
   translating,
   runAll,
+  stopping,
   canTranslate,
   onAdd,
   onPick,
@@ -69,7 +70,6 @@ export default function Rail({
                     event.preventDefault();
                     onPick(file.path);
                   }
-                  if (event.key === "Delete" || event.key === "Backspace") onRemove(file.path);
                 }}
               >
                 <span className={`ext ext-${file.ext.toLowerCase()}`}>{file.ext}</span>
@@ -98,7 +98,9 @@ export default function Rail({
           </p>
         )}
         {runAll ? (
-          <button type="button" className="go secondary" onClick={onStop}>停止</button>
+          <button type="button" className="go secondary" onClick={onStop} disabled={stopping}>
+            {stopping ? "译完这张就停…" : "停止"}
+          </button>
         ) : (
           <button
             type="button"

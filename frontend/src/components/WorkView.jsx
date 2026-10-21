@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Ellipsis, Plus, Save, Search, X } from "lucide-react";
 import { asText, fileName, viaLabel } from "../lib/core";
 import { modKey } from "../lib/native";
-import { Banner, Check, Menu, MenuItem } from "./ui";
+import { Banner, Menu, MenuItem } from "./ui";
 
 export function Notice({ notice, onClose }) {
   if (!notice?.text) return null;
@@ -32,12 +32,6 @@ function EmptyStart({ onAdd, dropOver }) {
   );
 }
 
-const FILTER_OPTIONS = [
-  ["numbers", "数字、尺寸", "尺寸数字、纯符号，一般不用译"],
-  ["dupes", "重复的句子", "同一句在图上出现多次，只译一次，每处都写回"],
-  ["nonsource", "已经是外文的", "已经是目标语言或夹杂别的文字，先跳过"],
-];
-
 export default function WorkView({
   file,
   rows,
@@ -45,7 +39,6 @@ export default function WorkView({
   stats,
   counts,
   filters,
-  onFilter,
   query,
   onQuery,
   notice,
@@ -124,18 +117,10 @@ export default function WorkView({
           >
             <Save size={14} strokeWidth={1.8} aria-hidden="true" />写出新文件
           </button>
-          <Menu ariaLabel="更多" title="先别译、表格" className="tbtn icon-only" caret={false} icon={<Ellipsis size={16} strokeWidth={1.8} aria-hidden="true" />}>
-            <div className="menu-pad">
-              <p className="menu-title">先别译</p>
-              {FILTER_OPTIONS.map(([key, label, hint]) => (
-                <Check key={key} checked={filters[key]} hint={hint} onChange={(value) => onFilter(key, value)}>{label}</Check>
-              ))}
-            </div>
-            <div className="menu-sep" />
-            <MenuItem onClick={() => onExportTable("xlsx")} disabled={locked} hint="给同事改译文">导出 Excel</MenuItem>
-            <MenuItem onClick={() => onExportTable("csv")} disabled={locked}>导出表格</MenuItem>
-            <MenuItem onClick={onImportTable} disabled={locked} hint="填回译文">导入表格</MenuItem>
-            {onWriteBackAll && <MenuItem onClick={onWriteBackAll} disabled={locked} hint="按表里的文件名">全部写回</MenuItem>}
+          <Menu ariaLabel="更多" title="用表格改译文" className="tbtn icon-only" caret={false} icon={<Ellipsis size={16} strokeWidth={1.8} aria-hidden="true" />}>
+            <MenuItem onClick={() => onExportTable("xlsx")} disabled={locked} hint="给同事改译文">导出表格</MenuItem>
+            <MenuItem onClick={onImportTable} disabled={locked} hint="把改好的填回来">导入表格</MenuItem>
+            {onWriteBackAll && <MenuItem onClick={onWriteBackAll} disabled={locked} hint="一张表，每张图各写一个新文件">按表格写出全部</MenuItem>}
           </Menu>
         </div>
       </div>
