@@ -694,10 +694,19 @@ def translate_drawing(
             translate_filename=translate_filename,
             translator=translator,
         )
+    left = []
+    for item in translated["items"]:
+        source = _as_text(item.get("source")).strip()
+        if source and not (item.get("target") or "").strip() and source not in left:
+            left.append(source)
+    if not translated["items"]:
+        # Nothing in the source language (an English schematic, say): not an error.
+        return {"path": "", "extracted": preview["count"], "translated": 0, "glossary": 0,
+                "mt": 0, "skipped": 0, "untranslated": [], "nothing_to_translate": True}
     if not any((item.get("target") or "").strip() for item in translated["items"]):
         if translated.get("has_engine"):
             raise ValueError("没有可写回的译文")
-        raise ValueError("没有可写回的译文。术语表没命中，也没有翻译引擎")
+        raise ValueError(f"没有可写回的译文。术语表没命中，也没有翻译引擎（{len(left)} 句：{'；'.join(left[:5])}）")
     written = writeback_rows(
         path,
         translated["items"],
@@ -714,6 +723,7 @@ def translate_drawing(
         "glossary": translated["glossary"],
         "mt": translated["mt"],
         "skipped": translated["skipped"],
+        "untranslated": left,
     }
 
 

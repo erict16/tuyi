@@ -118,6 +118,42 @@ class CliTranslateTests(unittest.TestCase):
         self.assertNotIn("勾选", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
 
+    def test_drawing_without_chinese_is_skipped_not_failed(self):
+        # CMA7 / SHM-D schematics are already English: nothing to do, exit 0.
+        src = self.root / "7E313G-19D CMA7.dxf"
+        doc = ezdxf.new()
+        doc.modelspace().add_text("Motor drive unit", dxfattribs={"height": 2.5})
+        doc.modelspace().add_text("AC400V", dxfattribs={"height": 2.5})
+        doc.saveas(src)
+        out = self.root / "out"
+        result = _run(["translate", str(src), "--output-dir", str(out)])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("skipped:", result.stdout)
+        self.assertIn("7E313G-19D CMA7.dxf", result.stdout)
+        self.assertFalse(out.exists() and any(out.iterdir()))
+
+    def test_untranslated_lines_are_listed(self):
+        src = self.root / "partial.dxf"
+        doc = ezdxf.new()
+        doc.modelspace().add_text("天花图", dxfattribs={"height": 2.5})
+        doc.modelspace().add_text("光缆（厂家提供）", dxfattribs={"height": 2.5})
+        doc.saveas(src)
+        result = _run(["translate", str(src), "-o", str(self.root / "partial_en.dxf")])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("untranslated: 1", result.stdout)
+        self.assertIn("  - 光缆（厂家提供）", result.stdout)
+
+    def test_one_bad_drawing_does_not_stop_the_batch(self):
+        missing = self.root / "missing.dxf"
+        good = self.root / "good.dxf"
+        shutil.copy(FLOOR, good)
+        result = _run(["translate", str(missing), str(good), "--output-dir", str(self.root / "out")])
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("图纸不存在 (missing.dxf)", result.stderr)
+        written = [Path(line) for line in result.stdout.splitlines() if line.endswith(".dxf")]
+        self.assertEqual(len(written), 1)
+        self.assertTrue(written[0].is_file())
+
     def test_unreadable_dxf_is_chinese_nonzero(self):
         junk = self.root / "junk.dxf"
         junk.write_bytes(b"not a dxf")

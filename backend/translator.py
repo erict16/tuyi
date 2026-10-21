@@ -91,6 +91,84 @@ def load_yaml_data(filename):
     return {}
 
 
+CJK_GAP_RE = re.compile(r"(?<=[\u3400-\u9fff])\s+(?=[\u3400-\u9fff])")
+
+
+def collapse_cjk_gaps(text: str) -> str:
+    """Drop spaces between two CJK characters (title-block letter spacing)."""
+    return CJK_GAP_RE.sub("", str(text or ""))
+
+
+# Standard drawing-frame cells. Plain, unambiguous wording; checked against the
+# Huaming locks (no conflicting entry there).
+TITLE_BLOCK_ZH_TO_EN = {
+    "开关编号": "Tap-changer S/N",
+    "开关型号": "Tap-changer type",
+    "开关合同号": "Contract No.",
+    "变压器编号": "Transformer No.",
+    "项目号": "Project No.",
+    "版本号": "Revision",
+    "图样名称": "Drawing title",
+    "图样类别": "Drawing category",
+    "图样代号": "Drawing No.",
+    "产品类别": "Product category",
+    "产品名称或材料标记": "Product name or material mark",
+    "旧底图总号": "Old base drawing No.",
+    "底图总号": "Base drawing No.",
+    "借通用件登记": "Borrowed/common parts register",
+    "借用件登记": "Borrowed parts register",
+    "所属装配图号": "Assembly drawing No.",
+    "图纸张数": "Number of sheets",
+    "页码": "Page No.",
+    "型号": "Type",
+    "代号": "Code",
+    "序号": "No.",
+    "名称": "Name",
+    "数量": "Qty.",
+    "材料": "Material",
+    "重量": "Weight",
+    "重量(kg)": "Weight (kg)",
+    "单重": "Unit weight",
+    "单件": "Unit",
+    "总计": "Total",
+    "备注": "Remarks",
+    "日期": "Date",
+    "签字": "Signature",
+    "描图": "Traced",
+    "校图": "Checked",
+    "校描": "Tracing checked",
+    "工艺": "Process",
+    "比例": "Scale",
+    "外形图": "Outline drawing",
+    "接线端子尺寸：": "Terminal dimensions:",
+    "分接位置指示": "Tap position indication",
+    "分接选择器触头": "Tap selector contacts",
+    "上层触头": "Upper contacts",
+    "下层触头": "Lower contacts",
+    "电流引出环": "Current take-off ring",
+    "华明负责连接": "Connected by Huaming",
+    "用户负责连接": "Connected by the customer",
+    "请勿重压": "Do not apply heavy load",
+    "采购方": "Purchaser",
+    "第几页": "Page",
+    "共几页": "Total pages",
+    "借（通）用件登记": "Borrowed/common parts register",
+    "表面积": "Surface area",
+    "触头数": "Number of contacts",
+    "对地": "To earth",
+    "相间": "Phase to phase",
+    "触头间": "Between contacts",
+    "最大最小间": "Max. to min. tap",
+    "工频耐压（50Hz,1min）": "Power-frequency withstand voltage (50 Hz, 1 min)",
+    "雷电冲击(1.2/50μS)": "Lightning impulse (1.2/50 μs)",
+    "档位显示": "Position indication",
+    "中性点引出环": "Current take-off ring",
+    "钟罩式安装法兰": "Bell-type mounting flange",
+    "型无载分接开关": "OCTC",
+    "型无励磁分接开关": "DETC",
+}
+
+
 # Workbook rows, then these. OS locks and the six drawing spellings win.
 SWITCH_OVERRIDES_ZH_TO_EN = {
     "均压罩": "terminal screen caps",
@@ -100,8 +178,8 @@ SWITCH_OVERRIDES_ZH_TO_EN = {
     "冷压管": "crimp sleeve",
     "组合式": "combined",
     "复合式": "compound",
-    "笼式": "cage",
-    "鼓式": "drum",
+    "笼式": "cage type",
+    "鼓式": "drum type",
     "极性选择器": "change-over selector",
     "有载分接开关": "OLTC",
     "分接选择器": "tap selector",
@@ -138,7 +216,7 @@ SWITCH_OVERRIDES_ZH_TO_EN = {
     "真空泡": "VI",
     "真空灭弧室": "VI",
     "无载分接开关": "OCTC",
-    "无励磁分接开关": "OCTC",
+    "无励磁分接开关": "DETC",
     "局部放电": "PD",
     "色谱分析": "DGA",
     "油中溶解气体分析法": "DGA",
@@ -160,6 +238,21 @@ SWITCH_OVERRIDES_ZH_TO_EN = {
     "分接选择器底部与A等电位": "Tap selector bottom and A are equal potential",
     "夹片式触头": "clamping contact",
     "滚动式触头": "rolling contact",
+    # Huaming locked terms (huaming-oltc-translate locks.md) the workbook lacked.
+    "上海华明电力设备制造有限公司": "Shanghai Huaming Power Equipment Co., Ltd.",
+    "有载分接开关保护继电器": "OLTC protective relay",
+    "布赫霍尔茨继电器": "Buchholz relay",
+    "选择触头双数层": "even-numbered contact layer of the tap selector",
+    "选择触头单数层": "odd-numbered contact layer of the tap selector",
+    "剪切销": "shear pin",
+    "切换开关芯子": "diverter switch insert",
+    "过渡电阻": "transition resistor",
+    "垂直传动轴": "vertical driving shaft",
+    "水平传动轴": "horizontal driving shaft",
+    "正反调": "reversing (W)",
+    "粗细调": "coarse-fine (G)",
+    "星点": "star-point",
+    "线端": "line-end",
 }
 
 
@@ -177,7 +270,7 @@ def _clean_pairs(*groups) -> dict:
 def switch_zh_to_en_context() -> dict:
     """Switch workbook plus the drawing overrides. No architectural terms."""
     switch = load_yaml_data("glossaries/switch_zh_to_en.yaml").get("context_zh_to_en") or {}
-    return _clean_pairs(switch, SWITCH_OVERRIDES_ZH_TO_EN)
+    return _clean_pairs(TITLE_BLOCK_ZH_TO_EN, switch, SWITCH_OVERRIDES_ZH_TO_EN)
 
 
 def transformer_zh_to_en_context() -> dict:
@@ -317,6 +410,7 @@ class CADChineseTranslator:
 
     def __init__(self, log_callback=None):
         self.translated_cache = {}
+        self._spaced_glossary_index = {}
         self.language_assets = LanguageAssets()
         self.project_package_path = ""
         self.use_glossary = True
@@ -558,7 +652,18 @@ class CADChineseTranslator:
         return text
 
     def get_glossary_translation(self, text, lang_config_key):
-        return self.language_configs[lang_config_key]['glossary'].get(text.strip().casefold())
+        glossary = self.language_configs[lang_config_key]['glossary']
+        key = text.strip().casefold()
+        hit = glossary.get(key)
+        if hit or not CJK_GAP_RE.search(key):
+            return hit
+        # Title blocks spread characters out ("设     计", "日   期"); the gaps are
+        # layout only, so "设 计" and "设计" are the same glossary term.
+        index = self._spaced_glossary_index.get(id(glossary))
+        if index is None or index[0] is not glossary:
+            index = (glossary, {collapse_cjk_gaps(k): v for k, v in glossary.items()})
+            self._spaced_glossary_index[id(glossary)] = index
+        return index[1].get(collapse_cjk_gaps(key))
 
     def get_layer_glossary_translation(self, text, lang_config_key, layer):
         text = str(text or "")

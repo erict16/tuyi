@@ -49,7 +49,10 @@ def fit_translated_labels(doc, rows) -> int:
         if is_mtext:
             column = float(entity.dxf.get("width", 0) or 0)
             if column > 0:
-                budget = min(budget, column * 0.96)
+                # The column is the cell. Short CJK labels leave most of it empty,
+                # so use it (as a hand-finished drawing does), but never more than
+                # twice the original label so oversized MTEXT boxes stay safe.
+                budget = min(column * 0.96, budget * 2)
         elif entity.dxf.get("halign", 0) in {3, 5}:
             span = (entity.dxf.align_point - entity.dxf.insert).magnitude
             if span > 0:
