@@ -1,4 +1,4 @@
-# PR / push smoke: unittest + frontend production build on Windows and macOS.
+# PR / push smoke: unittest + frontend tests + production build on Windows and macOS.
 name: ci
 
 on:
@@ -53,4 +53,5 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
+          npm test
           npm run build

@@ -10,20 +10,19 @@
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon-orange?style=flat-square">
 </p>
 
 <p align="center"><img src="docs/icons/app-rounded.png" width="20" alt=""> <a href="https://erict16.github.io/tuyi/">官网</a></p>
 
 图译打开 DWG / DXF 图纸，把上面的字译好，写回图纸，另存一份新文件。原图不动，也不用装 AutoCAD。标题栏、注释、块属性、标注、表格里的字都会译。
 
-## 下载（v0.1.11，免费）
+## 下载（v0.1.12，免费）
 
-- **Windows 10 / 11（64 位）**：[Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
-- **Mac，Apple 芯片（M1 到 M4）**：[Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
-- **Mac，Intel**：[Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+- **Windows 10 / 11（64 位）**：[Tuyi_v0.1.12_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe)
+- **Mac，Apple 芯片（M1 到 M4）**：[Tuyi_v0.1.12_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg)
 
-不确定 Mac 是哪种芯片，看苹果菜单里的「关于本机」。以后的版本都在 [Releases](https://github.com/erict16/tuyi/releases/latest)。
+Mac 版只支持 Apple 芯片（M1 及以后），Intel Mac 不再提供。以后的版本都在 [Releases](https://github.com/erict16/tuyi/releases/latest)。
 
 安装包还没签名，第一次打开系统会拦，这是正常的。Windows 点「更多信息」，再点「仍要运行」。Mac 打开 DMG，把图译拖进应用程序，第一次打开时右键图标，选「打开」。
 

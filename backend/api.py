@@ -1270,6 +1270,9 @@ def start_batch(body: BatchStartBody):
         ollama_model=body.ollama_model,
     )
     settings = body.model_dump()
+    # 重复的句子只译一次: the translator cache already sends each label once, and
+    # every copy (title blocks on each sheet) must still be written back.
+    settings["skip_dupes"] = False
     settings["output_dir"] = output_dir
     if body.provider == "azure":
         settings["api_key"] = body.azure_key

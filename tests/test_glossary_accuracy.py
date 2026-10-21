@@ -90,5 +90,25 @@ class GlossaryAccuracyTests(unittest.TestCase):
                 self.assertNotRegex(target, r"[一-鿿]")
 
 
+
+class PersonNameTests(unittest.TestCase):
+    """Engineers' signatures in title blocks stay as written."""
+
+    def test_signatures_are_not_translated(self):
+        from backend.drawings import item_passes_text_filters, looks_like_person_name
+
+        for name in ("沈  旭", "杨建琴", "王 伟", "欧阳明"):
+            with self.subTest(name=name):
+                self.assertTrue(looks_like_person_name(name))
+                self.assertFalse(item_passes_text_filters({"source": name}, skip_numbers=False, skip_dupes=False, skip_nonsource=False))
+
+    def test_terms_that_start_with_a_surname_are_still_translated(self):
+        from backend.drawings import looks_like_person_name
+
+        for term in ("高压", "方向", "陈列柜", "设  计", "校 对", "高压套管", "张力调整", "华明负责连接", "沈旭"):
+            with self.subTest(term=term):
+                self.assertFalse(looks_like_person_name(term))
+
+
 if __name__ == "__main__":
     unittest.main()

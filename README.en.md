@@ -10,20 +10,19 @@
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon-orange?style=flat-square">
 </p>
 
 <p align="center"><img src="docs/icons/app-rounded.png" width="20" alt=""> <a href="https://erict16.github.io/tuyi/en.html">Website</a></p>
 
 Tuyi opens a DWG or DXF drawing, translates the text on it, writes the translation back and saves a new file. The original stays as it is, and you don't need AutoCAD. Title blocks, notes, block attributes, dimensions and tables all get translated.
 
-## Download (v0.1.11, free)
+## Download (v0.1.12, free)
 
-- **Windows 10 / 11 (64-bit):** [Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
-- **Mac with Apple silicon (M1 to M4):** [Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
-- **Mac with Intel:** [Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+- **Windows 10 / 11 (64-bit):** [Tuyi_v0.1.12_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe)
+- **Mac with Apple silicon (M1 to M4):** [Tuyi_v0.1.12_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg)
 
-Not sure which Mac you have? Check About This Mac in the Apple menu. Newer versions show up on [Releases](https://github.com/erict16/tuyi/releases/latest).
+The Mac build runs on Apple silicon (M1 and later) only; Intel Macs are no longer supported. Newer versions show up on [Releases](https://github.com/erict16/tuyi/releases/latest).
 
 The installers aren't signed yet, so the system will stop them the first time. That's expected. On Windows, click More info, then Run anyway. On Mac, open the DMG, drag Tuyi into Applications, and the first time right-click the icon and choose Open.
 

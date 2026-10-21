@@ -22,6 +22,7 @@ from backend.drawings import translate_rows
 from backend import translator
 from backend.translator import CADChineseTranslator, decode_oda_mbcs_escapes, output_prefix
 from backend.api import BatchStartBody, TranslateBody, app, builtin_terms, default_output_name, service, start_batch
+from tests.frontend_source import ui_source
 
 
 class TranslationModeTests(unittest.TestCase):
@@ -544,11 +545,11 @@ class EngineAndGlossaryTests(unittest.TestCase):
         self._assert_calm(imported, 400, "术语表是空的")
 
     def test_frontend_engine_and_glossary_hints(self):
-        text = Path(__file__).resolve().parents[1].joinpath("frontend", "src", "App.jsx").read_text(encoding="utf-8")
+        text = ui_source()
         self.assertIn("请先启动 Ollama。", text)
         self.assertIn("无法连接自定义接口。", text)
         self.assertIn("剩下的要填网上翻译的密钥，或手填译文。", text)
-        self.assertIn('setStatus("术语表是空的")', text)
+        self.assertIn('"术语表是空的"', text)
         self.assertIn("术语表读不出来。", text)
         self.assertIn('useState("cloud")', text)
         self.assertIn("网上翻译", text)

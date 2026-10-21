@@ -10,16 +10,15 @@
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon-orange?style=flat-square">
 </p>
 
 Tuyi は DWG / DXF 図面を開いて文字を翻訳し、図面に書き戻して新しいファイルとして保存します。元の図面はそのままで、AutoCAD もいりません。表題欄、注記、ブロック属性、寸法、表の文字も翻訳します。
 
-## ダウンロード（v0.1.11、無料）
+## ダウンロード（v0.1.12、無料）
 
-- **Windows 10 / 11（64 ビット）**：[Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
-- **Mac（Apple シリコン、M1〜M4）**：[Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
-- **Mac（Intel）**：[Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+- **Windows 10 / 11（64 ビット）**：[Tuyi_v0.1.12_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe)
+- **Mac（Apple シリコン、M1〜M4）**：[Tuyi_v0.1.12_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg)
 
 どちらの Mac か分からないときは、アップルメニューの「この Mac について」で確認できます。新しい版は [Releases](https://github.com/erict16/tuyi/releases/latest) にあります。
 

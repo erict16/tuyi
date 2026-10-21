@@ -253,6 +253,48 @@ def keep_extracted_item(
     )
 
 
+# Common Chinese surnames. Used only to spot signatures in title blocks
+# (设计 沈  旭, 校对 杨建琴): people's names are kept as written.
+_SURNAMES = set(
+    "王李张刘陈杨黄赵吴周徐孙马朱胡郭何高林罗郑梁谢宋唐许韩冯邓曹彭曾肖田董袁潘于蒋蔡余杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦付方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤常温康施文牛樊葛邢安齐易乔伍庞颜倪庄聂章鲁岳翟殷詹申欧耿关兰焦俞左柳甘祝包宁尚符舒阮柯纪梅童凌毕单季裴霍涂成苗谷盛曲翁冉骆蓝路游辛靳管柴蒙鲍华喻祁蒲房滕屈饶解牟艾尤阳时穆农司卓古吉缪简车项连芦麦褚娄窦戚岑景党宫费卜冷晏席卫米柏宗瞿桂全佟应臧闵苟邬边卞姬师和仇栾隋商刁沙荣巫寇桑郎甄丛仲虞敖巩明佘池查麻苑迟邝"
+)
+_COMPOUND_SURNAMES = ("欧阳", "司马", "诸葛", "上官", "东方", "皇甫", "尉迟", "公孙", "慕容", "长孙", "宇文", "司徒", "夏侯")
+# Words for things and quantities end like this; given names practically never do.
+_THING_ENDINGS = set("柜箱板管阀器机图表线端子盒座环轴件号数位型式量门口孔槽面头杆架块片圈罩盖壳灯泵池房室层点向侧边角距长宽高厚径度压流温油水气电力值率钮钉销簧带链锁窗墙梁柱顶底体网框条")
+_NAME_GLOSSARY_KEYS: list[str] | None = None
+
+
+def _name_glossary_keys() -> list[str]:
+    global _NAME_GLOSSARY_KEYS
+    if _NAME_GLOSSARY_KEYS is None:
+        from backend.translator import collapse_cjk_gaps, merged_zh_to_en_context
+
+        _NAME_GLOSSARY_KEYS = [collapse_cjk_gaps(k) for k in merged_zh_to_en_context() if len(k) >= 2]
+    return _NAME_GLOSSARY_KEYS
+
+
+def looks_like_person_name(text: str) -> bool:
+    """A signature in a title block: never translated.
+
+    Conservative on purpose (高压, 方向 also start with surname characters):
+    a surname letter-spaced across the cell ("沈  旭"), or a three-character
+    name ("杨建琴"); and no glossary term inside it.
+    """
+    raw = _as_text(text).strip()
+    if not raw or not re.fullmatch(r"[\u4e00-\u9fff](?:\s*[\u4e00-\u9fff]){1,3}", raw):
+        return False
+    compact = re.sub(r"\s+", "", raw)
+    spaced = compact != raw
+    surname_ok = compact[0] in _SURNAMES or compact[:2] in _COMPOUND_SURNAMES
+    if not surname_ok:
+        return False
+    if not (spaced and len(compact) in (2, 3)) and len(compact) != 3:
+        return False
+    if compact[-1] in _THING_ENDINGS:
+        return False
+    return not any(key in compact for key in _name_glossary_keys())
+
+
 def item_passes_text_filters(
     item: dict,
     *,
@@ -262,6 +304,8 @@ def item_passes_text_filters(
     translation_mode: str = "zh_to_en",
 ) -> bool:
     source = _as_text(item.get("source") or item.get("original_text"))
+    if looks_like_person_name(source):
+        return False
     if skip_dupes and item.get("duplicate"):
         return False
     if skip_numbers and source and re.fullmatch(r"[\d.\-\s]+", source):
@@ -484,6 +528,39 @@ def _entity_from_handle(doc, handle: str):
         return None
 
 
+def fill_duplicate_targets(items: list[dict]) -> list[dict]:
+    """重复的句子只译一次: give every later copy the first copy's 译文.
+
+    The grid translates one copy of a repeated label; the same label in a second
+    title block must still be written, so empty duplicates inherit the target.
+    """
+    lead: dict[str, dict] = {}
+    for item in items:
+        source = _as_text(item.get("source"))
+        if item.get("duplicate") or source in lead:
+            continue
+        lead[source] = item
+    out = []
+    for item in items:
+        source = _as_text(item.get("source"))
+        master = lead.get(source)
+        usable = (
+            master is not None
+            and (master.get("target") or "").strip()
+            and master.get("selected", True) is not False
+            and not master.get("excluded")
+        )
+        if item.get("duplicate") and usable and not item.get("excluded") and not (item.get("target") or "").strip():
+            item = {
+                **item,
+                "target": master.get("target") or "",
+                "target_raw": master.get("target_raw") or master.get("target") or "",
+                "via": master.get("via") or "",
+            }
+        out.append(item)
+    return out
+
+
 def writeback_rows(
     path: str,
     items: list[dict],
@@ -498,8 +575,13 @@ def writeback_rows(
         raise FileNotFoundError("图纸不存在")
     if not items:
         raise ValueError("没有可写回的译文")
+    items = fill_duplicate_targets(items)
+
     def _should_write(item: dict) -> bool:
         if not (item.get("target") or "").strip():
+            return False
+        # The desktop grid marks rows the user unticked, including single copies.
+        if item.get("excluded"):
             return False
         if item.get("selected", True):
             return True
