@@ -34,6 +34,7 @@ from backend.drawings import (
 from backend.styles import bundled_font_path, looks_like_shx, register_cjk_font, rewrite_shx_styles
 from backend.translator import CADChineseTranslator
 from backend.updates import check_github_release
+from tests.frontend_source import ui_source
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 _SKIP_WIN_PRINT = unittest.skipIf(sys.platform == "win32", "print_pdf uses os.startfile on Windows")
@@ -922,8 +923,7 @@ class DrawingsLoopTests(unittest.TestCase):
         self.assertIn("reflected ceiling plan", model)
 
     def test_frontend_dims_label_is_honest(self):
-        source = Path(__file__).resolve().parents[1] / "frontend" / "src" / "App.jsx"
-        text = source.read_text(encoding="utf-8")
+        text = ui_source()
         self.assertIn("标注、表格", text)
         self.assertNotIn("标注（v0.2）", text)
         self.assertIn("enable_v02: params.dims", text)
@@ -944,8 +944,8 @@ class DrawingsLoopTests(unittest.TestCase):
         self.assertIn("skip_numbers: filters.numbers", text)
         self.assertIn("skip_dupes: filters.dupes", text)
         self.assertIn("skip_nonsource: filters.nonsource", text)
-        self.assertIn("items: visibleRows", text)
-        self.assertIn("if (!visibleRows.length)", text)
+        self.assertIn("items: pending", text)
+        self.assertIn("if (!shown.length)", text)
 
 
 class DrawingsApiTests(unittest.TestCase):
@@ -1581,10 +1581,10 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertNotIn("打印命令", empty["message"])
 
     def test_frontend_print_needs_a_drawing(self):
-        source = Path(__file__).resolve().parents[1] / "frontend" / "src" / "App.jsx"
-        text = source.read_text(encoding="utf-8")
+        text = ui_source()
         self.assertIn("先打开图纸。", text)
-        self.assertIn("disabled={busy || !current} onClick={() => exportPdf(true)}", text)
+        self.assertIn("canPdf={Boolean(current) && !busy}", text)
+        self.assertIn("onExportPdf(true)", text)
         self.assertIn("已送到系统打印", text)
         self.assertIn("function cadPathForPdf()", text)
         self.assertIn("PDF 已导出（写回图纸）", text)
@@ -1592,18 +1592,16 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertIn("style: layout", text)
 
     def test_frontend_empty_filter_is_calm(self):
-        source = Path(__file__).resolve().parents[1] / "frontend" / "src" / "App.jsx"
-        text = source.read_text(encoding="utf-8")
+        text = ui_source()
         self.assertIn("过滤后没有可显示的文字。", text)
         self.assertIn("这张图没有可译文字。", text)
-        self.assertIn("还没打开图纸，点左边添加", text)
+        self.assertIn("把 DWG / DXF 拖到这里", text)
         self.assertIn("function asCount(value)", text)
         self.assertIn("function asText(value)", text)
         self.assertIn("/^[\\d.\\-\\s]+$/", text)
 
     def test_frontend_import_tab_is_honest(self):
-        source = Path(__file__).resolve().parents[1] / "frontend" / "src" / "App.jsx"
-        text = source.read_text(encoding="utf-8")
+        text = ui_source()
         self.assertIn("导出表格", text)
         self.assertIn("导入表格", text)
         self.assertIn("全部写回", text)
@@ -1612,8 +1610,7 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertNotIn("人工 Excel 回填", text)
 
     def test_frontend_batch_and_glossary_controls(self):
-        source = Path(__file__).resolve().parents[1] / "frontend" / "src" / "App.jsx"
-        text = source.read_text(encoding="utf-8")
+        text = ui_source()
         self.assertIn("暂停", text)
         self.assertIn("停止", text)
         self.assertIn("重试", text)

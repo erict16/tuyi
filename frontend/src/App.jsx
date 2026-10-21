@@ -1,273 +1,150 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, Settings, Share } from "lucide-react";
+import { FilePlus2 } from "lucide-react";
 import "./App.css";
+import BatchView from "./components/BatchView";
+import Footer from "./components/Footer";
+import GlossaryView from "./components/GlossaryView";
+import Rail from "./components/Rail";
+import SettingsView from "./components/SettingsView";
+import Toasts from "./components/Toasts";
+import UpdateView from "./components/UpdateView";
+import WorkView from "./components/WorkView";
+import { api, uploadDrawings } from "./lib/api";
+import { RAIL_KEY } from "./lib/constants";
+import {
+  asCount,
+  asFiles,
+  asText,
+  b64ToBytes,
+  bytesToB64,
+  carryTargets,
+  editRow,
+  enginePayload,
+  engineFromConfig,
+  engineProvider,
+  fileName,
+  filterRows,
+  guessLang,
+  hasWritable,
+  isCadName,
+  langLabel,
+  mergeFiles,
+  mergeTranslated,
+  modeKey,
+  outputStem,
+  rowStats,
+  sourceCounts,
+  syncDuplicates,
+  termsCsv,
+} from "./lib/core";
+import { usePrefs, useTheme, useToasts } from "./lib/hooks";
+import { hasNativeTitlebar, py, reveal, saveFile } from "./lib/native";
 
-const LANGS = [
-  ["zh-Hans", "中文", "中"],
-  ["en", "英语", "英"],
-  ["vi", "越南语", "越"],
-  ["id", "印尼语", "印"],
-  ["th", "泰语", "泰"],
-  ["ms", "马来语", "马"],
-  ["ko", "韩语", "韩"],
-  ["ru", "俄语", "俄"],
-  ["ja", "日语", "日"],
-  ["de", "德语", "德"],
-];
+const DEMO_ROWS = [
+  ["电气原理图", "Electrical Schematic", "0", "MTEXT"],
+  ["平面布置图", "Floor Plan", "0", "TEXT"],
+  ["隔墙定位图", "Partition Location Plan", "A-WALL", "TEXT"],
+  ["进线柜", "Incoming Cabinet", "E-POWR", "ATTRIB"],
+  ["接地", "Earthing", "E-POWR", "MTEXT"],
+  ["总图", "General Layout", "TITLE", "TEXT"],
+  ["材料表", "Bill of Materials", "0", "TABLE"],
+  ["电缆桥架", "Cable Tray", "E-TRAY", "MTEXT"],
+].map(([source, target, layer, type], id) => ({ id, source, target, layer, type, duplicate: false, via: "glossary" }));
 
-const LATIN_LANGS = new Set(["en", "de", "id", "ms", "vi"]);
-
-function langLabel(code) {
-  return LANGS.find(([id]) => id === code)?.[1] || code;
+// Extract options that change which rows exist. Leaving 设置 with any of these
+// changed re-reads the drawing; filters are applied on screen only.
+function extractKey(params) {
+  return JSON.stringify([params.attribs, params.blocks, params.dims, params.model, params.paper, params.frozen, params.locked, params.off]);
 }
 
-function langShort(code) {
-  return LANGS.find(([id]) => id === code)?.[2] || code;
-}
-
-function guessLang(text) {
-  const sample = text == null ? "" : String(text);
-  if (/[\u4e00-\u9fff]/.test(sample)) return "zh-Hans";
-  if (/[\u3040-\u30ff]/.test(sample)) return "ja";
-  if (/[\uac00-\ud7af]/.test(sample)) return "ko";
-  if (/[\u0e00-\u0e7f]/.test(sample)) return "th";
-  if (/[\u0400-\u04ff]/.test(sample)) return "ru";
-  return "en";
-}
-
-const LAYOUTS = [
-  ["纯译文", "图纸上只留译文", "写回后图纸上只看到译文"],
-  ["原译对照", "原文和译文都留", "原文和译文都写在图上"],
-  ["译原对照", "译文在上、原文在下", "先写译文，原文叠在下面"],
-];
-
-const APPEARANCES = [
-  ["黑白", "白纸黑线", "打印用。线都是黑的"],
-  ["彩色", "白纸，颜色还在", "白底。青、红、绿、黄保持原色"],
-  ["Chrome", "深色屏幕", "深灰底，像在模型空间里看"],
-];
-
-const PDF_PAPERS = [
-  ["a4", "A4 竖向"],
-  ["a4l", "A4 横向"],
-  ["a3", "A3 竖向"],
-  ["a3l", "A3 横向"],
-];
-
-const ENGINES = [
-  ["cloud", "网上翻译"],
-  ["local", "不联网"],
-  ["custom", "自己配接口"],
-];
-
-const THEME_KEY = "tuyi-theme";
-
-function py() {
-  return window.pywebview?.api || null;
-}
-
-function isMacChrome() {
-  return /Mac/i.test(navigator.userAgent || "");
-}
-
-function hasNativeTitlebar() {
-  // Desktop shell uses the OS caption bar on Windows and Mac.
-  // Do not paint fake Mac traffic lights on Windows.
-  if (isMacChrome()) return true;
-  const platform = `${navigator.platform || ""} ${navigator.userAgent || ""}`;
-  if (/Win/i.test(platform)) return true;
-  return Boolean(window.pywebview);
-}
-
-function layoutLabel(value) {
-  return LAYOUTS.find(([api]) => api === value)?.[1] || value;
-}
-
-async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
-  });
-  const text = await response.text();
-  let data = {};
+function readRailWidth() {
   try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    data = { detail: text };
-  }
-  if (!response.ok) {
-    const detail = data.detail || data.message || `HTTP ${response.status}`;
-    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
-  }
-  return data;
-}
-
-function asText(value) {
-  if (value == null) return "";
-  return typeof value === "string" ? value : String(value);
-}
-
-function readTheme() {
-  try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === "dark" || stored === "light") return stored;
-  } catch {
-    /* ignore */
-  }
-  if (typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
-  return "light";
-}
-
-function termKey(term) {
-  return `${asText(term?.scope) || "global"}-${term?.id}-${asText(term?.source)}`;
-}
-
-function Choice({ on, onClick, children, title }) {
-  return (
-    <button type="button" className={`choice${on ? " on" : ""}`} aria-pressed={on} title={title} onClick={onClick}>
-      {children}
-    </button>
-  );
-}
-
-function Seg({ value, options, onChange, label }) {
-  return (
-    <div className="seg" role="radiogroup" aria-label={label}>
-      {options.map(([id, text]) => (
-        <button type="button" key={id} className={value === id ? "on" : ""} onClick={() => onChange(id)}>{text}</button>
-      ))}
-    </div>
-  );
-}
-
-function asCount(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function modeKey(source, target) {
-  source = asText(source);
-  target = asText(target);
-  if (source === "zh-Hans" && target === "en") return "zh_to_en";
-  if (source === "en" && target === "zh-Hans") return "en_to_zh";
-  if (source === "zh-Hans" && target === "fr") return "zh_to_fr";
-  if (source === "fr" && target === "zh-Hans") return "fr_to_zh";
-  return `${source}_to_${target}`;
-}
-
-function engineProvider(engine, config) {
-  if (engine === "local") return "ollama";
-  if (engine === "custom") return "openai";
-  return asText(config?.provider) === "azure" ? "azure" : "deepl";
-}
-
-function enginePayload(engine, config) {
-  config = config && typeof config === "object" ? config : {};
-  return {
-    provider: engineProvider(engine, config),
-    deepl_key: asText(config.deepl_key),
-    azure_key: asText(config.azure_key),
-    azure_region: asText(config.azure_region),
-    openai_key: asText(config.openai_key),
-    openai_base: asText(config.openai_base),
-    openai_model: asText(config.openai_model),
-    ollama_host: asText(config.ollama_host),
-    ollama_model: asText(config.ollama_model),
-    project_package_path: asText(config.project_package_path),
-  };
-}
-
-function asFiles(paths) {
-  return (paths || []).map((path) => ({
-    path,
-    name: String(path).split(/[/\\]/).pop(),
-    ext: String(path).toLowerCase().endsWith(".dxf") ? "DXF" : "DWG",
-  }));
+    const n = Number(localStorage.getItem(RAIL_KEY));
+    if (n >= 220 && n <= 420) return n;
+  } catch { /* ignore */ }
+  return 280;
 }
 
 export default function App() {
   const nativeTitlebar = hasNativeTitlebar();
   const [view, setView] = useState("work");
-  const [theme, setTheme] = useState(readTheme);
   const [settingsTab, setSettingsTab] = useState("tr");
-  const [railW, setRailW] = useState(() => {
-    try {
-      const n = Number(localStorage.getItem("tuyi-rail"));
-      if (n === 220) return 300;
-      if (n >= 200 && n <= 420) return n;
-    } catch { /* ignore */ }
-    return 300;
-  });
+  const [themePref, setThemePref, theme] = useTheme();
+  const [prefs, setPrefs] = usePrefs();
+  const { sourceLang, targetLang, layout, appearance, pdfPaper, filters, params } = prefs;
+  const [railW, setRailW] = useState(readRailWidth);
+  const [railDrag, setRailDrag] = useState(false);
 
   const [files, setFiles] = useState([]);
   const [current, setCurrent] = useState("");
   const [rows, setRows] = useState([]);
+  const [fileState, setFileState] = useState({});
+  const [query, setQuery] = useState("");
+  const [busy, setBusy] = useState("");
+  const [dropOver, setDropOver] = useState(false);
+
   const [engine, setEngine] = useState("cloud");
-  const [sourceLang, setSourceLang] = useState("zh-Hans");
-  const [targetLang, setTargetLang] = useState("en");
-  const [layout, setLayout] = useState("纯译文");
-  const [appearance, setAppearance] = useState("黑白");
-  const [pdfPaper, setPdfPaper] = useState("a4");
-  const [filters, setFilters] = useState({ numbers: true, dupes: true, nonsource: true });
-  const [params, setParams] = useState({
-    attribs: true,
-    dims: true,
-    model: true,
-    paper: true,
-    frozen: true,
-    locked: true,
-    off: true,
-    filename: true,
-    glossary: true,
-    blocks: true,
-    tree: true,
-    odaDxf: true,
-  });
+  const [config, setConfig] = useState({});
+  const [saved, setSaved] = useState(false);
+  const [probe, setProbe] = useState({ busy: false, text: "", ok: false });
   const [oda, setOda] = useState({ installed: false, path: "" });
-  const [glossary, setGlossary] = useState(0);
-  const [status, setStatus] = useState("还没打开图纸，点左边添加");
+  const [terms, setTerms] = useState([]);
+  const [builtinTerms, setBuiltinTerms] = useState([]);
+  const [batch, setBatch] = useState({ tasks: [], started: false, paused: false, progress: 0 });
+  const [table, setTable] = useState(null);
+
   const [appVersion, setAppVersion] = useState("");
-  const [config, setConfig] = useState({
-    provider: "deepl",
-    deepl_key: "",
-    azure_key: "",
-    azure_region: "",
-    output_dir: "",
-    openai_key: "",
-    openai_base: "",
-    openai_model: "",
-    ollama_host: "",
-    ollama_model: "",
-    project_package_path: "",
-  });
-  const [batch, setBatch] = useState({ tasks: [], running: false });
   const [updateMsg, setUpdateMsg] = useState("");
   const [updateInfo, setUpdateInfo] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [updatePercent, setUpdatePercent] = useState(0);
   const [checking, setChecking] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [translating, setTranslating] = useState(false);
-  const [dropOver, setDropOver] = useState(false);
-  const [railDrag, setRailDrag] = useState(false);
-  const [pickedTerms, setPickedTerms] = useState(() => new Set());
-  const [termQuery, setTermQuery] = useState("");
-  const [lastOutput, setLastOutput] = useState("");
-  const [writtenPath, setWrittenPath] = useState("");
-  const [terms, setTerms] = useState([]);
-  const [builtinTerms, setBuiltinTerms] = useState([]);
-  const [termDraft, setTermDraft] = useState({ source: "", target: "" });
-  const [tableCsv, setTableCsv] = useState("");
+
+  const { toasts, push: toast, dismiss } = useToasts();
   const cadInput = useRef(null);
   const glossaryInput = useRef(null);
   const tableInput = useRef(null);
-  const langRef = useRef(null);
+  const sheets = useRef(new Map());
+  const extractSeq = useRef(0);
   const extractSnap = useRef("");
   const pageReturn = useRef("work");
-  const [langOpen, setLangOpen] = useState(false);
+  const configLoaded = useRef(false);
+  const dragDepth = useRef(0);
+  const batchNoticeKey = useRef("");
 
+  const mode = modeKey(sourceLang, targetLang);
+  const selected = files.find((item) => item.path === current);
+  const visibleRows = useMemo(() => filterRows(rows, filters, sourceLang, query), [rows, filters, sourceLang, query]);
+  const stats = useMemo(() => rowStats(rows, filterRows(rows, filters, sourceLang)), [rows, filters, sourceLang]);
+  const counts = useMemo(() => sourceCounts(rows), [rows]);
+  const curState = fileState[current] || {};
+  const notice = curState.notice || fileState[""]?.notice || null;
+  const locked = busy === "extract" || busy === "translate" || busy === "write";
+  const translating = busy === "translate";
+  const writtenPath = asText(curState.output);
+
+  // ---------- small state helpers ----------
+  const patchFile = useCallback((path, patch) => {
+    setFileState((prev) => ({ ...prev, [path]: { ...(prev[path] || {}), ...patch } }));
+  }, []);
+
+  const say = useCallback((path, tone, text, extra = {}) => {
+    patchFile(path || "", { notice: text ? { tone, text, ...extra } : null });
+  }, [patchFile]);
+
+  const setFilter = (key, value) => setPrefs((prev) => ({ filters: { ...prev.filters, [key]: value } }));
+  const setParam = (key, value) => setPrefs((prev) => ({ params: { ...prev.params, [key]: value } }));
+
+  const updateRows = useCallback((fn) => {
+    setRows((prev) => {
+      const next = fn(prev);
+      if (current) sheets.current.set(current, next);
+      return next;
+    });
+  }, [current]);
+
+  // ---------- theme, rail width ----------
   useEffect(() => {
-    try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
     const paint = () => py()?.set_chrome_theme?.(theme === "dark");
@@ -277,182 +154,199 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    try { localStorage.setItem("tuyi-rail", String(railW)); } catch { /* ignore */ }
+    try { localStorage.setItem(RAIL_KEY, String(railW)); } catch { /* ignore */ }
   }, [railW]);
 
-  useEffect(() => {
-    if (!langOpen) return undefined;
-    const onDoc = (event) => {
-      if (!langRef.current?.contains(event.target)) setLangOpen(false);
-    };
-    const onKey = (event) => {
-      if (event.key === "Escape") setLangOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [langOpen]);
+  // ---------- meta, config ----------
+  const refreshAssets = useCallback(async () => {
+    const assets = await api("/api/language-assets");
+    setTerms(Array.isArray(assets.terms) ? assets.terms : []);
+    setBuiltinTerms(Array.isArray(assets.builtin_terms) ? assets.builtin_terms : []);
+  }, []);
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("shot")) return;
+    (async () => {
+      try {
+        const [odaStatus, cfg, health] = await Promise.all([
+          api("/api/odafc-status").catch(() => ({ installed: false })),
+          api("/api/config"),
+          api("/api/health").catch(() => ({})),
+        ]);
+        setOda(odaStatus || { installed: false });
+        const safe = cfg && typeof cfg === "object" && !Array.isArray(cfg) ? cfg : {};
+        setConfig(safe);
+        setEngine(engineFromConfig(safe));
+        if (health?.version) setAppVersion(asText(health.version));
+        await refreshAssets();
+      } catch (error) {
+        say("", "error", error.message);
+      } finally {
+        configLoaded.current = true;
+      }
+    })();
+  }, [refreshAssets, say]);
+
+  // Settings save themselves; there is no 保存 button to forget.
+  useEffect(() => {
+    if (!configLoaded.current) return undefined;
+    const timer = setTimeout(async () => {
+      try {
+        await api("/api/config", { json: { ...config, provider: engineProvider(engine, config) } });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1600);
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [config, engine, toast]);
+
+  // ---------- demo data for README / landing screenshots ----------
   useEffect(() => {
     const shot = new URLSearchParams(window.location.search).get("shot");
     if (!shot) return;
-    setFiles([
-      { path: "/demo/电气原理图.dwg", name: "电气原理图.dwg", ext: "DWG" },
-      { path: "/demo/配电箱.dxf", name: "配电箱.dxf", ext: "DXF" },
-      { path: "/demo/总图-A1.dwg", name: "总图-A1.dwg", ext: "DWG" },
-    ]);
-    setCurrent("/demo/电气原理图.dwg");
-    setRows([
-      { id: 0, source: "电气原理图", target: "Electrical Schematic", layer: "0", type: "MTEXT", duplicate: false },
-      { id: 1, source: "平面布置图", target: "Floor Plan", layer: "0", type: "TEXT", duplicate: false },
-      { id: 2, source: "隔墙定位图", target: "Partition Location Plan", layer: "A-WALL", type: "TEXT", duplicate: false },
-      { id: 3, source: "进线柜", target: "Incoming Cabinet", layer: "E-POWR", type: "ATTRIB", duplicate: false },
-      { id: 4, source: "接地", target: "Earthing", layer: "E-POWR", type: "MTEXT", duplicate: false },
-      { id: 5, source: "总图", target: "General Layout", layer: "TITLE", type: "TEXT", duplicate: false },
-      { id: 6, source: "材料表", target: "Bill of Materials", layer: "0", type: "TABLE", duplicate: false },
-      { id: 7, source: "电缆桥架", target: "Cable Tray", layer: "E-TRAY", type: "MTEXT", duplicate: false },
-    ]);
+    const demo = asFiles(["/demo/电气原理图.dwg", "/demo/配电箱.dxf", "/demo/总图-A1.dwg"]);
+    setFiles(demo);
+    setCurrent(demo[0].path);
+    setRows(DEMO_ROWS);
+    setOda({ installed: true, path: "" });
+    setAppVersion("demo");
     if (shot === "export") setView("batch");
     if (shot === "params") setView("settings");
+    if (shot === "glossary") setView("glossary");
   }, []);
 
-  const visibleRows = useMemo(() => {
-    const list = Array.isArray(rows) ? rows : [];
-    const source = asText(sourceLang);
-    const sourceIsZh = source.startsWith("zh");
-    const sourceIsAscii = LATIN_LANGS.has(source);
-    return list.filter((row) => {
-      const source = asText(row?.source);
-      if (filters.dupes && row?.duplicate) return false;
-      if (filters.numbers && source && /^[\d.\-\s]+$/.test(source)) return false;
-      if (filters.nonsource) {
-        const hasCjk = /[\u4e00-\u9fff]/.test(source);
-        if (sourceIsZh && !hasCjk) return false;
-        if (sourceIsAscii && hasCjk) return false;
-      }
-      return true;
-    });
-  }, [rows, filters, sourceLang]);
-
-  const selected = files.find((item) => item.path === current);
-
-  const refreshMeta = useCallback(async () => {
-    try {
-      const [odaStatus, assets, cfg, health] = await Promise.all([
-        api("/api/odafc-status"),
-        api("/api/language-assets"),
-        api("/api/config"),
-        api("/api/health").catch(() => ({})),
-      ]);
-      setOda(odaStatus);
-      setTerms(Array.isArray(assets.terms) ? assets.terms : []);
-      setBuiltinTerms(Array.isArray(assets.builtin_terms) ? assets.builtin_terms : []);
-      setGlossary(asCount(assets.builtin_terms?.length) + asCount(assets.terms?.length));
-      setConfig(cfg && typeof cfg === "object" && !Array.isArray(cfg) ? cfg : {});
-      if (health?.version) setAppVersion(asText(health.version));
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }, []);
-
-  useEffect(() => {
-    refreshMeta();
-  }, [refreshMeta]);
-
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("shot")) return undefined;
-    checkUpdates({ silent: true });
-    return undefined;
-  }, []);
-
-  useEffect(() => {
-    if (view !== "batch") return undefined;
-    const timer = setInterval(() => {
-      api("/api/batch").then(setBatch).catch(() => {});
-    }, 1200);
-    api("/api/batch").then(setBatch).catch(() => {});
-    return () => clearInterval(timer);
-  }, [view]);
-
-  async function loadOpened(next) {
-    if (!next.length) {
-      setStatus("没有选择文件。");
-      return;
-    }
-    setFiles(next);
-    setWrittenPath("");
-    setCurrent(next[0].path);
-    await extractFile(next[0].path);
-  }
-
-  async function removeDrawing(path, event) {
-    event?.stopPropagation?.();
-    const next = files.filter((file) => file.path !== path);
-    setFiles(next);
-    if (current === path) {
-      setWrittenPath("");
-      if (next[0]) {
-        setCurrent(next[0].path);
-        if (view === "work") extractFile(next[0].path);
-        else setRows([]);
-      } else {
-        setCurrent("");
-        setRows([]);
-        setStatus("还没打开图纸，点左边添加");
-      }
+  // ---------- updates ----------
+  async function checkUpdates({ silent = false } = {}) {
+    if (!silent) {
+      setChecking(true);
+      setUpdateMsg("正在检查…");
     }
     try {
-      await api("/api/drawings/close", { method: "POST", body: JSON.stringify({ path }) });
+      const data = await api("/api/updates/check");
+      setUpdateInfo(data);
+      if (data.current) setAppVersion(asText(data.current));
+      if (data.available) {
+        setUpdateMsg(`有新版本 ${data.latest}（当前 ${data.current}）`);
+        if (!silent) goPage("update");
+      } else if (!silent) {
+        setUpdateMsg(data.message || `已是 ${data.current}`);
+      }
     } catch {
-      /* queue already dropped it */
+      if (!silent) setUpdateMsg("GitHub 暂时连不上。过一会再试。");
+    } finally {
+      if (!silent) setChecking(false);
     }
   }
 
-  async function openDrawings() {
-    const native = py();
-    if (native?.pick_cad_files) {
-      const picked = await native.pick_cad_files();
-      const paths = picked?.paths || [];
-      if (!paths.length) {
-        setStatus("没有选择文件。");
-        return;
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("shot")) return;
+    checkUpdates({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function applyUpdate() {
+    if (updating) return;
+    setUpdating(true);
+    setChecking(true);
+    setUpdatePercent(0);
+    setView("update");
+    setUpdateMsg("正在下载更新…");
+    try {
+      await api("/api/updates/apply", { method: "POST" });
+      for (let i = 0; i < 900; i += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        const status = await api("/api/updates/status");
+        const percent = Math.round(Number(status.percent || 0) * 100);
+        if (status.phase === "downloading") {
+          setUpdatePercent(percent);
+          setUpdateMsg(`正在下载更新… ${percent}%`);
+        } else if (status.phase === "verifying") {
+          setUpdateMsg("正在校验…");
+        } else if (status.phase === "applying") {
+          setUpdateMsg("准备重启…");
+        } else if (status.phase === "restarting") {
+          setUpdateMsg("正在重启…");
+          py()?.close_window?.();
+          return;
+        } else if (status.phase === "cancelling" || status.phase === "idle") {
+          setUpdateMsg(status.message || "已取消");
+          setUpdating(false);
+          setChecking(false);
+          return;
+        } else if (status.phase === "error") {
+          throw new Error(status.message || "更新失败");
+        }
       }
-      await loadOpened(asFiles(paths));
+      throw new Error("更新超时");
+    } catch (error) {
+      setUpdateMsg(error.message || "更新失败");
+      setUpdating(false);
+      setChecking(false);
+    }
+  }
+
+  async function cancelUpdate() {
+    try {
+      const data = await api("/api/updates/cancel", { method: "POST" });
+      setUpdating(false);
+      setChecking(false);
+      setUpdateMsg(data.message || "已取消");
+      if (data.cancelled !== false) setView(pageReturn.current || "work");
+    } catch (error) {
+      toast(error.message || "取消不了", "error");
+    }
+  }
+
+  function openReleasePage() {
+    py()?.open_url?.(asText(updateInfo?.html_url) || "https://github.com/erict16/tuyi/releases");
+  }
+
+  // ---------- pages ----------
+  function goPage(next) {
+    if (view === "work" || view === "batch") pageReturn.current = view;
+    if (next === "settings" && view !== "settings") extractSnap.current = extractKey(params);
+    setView(next);
+  }
+
+  function leavePage() {
+    const fromSettings = view === "settings";
+    const back = pageReturn.current || "work";
+    setView(back);
+    if (fromSettings && extractSnap.current && extractSnap.current !== extractKey(params)) {
+      extractSnap.current = "";
+      sheets.current.clear();
+      if (current) extractFile(current, { keep: rows });
+    }
+  }
+
+  function toggleSettings(tab = "tr") {
+    if (view === "settings") {
+      leavePage();
       return;
     }
-    cadInput.current?.click();
+    setSettingsTab(tab);
+    goPage("settings");
   }
 
-  async function onCadPicked(event) {
-    const picked = [...(event.target.files || [])];
-    event.target.value = "";
-    if (!picked.length) return;
-    const form = new FormData();
-    picked.forEach((file) => form.append("files", file));
-    setBusy(true);
-    setStatus("正在打开图纸…");
-    try {
-      const response = await fetch("/api/drawings/open", { method: "POST", body: form });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "打开失败");
-      await loadOpened(data.files || []);
-    } catch (error) {
-      setStatus(error.message);
-    } finally {
-      setBusy(false);
-    }
+  function toggleGlossary() {
+    if (view === "glossary") leavePage();
+    else goPage("glossary");
   }
 
-  async function extractFile(path) {
-    setBusy(true);
-    setStatus("正在提取文字…");
+  // ---------- drawings ----------
+  async function extractFile(path, { keep = null, langs = null } = {}) {
+    const seq = extractSeq.current + 1;
+    extractSeq.current = seq;
+    const src = langs?.[0] || sourceLang;
+    const dst = langs?.[1] || targetLang;
+    setBusy("extract");
+    setRows([]);
+    patchFile(path, { status: "extracting", notice: null });
     try {
       const data = await api("/api/drawings/extract", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           path,
           include_blocks: params.blocks,
           include_attribs: params.attribs,
@@ -462,257 +356,472 @@ export default function App() {
           include_locked: params.locked,
           include_off: params.off,
           enable_v02: params.dims,
-          skip_numbers: filters.numbers,
-          skip_dupes: filters.dupes,
-          skip_nonsource: filters.nonsource,
-          translation_mode: modeKey(sourceLang, targetLang),
-        }),
+          // Filters only hide rows on screen. Every copy stays so it can be written.
+          skip_numbers: false,
+          skip_dupes: false,
+          skip_nonsource: false,
+          translation_mode: modeKey(src, dst),
+        },
       });
-      const items = Array.isArray(data.items) ? data.items : [];
+      if (seq !== extractSeq.current) return [];
+      const items = carryTargets(Array.isArray(data.items) ? data.items : [], keep);
+      sheets.current.set(path, items);
       setRows(items);
-      setStatus(`这张图有 ${asCount(data.unique)} 句。点翻译就会写出新文件。`);
+      patchFile(path, { status: "" });
+      if (!items.length) say(path, "info", "这张图没有可译文字。");
       return items;
     } catch (error) {
-      setRows([]);
-      setStatus(error.message);
+      if (seq !== extractSeq.current) return [];
+      const dwgNoOda = /\.dwg$/i.test(path) && !oda.installed;
+      patchFile(path, { status: "error" });
+      say(path, "error", error.message, dwgNoOda ? {
+        actions: [{ label: "怎么装 ODA", onClick: () => toggleSettings("wr") }],
+      } : {});
       return [];
     } finally {
-      setBusy(false);
+      if (seq === extractSeq.current) setBusy("");
     }
   }
 
-  function extractKey() {
-    return JSON.stringify({
-      attribs: params.attribs,
-      blocks: params.blocks,
-      dims: params.dims,
-      model: params.model,
-      paper: params.paper,
-      frozen: params.frozen,
-      locked: params.locked,
-      off: params.off,
-      numbers: filters.numbers,
-      dupes: filters.dupes,
-      nonsource: filters.nonsource,
+  async function addDrawings(incoming) {
+    if (!incoming.length) return;
+    const { files: next, added } = mergeFiles(files, incoming);
+    setFiles(next);
+    say("", "", "");
+    if (!added.length) {
+      toast("这些图纸已经打开了。");
+      return;
+    }
+    if (added.length > 1) toast(`加了 ${added.length} 张图纸`, "ok");
+    if (!current || view === "work") {
+      setCurrent(added[0].path);
+      setQuery("");
+      await extractFile(added[0].path);
+    }
+  }
+
+  async function uploadAndAdd(list) {
+    const cad = list.filter((file) => isCadName(file.name));
+    if (!cad.length) {
+      toast("只认 DWG 和 DXF 图纸。", "warn");
+      return;
+    }
+    if (cad.length < list.length) toast(`跳过了 ${list.length - cad.length} 个不是图纸的文件。`, "warn");
+    setBusy("extract");
+    try {
+      const data = await uploadDrawings(cad);
+      setBusy("");
+      await addDrawings(data.files || []);
+    } catch (error) {
+      setBusy("");
+      toast(error.message || "打开失败", "error");
+    }
+  }
+
+  async function openDrawings() {
+    if (locked) return;
+    const native = py();
+    if (native?.pick_cad_files) {
+      const picked = await native.pick_cad_files();
+      const paths = picked?.paths || [];
+      if (paths.length) await addDrawings(asFiles(paths));
+      return;
+    }
+    cadInput.current?.click();
+  }
+
+  async function onCadPicked(event) {
+    const picked = [...(event.target.files || [])];
+    event.target.value = "";
+    if (picked.length) await uploadAndAdd(picked);
+  }
+
+  function pickDrawing(path) {
+    if (path === current) return;
+    if (locked) {
+      toast("等这张译完再换。", "warn");
+      return;
+    }
+    setCurrent(path);
+    setQuery("");
+    if (view !== "work") setView("work");
+    const cached = sheets.current.get(path);
+    if (cached) setRows(cached);
+    else extractFile(path);
+  }
+
+  async function removeDrawing(path) {
+    if (locked && path === current) {
+      toast("等这张译完再去掉。", "warn");
+      return;
+    }
+    const index = files.findIndex((file) => file.path === path);
+    const next = files.filter((file) => file.path !== path);
+    setFiles(next);
+    sheets.current.delete(path);
+    setFileState((prev) => {
+      const copy = { ...prev };
+      delete copy[path];
+      return copy;
     });
-  }
-
-  function rememberReturn() {
-    if (view !== "update") pageReturn.current = view;
-  }
-
-  async function openSettings() {
-    if (view === "settings") {
-      await closePage();
-      return;
-    }
-    extractSnap.current = extractKey();
-    rememberReturn();
-    setSettingsTab("tr");
-    setView("settings");
-  }
-
-  function openOdaSettings() {
-    extractSnap.current = extractKey();
-    rememberReturn();
-    setSettingsTab("wr");
-    setView("settings");
-  }
-
-  function openGlossary() {
-    if (view === "glossary") {
-      setView(pageReturn.current || "work");
-      return;
-    }
-    rememberReturn();
-    setView("glossary");
-  }
-
-  async function closePage() {
-    const changed = view === "settings" && extractSnap.current !== extractKey();
-    setView(pageReturn.current || "work");
-    if (view === "settings") {
-      try {
-        await api("/api/config", { method: "POST", body: JSON.stringify({ ...config, provider: engineProvider(engine, config) }) });
-      } catch (error) {
-        setStatus(error.message);
+    if (current === path) {
+      const neighbour = next[Math.min(index, next.length - 1)];
+      if (neighbour) {
+        setCurrent(neighbour.path);
+        const cached = sheets.current.get(neighbour.path);
+        if (cached) setRows(cached);
+        else extractFile(neighbour.path);
+      } else {
+        setCurrent("");
+        setRows([]);
+        if (view === "batch") setView("work");
       }
-      if (current && changed) extractFile(current);
+    }
+    try {
+      await api("/api/drawings/close", { json: { path } });
+    } catch {
+      /* queue already dropped it */
     }
   }
 
+  // ---------- translate + write ----------
   async function runTranslate() {
     if (!current) {
-      setStatus("先打开图纸。");
+      say("", "info", "先打开图纸。");
       return;
     }
-    if (!visibleRows.length) {
-      setStatus("这张图没有可译文字。");
+    if (locked) return;
+    const shown = filterRows(rows, filters, sourceLang);
+    if (!shown.length) {
+      say(current, "info", rows.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。");
       return;
     }
-    setBusy(true);
-    setTranslating(true);
-    setStatus("正在翻译…");
-    try {
-      const data = await api("/api/drawings/translate", {
-        method: "POST",
-        body: JSON.stringify({
-          items: visibleRows,
-          translation_mode: modeKey(sourceLang, targetLang),
-          skip_numbers: filters.numbers,
-          skip_dupes: filters.dupes,
-          skip_nonsource: filters.nonsource,
-          use_glossary: params.glossary,
-          ...enginePayload(engine, config),
-        }),
-      });
-      const translated = Array.isArray(data.items) ? data.items : [];
-      const byKey = new Map();
-      translated.forEach((item) => {
-        const handle = asText(item?.handle);
-        const field = asText(item?.field) || "text";
-        if (handle) byKey.set(`${handle}\t${field}`, item);
-        if (item?.id != null) byKey.set(`id:${item.id}`, item);
-      });
-      const nextRows = (Array.isArray(rows) ? rows : []).map((row) => {
-        const handle = asText(row?.handle);
-        const field = asText(row?.field) || "text";
-        return (handle && byKey.get(`${handle}\t${field}`)) || (row?.id != null && byKey.get(`id:${row.id}`)) || row;
-      });
-      setRows(nextRows);
-      const bits = [`术语对上 ${asCount(data.glossary)}`, `网上译了 ${asCount(data.mt)}`];
-      if (asCount(data.skipped)) bits.push(`未译 ${asCount(data.skipped)}`);
-      const ready = nextRows.some((row) => row.selected !== false && asText(row.target).trim());
-      if (!ready) {
-        const hint = engine === "local"
-          ? "请先启动 Ollama。"
-          : engine === "custom"
-            ? "无法连接自定义接口。"
-            : "剩下的要填网上翻译的密钥，或手填译文。";
-        setStatus(`${bits.join("，")}。${hint}`);
-        if (engine !== "local" && !data.has_engine) openSettings();
-      } else {
-        const leftover = asCount(data.skipped) && !data.has_engine ? "没对上的先留中文。" : "";
-        setStatus(`译完。${bits.join("，")}。${leftover}正在写出新文件…`);
-        await writeBackRows(nextRows);
+    const pending = shown.filter((row) => row.selected !== false && !asText(row.target).trim());
+    let nextRows = rows;
+    let summary = "";
+    if (pending.length) {
+      setBusy("translate");
+      patchFile(current, { status: "translating" });
+      say(current, "busy", `正在译 ${pending.length} 句…`);
+      try {
+        const data = await api("/api/drawings/translate", {
+          json: {
+            items: pending,
+            translation_mode: mode,
+            skip_numbers: filters.numbers,
+            skip_dupes: false,
+            skip_nonsource: filters.nonsource,
+            use_glossary: params.glossary,
+            ...enginePayload(engine, config),
+          },
+        });
+        nextRows = mergeTranslated(rows, Array.isArray(data.items) ? data.items : []);
+        updateRows(() => nextRows);
+        const bits = [`术语对上 ${asCount(data.glossary)}`];
+        if (asCount(data.mt)) bits.push(`${engine === "cloud" ? "网上" : "接口"}译了 ${asCount(data.mt)}`);
+        if (asCount(data.skipped)) bits.push(`未译 ${asCount(data.skipped)}`);
+        summary = bits.join("，");
+        if (!hasWritable(nextRows)) {
+          const hint = engine === "local"
+            ? "请先启动 Ollama。"
+            : engine === "custom"
+              ? "无法连接自定义接口。"
+              : "剩下的要填网上翻译的密钥，或手填译文。";
+          patchFile(current, { status: "" });
+          say(current, "warn", `${summary}。${hint}`, {
+            actions: data.has_engine ? [] : [{ label: "去填密钥", primary: true, onClick: () => toggleSettings("tr") }],
+          });
+          setBusy("");
+          return;
+        }
+        if (asCount(data.skipped) && !data.has_engine) summary += "。没对上的先留原文，可以手填后再写出";
+      } catch (error) {
+        patchFile(current, { status: "error" });
+        say(current, "error", error.message);
+        setBusy("");
+        return;
       }
-    } catch (error) {
-      setStatus(error.message);
-    } finally {
-      setBusy(false);
-      setTranslating(false);
     }
+    await writeBackRows(nextRows, summary);
   }
 
   async function writeBack() {
-    await writeBackRows(visibleRows);
+    if (locked) return;
+    await writeBackRows(rows, "");
   }
 
-  async function writeBackRows(items) {
+  async function writeBackRows(list, summary) {
     if (!current) {
-      setStatus("先打开图纸。");
+      say("", "info", "先打开图纸。");
       return;
     }
-    const list = Array.isArray(items) ? items : [];
-    const ready = list.filter((row) => row.selected !== false && asText(row.target).trim());
-    if (!ready.length) {
-      setStatus("没有可写回的译文。先点翻译，或手填译文。");
+    const items = syncDuplicates(Array.isArray(list) ? list : []);
+    if (!hasWritable(items)) {
+      say(current, "info", "没有可写回的译文。先点翻译，或手填译文。");
       return;
     }
-    setStatus("正在写出新文件…");
+    const path = current;
+    setBusy("write");
+    patchFile(path, { status: "writing" });
+    say(path, "busy", "正在写出新文件…");
     try {
       const named = await api(
-        `/api/default-output-name?mode=${encodeURIComponent(modeKey(sourceLang, targetLang))}&base=${encodeURIComponent(selected?.name?.replace(/\.[^.]+$/, "") || "drawing")}&translate_filename=${params.filename ? "true" : "false"}`
+        `/api/default-output-name?mode=${encodeURIComponent(mode)}&base=${encodeURIComponent(outputStem(selected?.name))}&translate_filename=${params.filename ? "true" : "false"}`
       );
       const data = await api("/api/drawings/writeback", {
-        method: "POST",
-        body: JSON.stringify({
-          input_file: current,
-          items: list,
+        json: {
+          input_file: path,
+          items,
           output_dir: config.output_dir,
           output_name: named.name,
-          translation_mode: modeKey(sourceLang, targetLang),
+          translation_mode: mode,
+          include_blocks: params.blocks,
           style: layout,
           translate_filename: params.filename,
-        }),
+        },
       });
-      setWrittenPath(data.path || "");
-      setLastOutput(data.path || "");
-      setStatus(`译完，已写出新文件 ${asCount(data.written)} 句 → ${data.path}`);
-      const native = py();
-      if (native?.reveal_file && data.path) native.reveal_file(data.path);
+      const out = asText(data.path);
+      const missing = asCount(data.missing) ? `，${asCount(data.missing)} 句在图上没找到` : "";
+      patchFile(path, { status: "written", output: out });
+      say(path, "ok", `${summary ? `${summary}。` : ""}已写出新文件，写了 ${asCount(data.written)} 句${missing}。`, {
+        path: out,
+        actions: [
+          { label: "在文件夹中显示", onClick: () => reveal(out) },
+        ],
+      });
     } catch (error) {
-      setStatus(error.message);
+      patchFile(path, { status: "error" });
+      say(path, "error", error.message);
+    } finally {
+      setBusy("");
     }
   }
 
+  // ---------- PDF ----------
   function cadPathForPdf() {
-    const written = asText(writtenPath);
-    if (written && /\.(dxf|dwg)$/i.test(written)) return written;
+    if (writtenPath && /\.(dxf|dwg)$/i.test(writtenPath)) return writtenPath;
     return current;
   }
 
   async function exportPdf(andPrint = false) {
     if (!current) {
-      setStatus("先打开图纸。");
+      say("", "info", "先打开图纸。");
       return;
     }
     const sourcePath = cadPathForPdf();
     const fromWriteback = Boolean(writtenPath) && sourcePath === writtenPath;
-    const stem = (fromWriteback ? sourcePath : selected?.name || "drawing")
-      .replace(/^.*[/\\]/, "")
-      .replace(/\.[^.]+$/, "") || "drawing";
-    setBusy(true);
-    setStatus(andPrint ? "正在导出并打印…" : "正在导出 PDF…");
+    const stem = outputStem(fromWriteback ? sourcePath : selected?.name);
+    setBusy("pdf");
+    const tid = toast(andPrint ? "正在导出并打印…" : "正在导出 PDF…", "busy", { ttl: 0 });
     try {
       const data = await api(andPrint ? "/api/drawings/print" : "/api/drawings/export-pdf", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           path: sourcePath,
           output_dir: config.output_dir,
           output_name: `${stem}.pdf`,
           style: layout,
           appearance,
           paper: pdfPaper,
-          items: fromWriteback ? [] : visibleRows,
-        }),
+          items: fromWriteback ? [] : syncDuplicates(rows),
+        },
       });
-      setLastOutput(data.path || "");
+      const out = asText(data.path);
+      const where = fromWriteback ? "写回图纸" : "原图，还未写回译文";
       if (andPrint) {
         const printed = data.print || {};
-        const where = fromWriteback ? "写回图纸" : "原图，还未写回译文";
-        setStatus(printed.ok ? `已送到系统打印（${where}）：${data.path}` : `${printed.message || data.message || "打印没发出去"}。PDF：${data.path}`);
-        const native = py();
-        if (native?.print_pdf && data.path && !printed.ok) native.print_pdf(data.path);
-      } else if (fromWriteback) {
-        setStatus(`PDF 已导出（写回图纸）→ ${data.path}`);
-        const native = py();
-        if (native?.reveal_file && data.path) native.reveal_file(data.path);
+        if (printed.ok) toast(`已送到系统打印（${where}）`, "ok");
+        else {
+          toast(`${printed.message || data.message || "打印没发出去"}。PDF 已留下。`, "warn", { action: { label: "在文件夹中显示", onClick: () => reveal(out) } });
+          if (out) py()?.print_pdf?.(out);
+        }
       } else {
-        setStatus(`PDF 已导出（原图，还未写回译文。ezdxf drawing，不是 AutoCAD 出图）→ ${data.path}`);
-        const native = py();
-        if (native?.reveal_file && data.path) native.reveal_file(data.path);
+        toast(fromWriteback ? `PDF 已导出（写回图纸）：${fileName(out)}` : `PDF 已导出（原图，还未写回译文）：${fileName(out)}`, "ok", {
+          action: { label: "在文件夹中显示", onClick: () => reveal(out) },
+        });
       }
     } catch (error) {
-      setStatus(error.message);
+      toast(error.message, "error");
     } finally {
-      setBusy(false);
+      dismiss(tid);
+      setBusy("");
     }
   }
+
+  // ---------- tables ----------
+  async function exportTable(fmt = "csv") {
+    if (!current) {
+      say("", "info", "先打开图纸。");
+      return;
+    }
+    try {
+      const data = await api("/api/drawings/export-table", {
+        json: { path: current, items: syncDuplicates(rows), translation_mode: mode, format: fmt },
+      });
+      const name = data.filename || (fmt === "xlsx" ? "图译表格.xlsx" : "图译表格.csv");
+      const savedTo = fmt === "xlsx" && data.xlsx_b64
+        ? await saveFile(name, { b64: data.xlsx_b64, bytes: b64ToBytes(data.xlsx_b64), mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+        : await saveFile(name, { text: data.csv || "" });
+      if (savedTo) toast(`表格已导出 ${asCount(data.count)} 条`, "ok");
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  }
+
+  async function applyTable(next) {
+    setTable(next);
+    if (view === "batch") {
+      toast(`已导入 ${next.name}。点「全部写回」写进每张图。`, "ok");
+      return;
+    }
+    let items = rows;
+    if (!items.length && current) items = await extractFile(current);
+    if (!items.length) {
+      say("", "info", "先打开图纸。");
+      return;
+    }
+    const data = await api("/api/drawings/import-table", {
+      json: { csv: next.csv, xlsx_b64: next.xlsx_b64, items, file: selected?.name || "" },
+    });
+    updateRows(() => syncDuplicates(Array.isArray(data.items) ? data.items : []));
+    say(current, "ok", `表格填入 ${asCount(data.applied)} 条。可以改译文再写出新文件。`);
+  }
+
+  async function importTable() {
+    const native = py();
+    if (native?.pick_table_file) {
+      const picked = await native.pick_table_file();
+      if (!picked?.path) return;
+      if (picked.error) {
+        toast(picked.error, "error");
+        return;
+      }
+      try {
+        await applyTable({ name: fileName(picked.path), csv: picked.text || "", xlsx_b64: picked.xlsx_b64 || "" });
+      } catch (error) {
+        toast(error.message, "error");
+      }
+      return;
+    }
+    tableInput.current?.click();
+  }
+
+  async function onTablePicked(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      if (/\.xlsx$/i.test(file.name)) {
+        await applyTable({ name: file.name, csv: "", xlsx_b64: bytesToB64(await file.arrayBuffer()) });
+      } else {
+        const csv = await file.text();
+        if (!csv.trim()) {
+          toast("表格是空的", "warn");
+          return;
+        }
+        await applyTable({ name: file.name, csv, xlsx_b64: "" });
+      }
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  }
+
+  async function writeBackAll() {
+    if (!files.length) {
+      say("", "info", "先打开图纸。");
+      return;
+    }
+    if (!table) {
+      await importTable();
+      return;
+    }
+    setBusy("table");
+    try {
+      const data = await api("/api/batch/import", {
+        json: {
+          csv: table.csv,
+          xlsx_b64: table.xlsx_b64,
+          files: files.map((item) => item.path),
+          output_dir: config.output_dir,
+          translation_mode: mode,
+          style: layout,
+          translate_filename: params.filename,
+        },
+      });
+      (data.results || []).forEach((item) => {
+        const match = files.find((file) => file.name === item.file);
+        if (item.written && item.path && match) patchFile(match.path, { status: "written", output: item.path });
+      });
+      const last = [...(data.results || [])].reverse().find((item) => item.written && item.path);
+      say(current || "", "ok", `已写回 ${asCount(data.written)} 条，共 ${asCount(data.files)} 张图。`, last?.path ? {
+        path: last.path,
+        actions: [{ label: "在文件夹中显示", onClick: () => reveal(last.path) }],
+      } : {});
+    } catch (error) {
+      toast(error.message, "error");
+    } finally {
+      setBusy("");
+    }
+  }
+
+  // ---------- batch ----------
+  const batchWasRunning = useRef(false);
+  const refreshBatch = useCallback(async () => {
+    try {
+      const data = await api("/api/batch");
+      setBatch(data);
+      if (batchWasRunning.current && !data.started) {
+        const tasks = data.tasks || [];
+        const done = tasks.filter((task) => task.status === "succeeded");
+        const failed = tasks.filter((task) => task.status === "failed").length;
+        const stopped = tasks.some((task) => task.status === "cancelled" || task.status === "queued");
+        const last = done[done.length - 1]?.output_file;
+        const text = stopped
+          ? `已停止：写出 ${done.length} 张。`
+          : failed
+            ? `译完了：写出 ${done.length} 张，${failed} 张没译成，可以点重试。`
+            : `全部译完，写出 ${done.length} 张新图纸。`;
+        say(batchNoticeKey.current, failed || stopped ? "warn" : "ok", text, last ? {
+          actions: [{ label: "在文件夹中显示", onClick: () => reveal(last) }],
+        } : {});
+      }
+      batchWasRunning.current = Boolean(data.started);
+      (data.tasks || []).forEach((task) => {
+        if (task.status === "succeeded" && task.output_file) {
+          setFileState((prev) => (prev[task.input_file]?.output === task.output_file ? prev : {
+            ...prev,
+            [task.input_file]: { ...(prev[task.input_file] || {}), status: "written", output: task.output_file },
+          }));
+        }
+      });
+    } catch { /* next tick */ }
+  }, [say]);
+
+  useEffect(() => {
+    if (view !== "batch") return undefined;
+    refreshBatch();
+    const timer = setInterval(refreshBatch, 1200);
+    return () => clearInterval(timer);
+  }, [view, refreshBatch]);
 
   async function startExport() {
     const paths = files.map((item) => item.path);
     if (!paths.length) {
-      setStatus("先打开图纸。");
+      say("", "info", "先打开图纸。");
       return;
     }
     try {
-      await api("/api/batch/add", { method: "POST", body: JSON.stringify({ files: paths }) });
+      // Drop leftovers from an earlier session that are no longer in the list.
+      const wanted = new Set(paths);
+      for (const task of batch.tasks || []) {
+        if (!wanted.has(task.input_file) && task.status !== "running") {
+          await api(`/api/batch/${task.id}/remove`, { method: "POST" }).catch(() => {});
+        }
+      }
+      await api("/api/batch/add", { json: { files: paths } });
       const started = await api("/api/batch/start", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           output_dir: config.output_dir,
-          translation_mode: modeKey(sourceLang, targetLang),
+          translation_mode: mode,
           translate_blocks: params.blocks,
           include_attribs: params.attribs,
           enable_v02: params.dims,
@@ -731,379 +840,81 @@ export default function App() {
           output_format: "source",
           style: layout,
           ...enginePayload(engine, config),
-        }),
+        },
       });
-      setView("batch");
-      setStatus(started.message || "批量导出已开始。");
+      setBatch(started);
+      batchWasRunning.current = Boolean(started.started);
+      batchNoticeKey.current = current || "";
+      say(batchNoticeKey.current, "busy", started.message || "正在一起译。可以先去做别的，译完会在这里显示。");
     } catch (error) {
-      setStatus(error.message);
+      toast(error.message, "error");
+    }
+  }
+
+  async function batchCall(path, message, tone = "info") {
+    try {
+      const data = await api(path, { method: "POST" });
+      setBatch(data);
+      if (message) toast(message, tone);
+    } catch (error) {
+      toast(error.message, "error");
     }
   }
 
   async function pauseExport(paused) {
     try {
-      const data = await api("/api/batch/pause", { method: "POST", body: JSON.stringify({ paused }) });
+      const data = await api("/api/batch/pause", { json: { paused } });
       setBatch(data);
-      setStatus(paused ? "已暂停。" : "继续导出。");
+      toast(paused ? "已暂停。" : "继续导出。");
     } catch (error) {
-      setStatus(error.message);
+      toast(error.message, "error");
     }
   }
 
-  async function stopExport() {
-    try {
-      const data = await api("/api/batch/stop", { method: "POST" });
-      setBatch(data);
-      setStatus("已停止。");
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  async function retryTask(id) {
-    try {
-      const data = await api(`/api/batch/${id}/retry`, { method: "POST" });
-      setBatch(data);
-      setStatus("已重新排队。");
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  function bytesToB64(buffer) {
-    const bytes = new Uint8Array(buffer);
-    let binary = "";
-    bytes.forEach((value) => {
-      binary += String.fromCharCode(value);
-    });
-    return btoa(binary);
-  }
-
-  async function exportTable(fmt = "csv") {
-    if (!current && !visibleRows.length) {
-      setStatus("先打开图纸。");
-      return;
-    }
-    try {
-      const data = await api("/api/drawings/export-table", {
-        method: "POST",
-        body: JSON.stringify({
-          path: current,
-          items: rows,
-          translation_mode: modeKey(sourceLang, targetLang),
-          format: fmt,
-        }),
-      });
-      const native = py();
-      if (native?.save_table_file) {
-        const saved = await native.save_table_file(data.filename, data.csv || "", data.xlsx_b64 || "");
-        if (saved?.path) setStatus(`表格已导出 → ${saved.path}`);
-        return;
-      }
-      let blob;
-      if (fmt === "xlsx" && data.xlsx_b64) {
-        const binary = atob(data.xlsx_b64);
-        const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
-        blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      } else {
-        blob = new Blob([data.csv], { type: "text/csv;charset=utf-8" });
-      }
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = data.filename || (fmt === "xlsx" ? "图译表格.xlsx" : "图译表格.csv");
-      link.click();
-      URL.revokeObjectURL(url);
-      setStatus(`表格已导出 ${asCount(data.count)} 条。`);
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  async function applyTableCsv(text, xlsxB64 = "") {
-    const csv = String(text || "");
-    if (!csv.trim() && !xlsxB64) {
-      setStatus("表格是空的");
-      return;
-    }
-    setTableCsv(csv);
-    let items = rows;
-    if (!items.length && current) {
-      items = await extractFile(current);
-    }
-    if (!items.length) {
-      setStatus("先打开图纸。");
-      return;
-    }
-    const data = await api("/api/drawings/import-table", {
-      method: "POST",
-      body: JSON.stringify({
-        csv,
-        xlsx_b64: xlsxB64,
-        items,
-        file: selected?.name || "",
-      }),
-    });
-    setRows(Array.isArray(data.items) ? data.items : []);
-    setStatus(`表格填入 ${asCount(data.applied)} 条。可以改译文再写回。`);
-  }
-
-  async function importTable() {
-    const native = py();
-    if (native?.pick_table_file) {
-      const picked = await native.pick_table_file();
-      if (!picked?.path) return;
-      if (picked.error) {
-        setStatus(picked.error);
-        return;
-      }
-      try {
-        await applyTableCsv(picked.text, picked.xlsx_b64 || "");
-      } catch (error) {
-        setStatus(error.message);
-      }
-      return;
-    }
-    tableInput.current?.click();
-  }
-
-  async function onTablePicked(event) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    try {
-      if (/\.xlsx$/i.test(file.name)) {
-        await applyTableCsv("", bytesToB64(await file.arrayBuffer()));
-      } else {
-        await applyTableCsv(await file.text());
-      }
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  async function writeBackAll() {
-    if (!files.length) {
-      setStatus("先打开图纸。");
-      return;
-    }
-    let csv = tableCsv;
-    if (!csv.trim()) {
-      const native = py();
-      if (native?.pick_table_file) {
-        const picked = await native.pick_table_file();
-        if (!picked?.path) return;
-        csv = picked.text || "";
-      } else {
-        tableInput.current?.click();
-        return;
-      }
-    }
-    setBusy(true);
-    try {
-      const data = await api("/api/batch/import", {
-        method: "POST",
-        body: JSON.stringify({
-          csv,
-          files: files.map((item) => item.path),
-          output_dir: config.output_dir,
-          translation_mode: modeKey(sourceLang, targetLang),
-          style: layout,
-          translate_filename: params.filename,
-        }),
-      });
-      setStatus(`已写回 ${asCount(data.written)} 条，共 ${asCount(data.files)} 张图。`);
-      const last = [...(data.results || [])].reverse().find((item) => item.written && item.path);
-      if (last?.path) {
-        setWrittenPath(last.path);
-        setLastOutput(last.path);
-        py()?.reveal_file?.(last.path);
-      }
-    } catch (error) {
-      setStatus(error.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function saveTerm(term) {
+  // ---------- glossary ----------
+  async function saveTerm(term, { quiet = false } = {}) {
     try {
       await api("/api/language-assets/terms", {
-        method: "POST",
-        body: JSON.stringify({
+        json: {
           scope: term.scope || "global",
-          mode: term.mode || modeKey(sourceLang, targetLang),
+          mode: term.mode || mode,
           source: term.source,
           target: term.target,
           layer_contains: term.layer_contains || "",
           project_package_path: config.project_package_path || "",
           id: term.id,
-        }),
+        },
       });
-      await refreshMeta();
-      setStatus("这条译法记下了。");
+      await refreshAssets();
+      if (!quiet) toast("这条译法记下了。", "ok");
+      return true;
     } catch (error) {
-      setStatus(error.message);
+      toast(error.message, "error");
+      return false;
     }
   }
 
-  async function deleteTerm(term) {
-    try {
-      await api("/api/language-assets/terms/delete", {
-        method: "POST",
-        body: JSON.stringify({
-          scope: term.scope || "global",
-          id: term.id,
-          project_package_path: config.project_package_path || "",
-        }),
-      });
-      await refreshMeta();
-      setStatus("删掉了。");
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  async function deletePickedTerms() {
-    const keys = pickedTerms;
-    const doomed = terms.filter((term) => keys.has(termKey(term)));
-    if (!doomed.length) {
-      setStatus("先勾要删的。");
+  async function deleteTerms(list) {
+    if (!list.length) {
+      toast("先勾要删的。");
       return;
     }
-    for (const term of doomed) {
-      await deleteTerm(term);
-    }
-    setPickedTerms(new Set());
-    setStatus(`删掉了 ${doomed.length} 条。`);
-  }
-
-  function exportTerms() {
-    const lines = ["source,target,mode"];
-    terms.forEach((term) => {
-      lines.push(`${asText(term.source)},${asText(term.target)},${asText(term.mode)}`);
-    });
-    const csv = `${lines.join("\n")}\n`;
-    const native = py();
-    if (native?.save_table_file) {
-      native.save_table_file("术语表.csv", csv).then((saved) => {
-        if (saved?.path) setStatus(`术语表已导出 → ${saved.path}`);
-      });
-      return;
-    }
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "术语表.csv";
-    link.click();
-    URL.revokeObjectURL(url);
-    setStatus("术语表已导出。");
-  }
-
-  async function checkUpdates(options = {}) {
-    const silent = Boolean(options.silent);
-    if (!silent) {
-      setChecking(true);
-      setUpdateMsg("正在检查…");
-      setStatus("正在检查…");
-    }
     try {
-      const data = await api("/api/updates/check");
-      setUpdateInfo(data);
-      if (data.current) setAppVersion(asText(data.current));
-      if (data.available) {
-        const line = `有新版本 ${data.latest}（当前 ${data.current}）`;
-        setUpdateMsg(line);
-        if (!silent) {
-          rememberReturn();
-          setView("update");
-        }
-      } else if (!silent) {
-        setUpdateMsg(data.message || `已是 ${data.current}`);
+      for (const term of list) {
+        await api("/api/language-assets/terms/delete", {
+          json: { scope: term.scope || "global", id: term.id, project_package_path: config.project_package_path || "" },
+        });
       }
-    } catch {
-      if (!silent) {
-        setUpdateMsg("GitHub 暂时连不上。过一会再试。");
-      }
-    } finally {
-      if (!silent) setChecking(false);
-    }
-  }
-
-  function openUpdatePage() {
-    if (updateInfo?.available) {
-      rememberReturn();
-      setView("update");
-      return;
-    }
-    checkUpdates();
-  }
-
-  async function cancelUpdate() {
-    try {
-      const data = await api("/api/updates/cancel", { method: "POST" });
-      setUpdating(false);
-      setChecking(false);
-      setUpdateMsg(data.message || "已取消");
-      setStatus(data.message || "已取消");
-      if (data.cancelled !== false) setView(pageReturn.current || "work");
+      await refreshAssets();
+      toast(list.length > 1 ? `删掉了 ${list.length} 条。` : "删掉了。", "ok");
     } catch (error) {
-      setStatus(error.message || "取消不了");
+      toast(error.message, "error");
     }
   }
 
-  function openReleasePage() {
-    const url = asText(updateInfo?.html_url) || "https://github.com/erict16/tuyi/releases";
-    py()?.open_url?.(url);
-  }
-
-  async function applyUpdate() {
-    if (updating) return;
-    setUpdating(true);
-    setChecking(true);
-    setUpdatePercent(0);
-    setView("update");
-    setUpdateMsg("正在下载更新…");
-    setStatus("正在下载更新…");
-    try {
-      await api("/api/updates/apply", { method: "POST" });
-      for (let i = 0; i < 900; i += 1) {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        const status = await api("/api/updates/status");
-        const percent = Math.round(Number(status.percent || 0) * 100);
-        if (status.phase === "downloading") {
-          setUpdatePercent(percent);
-          setUpdateMsg(`正在下载更新… ${percent}%`);
-          setStatus(`正在下载更新… ${percent}%`);
-        } else if (status.phase === "verifying") {
-          setUpdateMsg("正在校验…");
-          setStatus("正在校验…");
-        } else if (status.phase === "applying") {
-          setUpdateMsg("准备重启…");
-          setStatus("准备重启…");
-        } else if (status.phase === "restarting") {
-          setUpdateMsg("正在重启…");
-          setStatus("正在重启…");
-          py()?.close_window?.();
-          return;
-        } else if (status.phase === "cancelling" || status.phase === "idle") {
-          setUpdateMsg(status.message || "已取消");
-          setStatus(status.message || "已取消");
-          setUpdating(false);
-          setChecking(false);
-          return;
-        } else if (status.phase === "error") {
-          throw new Error(status.message || "更新失败");
-        }
-      }
-      throw new Error("更新超时");
-    } catch (error) {
-      setUpdateMsg(error.message || "更新失败");
-      setStatus(error.message || "更新失败");
-      setUpdating(false);
-      setChecking(false);
-    }
+  async function exportTerms() {
+    const savedTo = await saveFile("术语表.csv", { text: termsCsv(terms) });
+    if (savedTo) toast(`术语表已导出 ${terms.length} 条`, "ok");
   }
 
   async function loadGlossary() {
@@ -1112,14 +923,11 @@ export default function App() {
       const picked = await native.pick_term_package();
       if (picked?.path) {
         try {
-          await api("/api/language-assets/project", {
-            method: "POST",
-            body: JSON.stringify({ path: picked.path, create: false }),
-          });
-          await refreshMeta();
-          setStatus("已加载术语表。");
+          await api("/api/language-assets/project", { json: { path: picked.path, create: false } });
+          await refreshAssets();
+          toast("已加载术语表。", "ok");
         } catch (error) {
-          setStatus(error.message);
+          toast(error.message, "error");
         }
         return;
       }
@@ -1134,27 +942,134 @@ export default function App() {
     try {
       const text = await file.text();
       if (!text.trim()) {
-        setStatus("术语表是空的");
+        toast("术语表是空的", "warn");
         return;
       }
-      const mode = modeKey(sourceLang, targetLang);
-      let payload = { mode, csv: "", terms: [] };
-      if (/\.json$/i.test(file.name)) {
-        const data = JSON.parse(text);
-        payload.terms = data.terms || [];
-      } else {
-        payload.csv = text;
-      }
-      const result = await api("/api/language-assets/import", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      await refreshMeta();
-      setStatus(`术语表写入 ${result.count} 条。`);
+      const payload = { mode, csv: "", terms: [] };
+      if (/\.json$/i.test(file.name)) payload.terms = JSON.parse(text).terms || [];
+      else payload.csv = text;
+      const result = await api("/api/language-assets/import", { json: payload });
+      await refreshAssets();
+      toast(`术语表写入 ${result.count} 条。`, "ok");
     } catch (error) {
       const message = String(error.message || "");
-      setStatus(/json|unexpected/i.test(message) ? "术语表读不出来。" : message || "术语表读不出来。");
+      toast(/json|unexpected/i.test(message) ? "术语表读不出来。" : message || "术语表读不出来。", "error");
     }
+  }
+
+  // ---------- settings ----------
+  function updateConfig(patch) {
+    setConfig((prev) => ({ ...prev, ...patch }));
+    setProbe({ busy: false, text: "", ok: false });
+  }
+
+  async function pickOutputDir() {
+    const native = py();
+    if (!native?.pick_output_dir) {
+      toast("浏览器里选不了文件夹。用图译桌面版选。", "warn");
+      return;
+    }
+    const picked = await native.pick_output_dir();
+    if (picked?.path) updateConfig({ output_dir: picked.path });
+  }
+
+  async function runProbe() {
+    setProbe({ busy: true, text: "", ok: false });
+    const sample = mode.startsWith("zh") ? "请在安装前确认接线正确" : "Check the wiring before installation";
+    try {
+      const data = await api("/api/drawings/translate", {
+        json: {
+          items: [{ id: 0, source: sample, type: "TEXT", layer: "0", handle: "", field: "text" }],
+          translation_mode: mode,
+          use_glossary: false,
+          ...enginePayload(engine, config),
+        },
+      });
+      const target = asText(data.items?.[0]?.target).trim();
+      if (!data.has_engine) setProbe({ busy: false, ok: false, text: "还没填全，连不上。" });
+      else if (target) setProbe({ busy: false, ok: true, text: `通了：${target}` });
+      else setProbe({ busy: false, ok: false, text: "连上了，但没译出来。" });
+    } catch (error) {
+      setProbe({ busy: false, ok: false, text: error.message });
+    }
+  }
+
+  // ---------- languages ----------
+  function changeLangs(src, dst) {
+    if (src === sourceLang && dst === targetLang) return;
+    setPrefs({ sourceLang: src, targetLang: dst });
+    sheets.current.clear();
+    if (current && !locked) extractFile(current, { langs: [src, dst] });
+  }
+
+  function detectSource() {
+    const blob = rows.slice(0, 40).map((row) => asText(row.source)).join("\n");
+    if (!blob.trim()) {
+      toast("先打开图纸再检测");
+      return;
+    }
+    const next = guessLang(blob);
+    const dst = next === targetLang ? (next === "en" ? "zh-Hans" : "en") : targetLang;
+    changeLangs(next, dst);
+    toast(`原文设成${langLabel(next)}`);
+  }
+
+  // ---------- keyboard + drag/drop ----------
+  const keyHandler = useRef(null);
+  keyHandler.current = (event) => {
+    const mod = event.metaKey || event.ctrlKey;
+    if (event.key === "Escape" && (view === "settings" || view === "glossary" || (view === "update" && !updating))) {
+      if (!document.querySelector(".menu, .lang-pop")) leavePage();
+      return;
+    }
+    if (!mod) return;
+    const key = event.key.toLowerCase();
+    if (key === "o") {
+      event.preventDefault();
+      openDrawings();
+    } else if (key === "enter" && view === "work") {
+      event.preventDefault();
+      runTranslate();
+    } else if (key === "s" && view === "work") {
+      event.preventDefault();
+      writeBack();
+    } else if (key === ",") {
+      event.preventDefault();
+      toggleSettings();
+    }
+  };
+
+  useEffect(() => {
+    const onKey = (event) => keyHandler.current?.(event);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const dragHasFiles = (event) => [...(event.dataTransfer?.types || [])].includes("Files");
+
+  function onDragEnter(event) {
+    if (!dragHasFiles(event)) return;
+    event.preventDefault();
+    dragDepth.current += 1;
+    setDropOver(true);
+  }
+
+  function onDragLeave(event) {
+    if (!dragHasFiles(event)) return;
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (!dragDepth.current) setDropOver(false);
+  }
+
+  async function onDrop(event) {
+    if (!dragHasFiles(event)) return;
+    event.preventDefault();
+    dragDepth.current = 0;
+    setDropOver(false);
+    if (locked) {
+      toast("等这张译完再加。", "warn");
+      return;
+    }
+    await uploadAndAdd([...event.dataTransfer.files]);
   }
 
   function onLights(kind) {
@@ -1164,56 +1079,7 @@ export default function App() {
     if (kind === "max") native?.toggle_maximize?.();
   }
 
-  const footBusy = checking || updating;
-  const termFilter = termQuery.trim();
-  const mineShown = terms.filter((term) => !termFilter || asText(term.source).includes(termFilter) || asText(term.target).includes(termFilter));
-  const builtinShown = builtinTerms.filter((term) => !termFilter || asText(term.source).includes(termFilter) || asText(term.target).includes(termFilter));
-  const allMineKeys = mineShown.map(termKey);
-  const pickedCount = allMineKeys.filter((key) => pickedTerms.has(key)).length;
-
-  async function onRailDrop(event) {
-    event.preventDefault();
-    setDropOver(false);
-    const dropped = [...event.dataTransfer.files].filter((file) => /\.(dxf|dwg)$/i.test(file.name));
-    if (!dropped.length) return;
-    const form = new FormData();
-    dropped.forEach((file) => form.append("files", file));
-    try {
-      const response = await fetch("/api/drawings/open", { method: "POST", body: form });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "打开失败");
-      await loadOpened(data.files || []);
-    } catch (error) {
-      setStatus(error.message);
-    }
-  }
-
-  function pickSource(code) {
-    if (code === targetLang) return;
-    setSourceLang(code);
-  }
-
-  function pickTarget(code) {
-    if (code === sourceLang) return;
-    setTargetLang(code);
-  }
-
-  function swapLangs() {
-    setSourceLang(targetLang);
-    setTargetLang(sourceLang);
-  }
-
-  function detectSource() {
-    const blob = (Array.isArray(rows) ? rows : []).slice(0, 40).map((row) => asText(row.source)).join("\n");
-    if (!blob.trim()) {
-      setStatus("先打开图纸再检测");
-      return;
-    }
-    const next = guessLang(blob);
-    setSourceLang(next);
-    if (next === targetLang) setTargetLang(next === "en" ? "zh-Hans" : "en");
-    setStatus(`原文设成${langLabel(next)}`);
-  }
+  const onWorkPage = view === "work" || view === "batch";
 
   return (
     <div
@@ -1223,109 +1089,57 @@ export default function App() {
       data-files={files.length ? "1" : "0"}
       data-native-titlebar={nativeTitlebar ? "true" : "false"}
       data-engine={engine}
-      role="application"
-      aria-label="图译"
+      onDragEnter={onWorkPage ? onDragEnter : undefined}
+      onDragOver={onWorkPage ? (event) => { if (dragHasFiles(event)) event.preventDefault(); } : undefined}
+      onDragLeave={onWorkPage ? onDragLeave : undefined}
+      onDrop={onWorkPage ? onDrop : undefined}
     >
       <a className="skip" href="#main">跳到图纸文字</a>
-      <header className={nativeTitlebar ? "tb tb-mac" : "tb pywebview-drag-region"}>
-        {nativeTitlebar ? null : (
+      {!nativeTitlebar && (
+        <header className="tb pywebview-drag-region">
           <div className="lights" aria-hidden="true">
             <i className="r" onClick={() => onLights("close")} />
             <i className="y" onClick={() => onLights("min")} />
             <i className="g" onClick={() => onLights("max")} />
           </div>
-        )}
-        {view === "settings" || view === "glossary" || view === "update" ? (
-          <>
-            {view === "update" && updating ? (
-              <button type="button" className="tbtn" onClick={cancelUpdate}>取消这次</button>
-            ) : (
-              <button type="button" className="tbtn" onClick={closePage}>{view === "update" ? "以后再说" : "返回"}</button>
-            )}
-            <span className="grow" />
-            {view === "glossary" && (
-              <>
-                <button type="button" className="tbtn ghost" onClick={loadGlossary} aria-label="加载术语表">从表格导入</button>
-                <button type="button" className="tbtn ghost" onClick={exportTerms} aria-label="导出术语">导出成表格</button>
-              </>
-            )}
-          </>
-        ) : (
-          <span className="grow" />
-        )}
-      </header>
+          <span className="tb-title">图译</span>
+        </header>
+      )}
 
       <input ref={cadInput} type="file" accept=".dwg,.dxf" multiple hidden onChange={onCadPicked} />
       <input ref={glossaryInput} type="file" accept=".json,.csv,.txt,.hcterms.json" hidden onChange={onGlossaryPicked} />
       <input ref={tableInput} type="file" accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden onChange={onTablePicked} />
 
-      {(view === "work" || view === "batch") && (
+      {onWorkPage && (
         <div className="body page-enter">
-          <aside
-            className="rail"
-            style={{ width: railW }}
-            aria-label="图纸队列"
-            onDragEnter={(event) => { event.preventDefault(); setDropOver(true); }}
-            onDragOver={(event) => { event.preventDefault(); setDropOver(true); }}
-            onDragLeave={() => setDropOver(false)}
-            onDrop={onRailDrop}
-          >
-            <button
-              type="button"
-              className={`drop${dropOver ? " over" : ""}`}
-              onClick={openDrawings}
-            >
-              <span className="plus" aria-hidden="true">+</span>
-              <h2>添加图纸</h2>
-              <p className="long">DWG、DXF，一次可多张</p>
-            </button>
-            {files.length === 0 && <p className="queue-empty">打开的图纸排在这里</p>}
-            {files.length > 0 && (
-              <div className="queue">
-                {files.map((file) => (
-                  <div
-                    key={file.path}
-                    className={`file${file.path === current ? " on" : ""}`}
-                    onClick={() => {
-                      if (file.path !== current) setWrittenPath("");
-                      setCurrent(file.path);
-                      if (view === "work") extractFile(file.path);
-                    }}
-                  >
-                    <span className="name" title={file.name}>{file.name}</span>
-                    <span className="meta">{file.ext}</span>
-                    <span className={`st ${file.path === current ? (translating ? "st-run" : "st-ok") : "st-idle"}`}>{file.path === current ? (translating ? "正在译" : "当前") : "排队"}</span>
-                    <button
-                      type="button"
-                      className="del"
-                      aria-label={`从队列去掉 ${file.name}`}
-                      onClick={(event) => removeDrawing(file.path, event)}
-                    >去掉</button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="rail-go">
-              <button type="button" className={`go${translating ? " busy" : ""}`} disabled={busy || !current} onClick={runTranslate}>
-                <i className="spin" aria-hidden="true" />
-                <span className="go-label">{translating ? "正在译…" : "快速翻译"}</span>
-              </button>
-            </div>
-          </aside>
+          <div className="rail-wrap" style={{ width: railW }}>
+            <Rail
+              files={files}
+              current={current}
+              fileState={fileState}
+              locked={locked}
+              view={view}
+              translating={translating || busy === "write"}
+              canTranslate={Boolean(current) && !locked}
+              onAdd={openDrawings}
+              onPick={pickDrawing}
+              onRemove={removeDrawing}
+              onTranslate={view === "work" ? runTranslate : null}
+              onToggleBatch={() => setView(view === "batch" ? "work" : "batch")}
+            />
+          </div>
           <div
             className={`split${railDrag ? " on" : ""}`}
             role="separator"
             aria-orientation="vertical"
             aria-label="调整左右宽度"
+            onDoubleClick={() => setRailW(280)}
             onPointerDown={(event) => {
               event.preventDefault();
               setRailDrag(true);
               const startX = event.clientX;
               const startW = railW;
-              const move = (ev) => {
-                const next = Math.min(420, Math.max(200, startW + ev.clientX - startX));
-                setRailW(next);
-              };
+              const move = (ev) => setRailW(Math.min(420, Math.max(220, startW + ev.clientX - startX)));
               const up = () => {
                 setRailDrag(false);
                 window.removeEventListener("pointermove", move);
@@ -1335,595 +1149,171 @@ export default function App() {
               window.addEventListener("pointerup", up);
             }}
           />
-
-          {view === "work" && (
-            <section className="stage" id="main">
-              {files.length > 0 && (
-                <div className={`status${/已写出新文件/.test(status) ? " ok" : ""}`} aria-live="polite">{status}</div>
-              )}
-              {current ? (
-                <>
-                  <div className={`table${translating ? " busy" : ""}`} aria-busy={translating}>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th style={{ width: 36 }}>
-                            <input
-                              type="checkbox"
-                              checked={visibleRows.length > 0 && visibleRows.every((row) => row.selected !== false)}
-                              onChange={(event) => {
-                                const checked = event.target.checked;
-                                const visible = new Set(visibleRows.map((row) => row.id));
-                                setRows((prev) => prev.map((item) => (visible.has(item.id) ? { ...item, selected: checked } : item)));
-                              }}
-                              aria-label="全选"
-                            />
-                          </th>
-                          <th>原文</th>
-                          <th>译文</th>
-                          <th>图层</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {visibleRows.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="kind">{rows.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。"}</td>
-                          </tr>
-                        ) : visibleRows.map((row, index) => (
-                          <tr key={row.id} className={index === 0 ? "on" : row.duplicate ? "skip" : ""}>
-                            <td>
-                              <input
-                                type="checkbox"
-                                checked={row.selected !== false}
-                                onChange={(event) => {
-                                  const checked = event.target.checked;
-                                  setRows((prev) => prev.map((item) => (item.id === row.id ? { ...item, selected: checked } : item)));
-                                }}
-                              />
-                            </td>
-                            <td className="src">{asText(row.source)}</td>
-                            <td>
-                              <input
-                                type="text"
-                                value={asText(row.target)}
-                                placeholder={translating && row.selected !== false ? "正在译…" : ""}
-                                onChange={(event) => {
-                                  const value = event.target.value;
-                                  setRows((prev) => prev.map((item) => (item.id === row.id ? { ...item, target: value, via: "edit" } : item)));
-                                }}
-                                aria-label="译文"
-                              />
-                            </td>
-                            <td className="kind">{asText(row.layer) || "0"} · {asText(row.type)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              ) : (
-                <div
-                  className="empty start"
-                  onDragEnter={(event) => { event.preventDefault(); setDropOver(true); }}
-                  onDragOver={(event) => { event.preventDefault(); setDropOver(true); }}
-                  onDragLeave={() => setDropOver(false)}
-                  onDrop={onRailDrop}
-                >
-                  <button type="button" className={`drop-hero${dropOver ? " over" : ""}`} onClick={openDrawings}>
-                    <span className="plus" aria-hidden="true">+</span>
-                    <strong>把 DWG / DXF 拖到这里</strong>
-                    <span>或点这里选图纸，一次可以多张</span>
-                  </button>
-                  <ol className="empty-steps">
-                    <li><b>1</b>添加图纸</li>
-                    <li><b>2</b>点「快速翻译」</li>
-                    <li><b>3</b>另存新文件，原图不动</li>
-                  </ol>
-                </div>
-              )}
-            </section>
+          {view === "work" ? (
+            <WorkView
+              file={selected}
+              rows={rows}
+              visibleRows={visibleRows}
+              stats={stats}
+              counts={counts}
+              filters={filters}
+              onFilter={setFilter}
+              query={query}
+              onQuery={setQuery}
+              notice={notice}
+              onCloseNotice={() => say(current, "", "")}
+              loading={busy === "extract"}
+              translating={translating}
+              locked={locked}
+              canWrite={hasWritable(rows)}
+              dropOver={dropOver}
+              onAdd={openDrawings}
+              onEditRow={(id, value) => updateRows((prev) => editRow(prev, id, value))}
+              onToggleRow={(id, checked) => updateRows((prev) => prev.map((item) => (item.id === id ? { ...item, selected: checked } : item)))}
+              onToggleAll={(checked) => {
+                const ids = new Set(visibleRows.map((row) => row.id));
+                updateRows((prev) => prev.map((item) => (ids.has(item.id) ? { ...item, selected: checked } : item)));
+              }}
+              onWriteBack={writeBack}
+              onExportTable={exportTable}
+              onImportTable={importTable}
+            />
+          ) : (
+            <BatchView
+              files={files}
+              batch={batch}
+              layout={layout}
+              onLayout={(value) => setPrefs({ layout: value })}
+              outputDir={asText(config.output_dir)}
+              onPickOutputDir={pickOutputDir}
+              params={params}
+              onParam={setParam}
+              filters={filters}
+              onFilter={setFilter}
+              notice={notice}
+              onCloseNotice={() => say(current, "", "")}
+              busy={Boolean(busy)}
+              tableName={table?.name || ""}
+              onStart={startExport}
+              onPause={pauseExport}
+              onStop={() => batchCall("/api/batch/stop", "已停止。")}
+              onClear={() => batchCall("/api/batch/clear", "列表清空了。")}
+              onRetry={(id) => batchCall(`/api/batch/${id}/retry`, "已重新排队。")}
+              onRemoveTask={(id) => batchCall(`/api/batch/${id}/remove`, "")}
+              onImportTable={importTable}
+              onWriteBackAll={writeBackAll}
+              onReveal={reveal}
+            />
           )}
-
-          {view === "batch" && (
-            <section className="stage">
-              <div className="act">
-                <span className="grow" />
-                <button type="button" className="tbtn ghost" onClick={stopExport}>停止</button>
-                {batch.started && !batch.paused ? (
-                  <button type="button" className="tbtn" onClick={() => pauseExport(true)}>暂停</button>
-                ) : (
-                  <button type="button" className="go" disabled={!files.length} onClick={() => (batch.started ? pauseExport(false) : startExport())}>
-                    <span className="go-label">{batch.started ? "继续" : "快速翻译这几张"}</span>
-                  </button>
-                )}
-              </div>
-              <div className="status" aria-live="polite">{status}</div>
-              <div className="batch-body">
-              <div className="jobs">
-                {!files.length ? (
-                  <div className="empty">
-                    <p>还没打开图纸，点左边添加<span>打开后再一起译</span></p>
-                  </div>
-                ) : (
-                  <>
-                    {(batch.tasks || []).length === 0 && files.map((file) => (
-                      <div className="job" key={file.path}>
-                        <span>{file.name}</span>
-                        <span>{layoutLabel(layout)}</span>
-                        <span className="bar"><i style={{ width: 0 }} /></span>
-                        <span>排队</span>
-                      </div>
-                    ))}
-                    {(batch.tasks || []).map((task) => (
-                      <div className="job" key={task.id}>
-                        <span>{(task.input_file || "").split(/[/\\]/).pop()}</span>
-                        <span>{layoutLabel(layout)}</span>
-                        <span className="bar"><i style={{ width: `${task.progress || 0}%` }} /></span>
-                        <span>{task.status}</span>
-                        {(task.status === "failed" || task.status === "cancelled") && (
-                          <button type="button" className="tbtn" onClick={() => retryTask(task.id)}>重试</button>
-                        )}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-              <aside className="insp">
-                <h3>图纸上怎么写</h3>
-                <div className="choices">
-                  {LAYOUTS.map(([value, label, title]) => (
-                    <Choice key={value} on={layout === value} title={title} onClick={() => setLayout(value)}>{label}</Choice>
-                  ))}
-                </div>
-                <h3>放到哪里</h3>
-                <div className="path">
-                  <input value={config.output_dir || ""} readOnly aria-label="输出文件夹" />
-                  <button type="button" onClick={async () => {
-                    const picked = await py()?.pick_output_dir?.();
-                    if (picked?.path) {
-                      await api("/api/config", { method: "POST", body: JSON.stringify({ ...config, output_dir: picked.path }) });
-                      setConfig((prev) => ({ ...prev, output_dir: picked.path }));
-                    }
-                  }}>选取</button>
-                </div>
-                <div className="choices">
-                  <Choice on={params.tree} title="输出目录按原来的文件夹一层层放" onClick={() => setParams((prev) => ({ ...prev, tree: !prev.tree }))}>按原来的文件夹放</Choice>
-                  <Choice on={params.odaDxf} title="没有 ODA 时，写不出 DWG 就改成 DXF" onClick={() => setParams((prev) => ({ ...prev, odaDxf: !prev.odaDxf }))}>打不开 DWG 时改存成 DXF</Choice>
-                </div>
-                <h3>先别译</h3>
-                <div className="choices">
-                  <Choice on={filters.numbers} title="尺寸数字、纯符号，一般不用译" onClick={() => setFilters((prev) => ({ ...prev, numbers: !prev.numbers }))}>数字、尺寸</Choice>
-                  <Choice on={filters.dupes} title="同一句在图上出现多次，只译一次" onClick={() => setFilters((prev) => ({ ...prev, dupes: !prev.dupes }))}>重复的句子</Choice>
-                  <Choice on={filters.nonsource} title="已经是目标语言或夹杂别的文字，先跳过" onClick={() => setFilters((prev) => ({ ...prev, nonsource: !prev.nonsource }))}>不是原文那种语言</Choice>
-                </div>
-                <h3>表格</h3>
-                <p className="note" style={{ paddingLeft: 0 }}>有填好的表格也可以导进来写回。</p>
-                <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportTable("csv")}>导出表格</button>
-                <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportTable("xlsx")}>导出 Excel</button>
-                <button type="button" className="tbtn" disabled={busy} onClick={importTable}>导入表格</button>
-                <button type="button" className="tbtn" disabled={busy} onClick={writeBackAll}>全部写回</button>
-                <h3>PDF 看起来</h3>
-                <div className="choices">
-                  {APPEARANCES.map(([value, label, title]) => (
-                    <Choice key={value} on={appearance === value} title={title} onClick={() => setAppearance(value)}>{label}</Choice>
-                  ))}
-                </div>
-                <div className="field">
-                  纸张
-                  <select className="mini" aria-label="PDF 纸张" value={pdfPaper} onChange={(event) => setPdfPaper(event.target.value)}>
-                    {PDF_PAPERS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                  </select>
-                </div>
-                <h3>PDF</h3>
-                <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(false)}>导出 PDF</button>
-                <button type="button" className="tbtn" disabled={busy || !current} onClick={() => exportPdf(true)}>打印</button>
-                {lastOutput && <p className="note" style={{ paddingLeft: 0 }}>{lastOutput}</p>}
-              </aside>
-              </div>
-            </section>
+          {dropOver && (
+            <div className="drop-veil" aria-hidden="true">
+              <div><FilePlus2 size={34} strokeWidth={1.5} /><strong>松手就加进来</strong><span>DWG、DXF，一次可以多张</span></div>
+            </div>
           )}
         </div>
       )}
 
       {view === "settings" && (
-        <div className="body page-enter">
-          <section className="set-page" aria-label="设置">
-            <div className="set-tabs" role="tablist" aria-label="设置分页">
-              <button type="button" role="tab" className={settingsTab === "tr" ? "on" : ""} aria-selected={settingsTab === "tr"} onClick={() => setSettingsTab("tr")}>翻译</button>
-              <button type="button" role="tab" className={settingsTab === "wr" ? "on" : ""} aria-selected={settingsTab === "wr"} onClick={() => setSettingsTab("wr")}>图上怎么写</button>
-              <button type="button" role="tab" className={settingsTab === "more" ? "on" : ""} aria-selected={settingsTab === "more"} onClick={() => setSettingsTab("more")}>外观和更新</button>
-            </div>
-            <div className="set-pane" key={settingsTab}>
-              {settingsTab === "tr" && (
-                <>
-                  <h1>翻译</h1>
-                  <p className="help">图上的字默认全译。只要选送到哪。</p>
-                  <div className="card">
-                    <Seg
-                      label="用哪个翻译"
-                      value={engine === "local" ? "custom" : engine}
-                      options={[["cloud", "网上翻译"], ["custom", "自己配接口"]]}
-                      onChange={(id) => setEngine(id)}
-                    />
-                    {engine !== "custom" && engine !== "local" && (
-                      <>
-                        <p className="help">网上翻译用 DeepL 或 Azure，要密钥。</p>
-                        <div className="field">网上用哪家
-                          <select className="mini" aria-label="网上翻译服务" value={config.provider === "azure" ? "azure" : "deepl"} onChange={(event) => setConfig((prev) => ({ ...prev, provider: event.target.value }))}>
-                            <option value="deepl">DeepL</option>
-                            <option value="azure">Azure</option>
-                          </select>
-                        </div>
-                        <div className="field">DeepL 密钥 <input type="password" name="deepl" autoComplete="off" spellCheck={false} placeholder="没有就空着" aria-label="DeepL 密钥" value={config.deepl_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, deepl_key: event.target.value }))} /></div>
-                        <div className="field">Azure 密钥 <input type="password" name="azure" autoComplete="off" spellCheck={false} placeholder="没有就空着" aria-label="Azure 密钥" value={config.azure_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, azure_key: event.target.value }))} /></div>
-                        <div className="field">Azure 区域 <input type="text" name="azure-region" autoComplete="off" spellCheck={false} placeholder="eastasia" aria-label="Azure 区域" value={config.azure_region || ""} onChange={(event) => setConfig((prev) => ({ ...prev, azure_region: event.target.value }))} /></div>
-                      </>
-                    )}
-                    {(engine === "custom" || engine === "local") && (
-                      <>
-                        <p className="help">填网址和密钥。本机 Ollama 也填在这里。</p>
-                        <div className="field">网址 <input type="url" name="openai-base" autoComplete="off" spellCheck={false} placeholder="https://api.deepseek.com/v1 或 http://127.0.0.1:11434" aria-label="接口网址" value={engine === "local" ? (config.ollama_host || "") : (config.openai_base || "")} onChange={(event) => {
-                          const value = event.target.value;
-                          if (engine === "local") setConfig((prev) => ({ ...prev, ollama_host: value }));
-                          else setConfig((prev) => ({ ...prev, openai_base: value }));
-                        }} /></div>
-                        <div className="field">密钥 <input type="password" name="openai-key" autoComplete="off" spellCheck={false} placeholder="没有就空着" aria-label="接口密钥" value={config.openai_key || ""} onChange={(event) => setConfig((prev) => ({ ...prev, openai_key: event.target.value }))} /></div>
-                        <div className="field">模型 <input type="text" name="openai-model" autoComplete="off" spellCheck={false} placeholder="deepseek-chat 或 llama3.1" aria-label="模型名" value={engine === "local" ? (config.ollama_model || "") : (config.openai_model || "")} onChange={(event) => {
-                          const value = event.target.value;
-                          if (engine === "local") setConfig((prev) => ({ ...prev, ollama_model: value }));
-                          else setConfig((prev) => ({ ...prev, openai_model: value }));
-                        }} /></div>
-                      </>
-                    )}
-                    <label className="row" title="勾上后，这张图会先查术语表"><input type="checkbox" checked={params.glossary} onChange={(event) => setParams((prev) => ({ ...prev, glossary: event.target.checked }))} /> 先查术语表</label>
-                    <details className="adv">
-                      <summary>高级翻译设置</summary>
-                      <p className="help">图上的字默认全译。一般不用改。</p>
-                      <label className="row"><input type="radio" name="set-eng-adv" checked={engine === "local"} onChange={() => setEngine("local")} /> 不联网</label>
-                      <label className="row" title="尺寸数字、纯符号，一般不用译"><input type="checkbox" checked={filters.numbers} onChange={(event) => setFilters((prev) => ({ ...prev, numbers: event.target.checked }))} /> 数字、尺寸先别译</label>
-                      <label className="row" title="同一句在图上出现多次，只译一次"><input type="checkbox" checked={filters.dupes} onChange={(event) => setFilters((prev) => ({ ...prev, dupes: event.target.checked }))} /> 重复的句子先别译</label>
-                      <label className="row" title="已经是目标语言或夹杂别的文字，先跳过"><input type="checkbox" checked={filters.nonsource} onChange={(event) => setFilters((prev) => ({ ...prev, nonsource: event.target.checked }))} /> 已经是外文的先别译</label>
-                      <label className="row"><input type="checkbox" checked={params.attribs} onChange={(event) => setParams((prev) => ({ ...prev, attribs: event.target.checked }))} /> 块属性</label>
-                      <label className="row"><input type="checkbox" checked={params.blocks} onChange={(event) => setParams((prev) => ({ ...prev, blocks: event.target.checked }))} /> 块里的字</label>
-                      <label className="row"><input type="checkbox" checked={params.dims} onChange={(event) => setParams((prev) => ({ ...prev, dims: event.target.checked }))} /> 标注、表格</label>
-                      <label className="row"><input type="checkbox" checked={params.model} onChange={(event) => setParams((prev) => ({ ...prev, model: event.target.checked }))} /> 模型空间</label>
-                      <label className="row"><input type="checkbox" checked={params.paper} onChange={(event) => setParams((prev) => ({ ...prev, paper: event.target.checked }))} /> 图纸空间</label>
-                      <label className="row"><input type="checkbox" checked={params.filename} onChange={(event) => setParams((prev) => ({ ...prev, filename: event.target.checked }))} /> 文件名也译</label>
-                      <label className="row"><input type="checkbox" checked={params.frozen} onChange={(event) => setParams((prev) => ({ ...prev, frozen: event.target.checked }))} /> 冻住看不见的图层</label>
-                      <label className="row"><input type="checkbox" checked={params.locked} onChange={(event) => setParams((prev) => ({ ...prev, locked: event.target.checked }))} /> 锁住改不了的图层</label>
-                      <label className="row"><input type="checkbox" checked={params.off} onChange={(event) => setParams((prev) => ({ ...prev, off: event.target.checked }))} /> 关掉藏起来的图层</label>
-                    </details>
-                  </div>
-                </>
-              )}
-              {settingsTab === "wr" && (
-                <>
-                  <h1>图上怎么写</h1>
-                  <p className="help">译完的新文件里，图上留什么字。打印样子另选，跟这三项无关。</p>
-                  <div className="card">
-                    <Seg
-                      label="图纸上怎么写"
-                      value={layout}
-                      options={LAYOUTS.map(([value, text]) => [value, text])}
-                      onChange={setLayout}
-                    />
-                    <Seg
-                      label="PDF 看起来"
-                      value={appearance}
-                      options={APPEARANCES.map(([value, text]) => [value, text])}
-                      onChange={setAppearance}
-                    />
-                    <div className="field">
-                      纸张
-                      <select className="mini" aria-label="PDF 纸张" value={pdfPaper} onChange={(event) => setPdfPaper(event.target.value)}>
-                        {PDF_PAPERS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                    </div>
-                    <div className="field">导出到
-                      <input value={config.output_dir || ""} readOnly aria-label="输出文件夹" />
-                    </div>
-                    <div className="field-actions">
-                      <button type="button" className="tbtn" onClick={async () => {
-                        const picked = await py()?.pick_output_dir?.();
-                        if (picked?.path) {
-                          await api("/api/config", { method: "POST", body: JSON.stringify({ ...config, output_dir: picked.path }) });
-                          setConfig((prev) => ({ ...prev, output_dir: picked.path }));
-                        }
-                      }}>选取文件夹</button>
-                    </div>
-                    <p className="help">没选的话，文件进下载文件夹。不会再建 Tuyi output。</p>
-                    <label className="row" title="输出目录按原来的文件夹一层层放"><input type="checkbox" checked={params.tree} onChange={(event) => setParams((prev) => ({ ...prev, tree: event.target.checked }))} /> 按原来的文件夹放</label>
-                    <label className="row" title="没有 ODA 时，写不出 DWG 就改成 DXF"><input type="checkbox" checked={params.odaDxf} onChange={(event) => setParams((prev) => ({ ...prev, odaDxf: event.target.checked }))} /> 打不开 DWG 时改存成 DXF</label>
-                    <p className="help" id="oda-setup">{oda.installed ? "已装 ODA，DWG 能直接开。" : "没装 ODA，DWG 请先另存成 DXF。"}</p>
-                  </div>
-                </>
-              )}
-              {settingsTab === "more" && (
-                <>
-                  <h1>外观和更新</h1>
-                  <p className="help">只改这个窗口。术语管理在单独一页。</p>
-                  <div className="card">
-                    <Seg
-                      label="窗口颜色"
-                      value={theme}
-                      options={[["light", "浅色"], ["dark", "深色"]]}
-                      onChange={setTheme}
-                    />
-                    <div className="field-actions">
-                      <button type="button" className="tbtn ghost" onClick={openGlossary}>打开术语管理</button>
-                      <button type="button" className="tbtn ghost" onClick={openUpdatePage} disabled={updating || checking}>检查更新</button>
-                    </div>
-                    <p className="help">图译 {appVersion || updateInfo?.current || "—"} · ODA {oda.installed ? "已安装" : "未装"}</p>
-                    {updateMsg && <p className="help">{updateMsg}</p>}
-                    {updateInfo?.available && (
-                      <p className="help">有新版本 {updateInfo.latest}。</p>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          </section>
-        </div>
+        <SettingsView
+          tab={settingsTab}
+          onTab={setSettingsTab}
+          onBack={leavePage}
+          engine={engine}
+          onEngine={(value) => {
+            setEngine(value);
+            setProbe({ busy: false, text: "", ok: false });
+          }}
+          config={config}
+          onConfig={updateConfig}
+          saved={saved}
+          probe={probe}
+          onProbe={runProbe}
+          params={params}
+          onParam={setParam}
+          filters={filters}
+          onFilter={setFilter}
+          layout={layout}
+          onLayout={(value) => setPrefs({ layout: value })}
+          appearance={appearance}
+          onAppearance={(value) => setPrefs({ appearance: value })}
+          pdfPaper={pdfPaper}
+          onPdfPaper={(value) => setPrefs({ pdfPaper: value })}
+          onPickOutputDir={pickOutputDir}
+          oda={oda}
+          themePref={themePref}
+          onTheme={setThemePref}
+          appVersion={appVersion}
+          updateInfo={updateInfo}
+          updateMsg={updateMsg}
+          checking={checking}
+          updating={updating}
+          onCheckUpdates={() => (updateInfo?.available ? goPage("update") : checkUpdates())}
+          onOpenGlossary={() => setView("glossary")}
+        />
       )}
 
       {view === "glossary" && (
-        <div className="body page-enter">
-          <section className="gloss" aria-label="术语管理">
-            <div className="head">
-              <h1>术语管理</h1>
-              <p>图上碰到左边这句，就写成右边。软件自带的改不了。两边都有时用你加的。</p>
-            </div>
-            <div className="tools">
-              <input type="search" value={termQuery} onChange={(event) => setTermQuery(event.target.value)} placeholder="搜一下…" aria-label="搜译法" />
-              <button
-                type="button"
-                className="tbtn danger"
-                disabled={!pickedCount}
-                onClick={deletePickedTerms}
-              >删掉选中的{pickedCount ? ` ${pickedCount}` : ""}</button>
-              <div className="add">
-                <input
-                  value={termDraft.source}
-                  placeholder="图上的中文"
-                  aria-label="新术语原文"
-                  onChange={(event) => setTermDraft((prev) => ({ ...prev, source: event.target.value }))}
-                />
-                <input
-                  value={termDraft.target}
-                  placeholder="要写成"
-                  aria-label="新术语译文"
-                  onChange={(event) => setTermDraft((prev) => ({ ...prev, target: event.target.value }))}
-                />
-                <button
-                  type="button"
-                  className="tbtn pri"
-                  onClick={async () => {
-                    if (!termDraft.source.trim() || !termDraft.target.trim()) {
-                      setStatus("中文、译文不能为空");
-                      return;
-                    }
-                    await saveTerm({ ...termDraft, scope: "global" });
-                    setTermDraft({ source: "", target: "" });
-                  }}
-                >加上</button>
-              </div>
-            </div>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: 36 }}>
-                      <input
-                        type="checkbox"
-                        checked={mineShown.length > 0 && pickedCount === mineShown.length}
-                        onChange={(event) => {
-                          const checked = event.target.checked;
-                          setPickedTerms(() => (checked ? new Set(allMineKeys) : new Set()));
-                        }}
-                        aria-label="全选术语管理"
-                      />
-                    </th>
-                    <th>图上的中文</th>
-                    <th>要写成</th>
-                    <th style={{ width: 90 }}>谁定的</th>
-                    <th style={{ width: 52 }} />
-                  </tr>
-                </thead>
-                <tbody>
-                  {mineShown.length === 0 && !termFilter && (
-                    <tr><td colSpan={5} className="kind">还没有自己定的译法。上面填一行再点加上。</td></tr>
-                  )}
-                  {mineShown.map((term) => {
-                    const key = termKey(term);
-                    return (
-                      <tr key={key} className="row-enter">
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={pickedTerms.has(key)}
-                            onChange={(event) => {
-                              const checked = event.target.checked;
-                              setPickedTerms((prev) => {
-                                const next = new Set(prev);
-                                if (checked) next.add(key);
-                                else next.delete(key);
-                                return next;
-                              });
-                            }}
-                            aria-label={`选中 ${asText(term.source)}`}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={asText(term.source)}
-                            aria-label="术语原文"
-                            onChange={(event) => {
-                              const value = event.target.value;
-                              setTerms((prev) => prev.map((item) => (item === term ? { ...item, source: value } : item)));
-                            }}
-                            onBlur={() => saveTerm(term)}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={asText(term.target)}
-                            aria-label="术语译文"
-                            onChange={(event) => {
-                              const value = event.target.value;
-                              setTerms((prev) => prev.map((item) => (item === term ? { ...item, target: value } : item)));
-                            }}
-                            onBlur={() => saveTerm(term)}
-                          />
-                        </td>
-                        <td>我加的</td>
-                        <td><button type="button" className="tbtn" onClick={() => deleteTerm(term)}>删掉</button></td>
-                      </tr>
-                    );
-                  })}
-                  {builtinShown.map((term) => (
-                    <tr key={termKey(term)} className="locked">
-                      <td />
-                      <td><input type="text" value={asText(term.source)} readOnly aria-label="软件自带原文" /></td>
-                      <td><input type="text" value={asText(term.target)} readOnly aria-label="软件自带译文" /></td>
-                      <td><span className="tag">软件自带</span></td>
-                      <td />
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
+        <GlossaryView
+          terms={terms}
+          builtinTerms={builtinTerms}
+          onBack={leavePage}
+          onAdd={(term) => saveTerm({ ...term, scope: "global" })}
+          onSave={(term) => saveTerm(term, { quiet: true })}
+          onDelete={(term) => deleteTerms([term])}
+          onDeleteMany={deleteTerms}
+          onImport={loadGlossary}
+          onExport={exportTerms}
+        />
       )}
 
       {view === "update" && (
-        <div className="body page-enter">
-          <section className="upd" aria-label="检查更新">
-            <div className="head">
-              <h1>{updating ? "正在更新" : (updateInfo?.available ? "有新版本" : "检查更新")}</h1>
-              <p>
-                {updating
-                  ? (updateMsg || "正在下载更新…")
-                  : (updateInfo?.available
-                    ? `现在是 ${updateInfo.current || appVersion}，可以换成 ${updateInfo.latest}。`
-                    : (updateMsg || "点下面检查。"))}
-              </p>
-            </div>
-            {updating && (
-              <div className="upd-bar" aria-label="下载进度">
-                <span className="bar"><i style={{ width: `${updatePercent}%` }} /></span>
-                <span>{updatePercent}%</span>
-              </div>
-            )}
-            {updateInfo?.available && !updating && (
-              <div className="upd-actions">
-                {updateInfo.can_apply ? (
-                  <button type="button" className="go" onClick={applyUpdate}>
-                    <span className="go-label">现在更新并重启</span>
-                  </button>
-                ) : (
-                  <p className="note">这个版本得下安装包。点下面会用系统浏览器打开 GitHub，不会新开图译窗口。</p>
-                )}
-                <button type="button" className="tbtn ghost" onClick={openReleasePage}>打开 GitHub 发布页</button>
-                <button type="button" className="tbtn" onClick={closePage}>以后再说</button>
-              </div>
-            )}
-            {!updateInfo?.available && !updating && (
-              <div className="upd-actions">
-                <button type="button" className="go" onClick={() => checkUpdates()} disabled={checking}>
-                  <i className="spin" aria-hidden="true" />
-                  <span className="go-label">{checking ? "正在查…" : "再检查一次"}</span>
-                </button>
-                <button type="button" className="tbtn" onClick={closePage}>返回</button>
-              </div>
-            )}
-            {updating && (
-              <div className="upd-actions">
-                <button type="button" className="tbtn danger" onClick={cancelUpdate}>取消这次</button>
-              </div>
-            )}
-          </section>
-        </div>
+        <UpdateView
+          updateInfo={updateInfo}
+          updateMsg={updateMsg}
+          updating={updating}
+          updatePercent={updatePercent}
+          checking={checking}
+          appVersion={appVersion}
+          onBack={leavePage}
+          onCancel={cancelUpdate}
+          onApply={applyUpdate}
+          onCheck={() => checkUpdates()}
+          onOpenRelease={openReleasePage}
+        />
       )}
 
-      <footer className={footBusy ? "foot slim checking" : "foot slim"}>
-        {oda.installed ? (
-          <span className="live">ODA 已安装</span>
-        ) : (
-          <button type="button" className="live missing" onClick={openOdaSettings}>没装 ODA · 点这里</button>
-        )}
-        <span className="sep" aria-hidden="true" />
-        <span className="lang-anchor" ref={langRef}>
-          <button
-            type="button"
-            className={`lang-mini${langOpen ? " on" : ""}`}
-            aria-expanded={langOpen}
-            aria-haspopup="dialog"
-            onClick={() => setLangOpen((open) => !open)}
-          >
-            {langShort(sourceLang)} ⇄ {langShort(targetLang)}
-          </button>
-          {langOpen && (
-            <div className="lang-pop" role="dialog" aria-label="选择语言">
-              <div className="chip-row" aria-label="原文">
-                <span>
-                  原文
-                  <button type="button" className="detect" onClick={detectSource}>检测</button>
-                </span>
-                {LANGS.map(([code, label]) => (
-                  <button
-                    key={`src-${code}`}
-                    type="button"
-                    className={sourceLang === code ? "on" : ""}
-                    disabled={code === targetLang}
-                    onClick={() => pickSource(code)}
-                  >{label}</button>
-                ))}
-              </div>
-              <div className="chip-row" aria-label="译文">
-                <span>译文</span>
-                {LANGS.map(([code, label]) => (
-                  <button
-                    key={`dst-${code}`}
-                    type="button"
-                    className={targetLang === code ? "on" : ""}
-                    disabled={code === sourceLang}
-                    onClick={() => pickTarget(code)}
-                  >{label}</button>
-                ))}
-              </div>
-              <button type="button" className="pop-swap" onClick={swapLangs}>⇄ 对调</button>
-            </div>
-          )}
-        </span>
-        <span className="grow" />
-        {files.length > 1 && (view === "work" || view === "batch") && (
-          <button
-            type="button"
-            className={`tbtn${view === "batch" ? " on" : ""}`}
-            onClick={() => setView(view === "batch" ? "work" : "batch")}
-          >一起译</button>
-        )}
-        <button type="button" className="tbtn ico" disabled={busy || !current} onClick={() => exportPdf(false)}>
-          <Share size={14} strokeWidth={1.5} aria-hidden="true" />导出 PDF
-        </button>
-        <button type="button" className={`tbtn ico${view === "glossary" ? " on" : ""}`} onClick={openGlossary}>
-          <BookOpen size={14} strokeWidth={1.5} aria-hidden="true" />术语管理
-        </button>
-        <button type="button" className={`tbtn ico${view === "settings" ? " on" : ""}`} onClick={openSettings}>
-          <Settings size={14} strokeWidth={1.5} aria-hidden="true" />设置
-        </button>
-        <span className="sep" aria-hidden="true" />
-        <span className="ver">{appVersion ? `v${appVersion}` : ""}</span>
-        <span className="end">
-          <span className="spin" aria-hidden="true" />
-          {updateInfo?.available && view !== "update" && (
-            <button type="button" className="tbtn" onClick={openUpdatePage} disabled={updating}>有新版本</button>
-          )}
-        </span>
-      </footer>
+      <Footer
+        oda={oda}
+        onOdaHelp={() => toggleSettings("wr")}
+        lang={{
+          sourceLang,
+          targetLang,
+          disabled: locked,
+          onSource: (code) => code !== targetLang && changeLangs(code, targetLang),
+          onTarget: (code) => code !== sourceLang && changeLangs(sourceLang, code),
+          onSwap: () => changeLangs(targetLang, sourceLang),
+          onDetect: detectSource,
+        }}
+        view={view}
+        canPdf={Boolean(current) && !busy}
+        pdf={{
+          appearance,
+          paper: pdfPaper,
+          fromWriteback: Boolean(writtenPath),
+          onAppearance: (value) => setPrefs({ appearance: value }),
+          onPaper: (value) => setPrefs({ pdfPaper: value }),
+        }}
+        onExportPdf={exportPdf}
+        onOpenGlossary={toggleGlossary}
+        onOpenSettings={() => toggleSettings()}
+        appVersion={appVersion}
+        footBusy={checking || updating}
+        updateAvailable={Boolean(updateInfo?.available)}
+        updating={updating}
+        onOpenUpdate={() => goPage("update")}
+      />
+
+      <Toasts toasts={toasts} onDismiss={dismiss} />
     </div>
   );
 }

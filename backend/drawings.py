@@ -484,6 +484,32 @@ def _entity_from_handle(doc, handle: str):
         return None
 
 
+def fill_duplicate_targets(items: list[dict]) -> list[dict]:
+    """重复的句子只译一次: give every later copy the first copy's 译文.
+
+    The grid translates one copy of a repeated label; the same label in a second
+    title block must still be written, so empty duplicates inherit the target.
+    """
+    lead: dict[str, dict] = {}
+    for item in items:
+        source = _as_text(item.get("source"))
+        if not item.get("duplicate") and (item.get("target") or "").strip() and source not in lead:
+            lead[source] = item
+    out = []
+    for item in items:
+        source = _as_text(item.get("source"))
+        master = lead.get(source)
+        if item.get("duplicate") and master is not None and not (item.get("target") or "").strip():
+            item = {
+                **item,
+                "target": master.get("target") or "",
+                "target_raw": master.get("target_raw") or master.get("target") or "",
+                "via": master.get("via") or "",
+            }
+        out.append(item)
+    return out
+
+
 def writeback_rows(
     path: str,
     items: list[dict],
@@ -498,6 +524,8 @@ def writeback_rows(
         raise FileNotFoundError("图纸不存在")
     if not items:
         raise ValueError("没有可写回的译文")
+    items = fill_duplicate_targets(items)
+
     def _should_write(item: dict) -> bool:
         if not (item.get("target") or "").strip():
             return False

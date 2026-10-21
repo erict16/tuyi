@@ -19,6 +19,7 @@ from backend.app_meta import (
     migrate_legacy_dir,
     migrate_user_data,
 )
+from tests.frontend_source import ui_css, ui_source
 
 
 class PlatformCompatibilityTests(unittest.TestCase):
@@ -81,8 +82,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("/api/health", launcher)
         self.assertNotIn("server.started", launcher)
         self.assertIn("OPEN_EXTERNAL_LINKS_IN_BROWSER", launcher)
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
-        css = (root / "frontend" / "src" / "App.css").read_text(encoding="utf-8")
+        ui = ui_source()
+        css = ui_css()
         self.assertIn("isMacChrome", ui)
         self.assertIn("hasNativeTitlebar", ui)
         self.assertIn("data-native-titlebar", ui)
@@ -119,11 +120,11 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_translate_button_writes_when_glossary_hits_and_some_rows_are_skipped(self):
         root = Path(__file__).resolve().parents[1]
-        source = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        source = ui_source()
         start = source.index("async function runTranslate")
         body = source[start:source.index("async function writeBack", start)]
         self.assertNotIn("if (data.skipped && !data.has_engine)", body)
-        self.assertIn("writeBackRows(nextRows)", body)
+        self.assertIn("writeBackRows(nextRows", body)
         self.assertIn("asText(row.target).trim()", body)
 
     def test_changelog_leads_with_app_version(self):
@@ -238,7 +239,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("apply_chrome_theme", launch)
         self.assertIn("read_saved_dark", launch)
         self.assertIn("NSRequiresAquaSystemAppearance", (root / "Tuyi_macos.spec").read_text(encoding="utf-8"))
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        ui = ui_source()
         self.assertIn("pywebviewready", ui)
         self.assertIn("windows-latest", ci)
         self.assertIn("macos-latest", ci)
@@ -361,12 +362,12 @@ class PlatformCompatibilityTests(unittest.TestCase):
     def test_cad_picker_is_dwg_dxf_and_multiple(self):
         root = Path(__file__).resolve().parents[1]
         bridge = (root / "desktop" / "native_bridge.py").read_text(encoding="utf-8")
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        ui = ui_source()
         self.assertIn('file_types=("图纸 (*.dwg;*.dxf)",)', bridge)
         self.assertIn("multiple=True", bridge)
         self.assertIn('accept=".dwg,.dxf"', ui)
         self.assertIn("multiple hidden", ui)
-        self.assertIn("onClick={openDrawings}", ui)
+        self.assertIn("onAdd={openDrawings}", ui)
         self.assertIn("添加图纸", ui)
         self.assertIn("className=\"plus\"", ui)
         self.assertIn("rail-go", ui)
@@ -377,8 +378,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_frontend_ui_uses_os_titlebar_not_mac_lights_on_windows(self):
         root = Path(__file__).resolve().parents[1]
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
-        css = (root / "frontend" / "src" / "App.css").read_text(encoding="utf-8")
+        ui = ui_source()
+        css = ui_css()
         launcher = (root / "desktop" / "launcher.py").read_text(encoding="utf-8")
         self.assertIn("frameless=False", launcher)
         self.assertIn("/Win/i.test(platform)", ui)
@@ -398,10 +399,10 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("快速翻译", ui)
         self.assertIn("检测", ui)
         self.assertIn("lang-pop", ui)
-        self.assertIn("openOdaSettings", ui)
+        self.assertIn('onOdaHelp={() => toggleSettings("wr")}', ui)
         self.assertIn("live missing", ui)
         self.assertIn('if (view === "glossary")', ui)
-        self.assertIn("await closePage();", ui)
+        self.assertIn("leavePage();", ui)
         self.assertIn("lucide-react", ui)
         self.assertIn("越南语", ui)
         self.assertIn("disabled={code === targetLang}", ui)
@@ -423,7 +424,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("/api/updates/cancel", ui)
         self.assertIn("检查更新", ui)
         self.assertNotIn(">全部文字", ui)
-        self.assertIn("set-tabs", ui)
+        self.assertIn("set-nav", ui)
         self.assertIn("外观和更新", ui)
         self.assertIn("图上怎么写", ui)
         self.assertIn("调整左右宽度", ui)
