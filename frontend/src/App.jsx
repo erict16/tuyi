@@ -779,6 +779,7 @@ export default function App() {
         }
       } else {
         toast(fromWriteback ? `PDF 已导出（写回图纸）：${fileName(out)}` : `PDF 已导出（原图，还未写回译文）：${fileName(out)}`, "ok", {
+          ttl: 10000,
           action: { label: "在文件夹中显示", onClick: () => reveal(out) },
         });
       }
