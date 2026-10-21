@@ -114,7 +114,7 @@ context_zh_to_en:
   工作分接位置数: number of service tap positions
   工作档位: operating position
   工作负载试验: service duty test
-  工艺: process
+  工艺: Process
   工频电压: power-frequency voltage/ AC voltage test
   布置图: layout drawing
   带手摇把联锁开关的手摇把开孔: Hand-crank access port with interlock switch
@@ -170,10 +170,10 @@ context_zh_to_en:
   旋转角度: Swiveling angle
   日 期: Date
   日期: Date
-  更改文件号: Changes file number
+  更改文件号: Change doc. No.
   有载分接开关: OLTC
   无载分接开关: OCTC
-  无励磁分接开关: OCTC
+  无励磁分接开关: DETC
   有载开关保护: OLTC protective relay
   有载开关顶盖: OLTC head cover
   机座: frame
@@ -264,7 +264,7 @@ context_zh_to_en:
   突发压力继电器: Rapid pressure rise relay
   第 页: Page NO. ( )
   笼型: cage type
-  笼式: cage
+  笼式: cage type
   等电位连线: potential connection
   签字: Signature
   箱门: Enclosure door
@@ -367,7 +367,7 @@ context_zh_to_en:
   驱动机构: drive unit
   高压检测和诊断系统: high-voltage testing and diagnostic system
   鼓型: drum type
-  鼓式: drum
+  鼓式: drum type
   齿轮盒出轴: Gearbox shaft
   齿轮盒座（变压器）: gearbox bracket (transformer)
   （压力释放阀）自我封闭膜: self-sealing diaphragm
