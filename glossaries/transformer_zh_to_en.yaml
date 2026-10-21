@@ -53,7 +53,7 @@ context_zh_to_en:
   密封垫: gasket
   有载分接开关: OLTC
   无载分接开关: OCTC
-  无励磁分接开关: OCTC
+  无励磁分接开关: DETC
   有载调压: on-load tap-changing
   无励磁调压: off-circuit tap-changing
   分接: tapping
@@ -81,13 +81,13 @@ context_zh_to_en:
   绝缘水平: insulation level
   温升: temperature rise
   声级: sound power level
-  总重: total weight
+  总重: Total weight
   油重: oil weight
   器身重: core and winding weight
   运输重: transport weight
   户内: indoor
   户外: outdoor
-  图号: drawing No.
+  图号: Drawing No.
   比例: scale
   日期: date
   设计: drawn
