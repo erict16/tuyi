@@ -1,5 +1,5 @@
 // Pure helpers. No DOM, no fetch, so they stay unit-testable.
-import { LANGS, LATIN_LANGS, LAYOUTS, TASK_STATUS, VIA_LABELS } from "./constants";
+import { LANGS, LATIN_LANGS, LAYOUTS, VIA_LABELS } from "./constants";
 
 export function asText(value) {
   if (value == null) return "";
@@ -248,22 +248,6 @@ export function viaLabel(via) {
   const key = asText(via);
   if (!key) return "";
   return VIA_LABELS[key] || "机翻";
-}
-
-export function taskStatus(status) {
-  return TASK_STATUS[asText(status)] || [asText(status) || "排队", "idle"];
-}
-
-export function batchSummary(tasks) {
-  const list = Array.isArray(tasks) ? tasks : [];
-  const count = (name) => list.filter((task) => task.status === name).length;
-  return {
-    total: list.length,
-    done: count("succeeded"),
-    failed: count("failed"),
-    running: count("running"),
-    queued: count("queued"),
-  };
 }
 
 function csvCell(value) {

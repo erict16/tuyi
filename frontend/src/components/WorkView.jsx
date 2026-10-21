@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { ListFilter, Plus, Save, Search, Table2, X } from "lucide-react";
+import { Ellipsis, Plus, Save, Search, X } from "lucide-react";
 import { asText, fileName, viaLabel } from "../lib/core";
 import { modKey } from "../lib/native";
 import { Banner, Check, Menu, MenuItem } from "./ui";
@@ -23,16 +23,11 @@ export function Notice({ notice, onClose }) {
 function EmptyStart({ onAdd, dropOver }) {
   return (
     <div className="empty start">
-      <button type="button" className={`drop-hero${dropOver ? " over" : ""}`} onClick={onAdd}>
+      <button type="button" className={`drop-hero${dropOver ? " over" : ""}`} onClick={onAdd} aria-label="添加图纸：把 DWG / DXF 拖到这里">
         <span className="plus" aria-hidden="true"><Plus size={26} strokeWidth={1.8} /></span>
         <strong>把 DWG / DXF 拖到这里</strong>
-        <span>或点这里选图纸，一次可以多张（{modKey()}+O）</span>
+        <span>或点这里选图纸（{modKey()}+O）。译好另存新文件，原图不动。</span>
       </button>
-      <ol className="empty-steps">
-        <li><b>1</b>添加图纸</li>
-        <li><b>2</b>点「快速翻译」</li>
-        <li><b>3</b>另存新文件，原图不动</li>
-      </ol>
     </div>
   );
 }
@@ -67,9 +62,9 @@ export default function WorkView({
   onWriteBack,
   onExportTable,
   onImportTable,
+  onWriteBackAll,
 }) {
   const tableRef = useRef(null);
-  const hiddenFilters = FILTER_OPTIONS.filter(([key]) => filters[key]).length;
 
   if (!file) {
     return (
@@ -102,9 +97,7 @@ export default function WorkView({
               <>
                 <span>这张图有 {stats.unique} 句</span>
                 <span className="dot" aria-hidden="true" />
-                <span>显示 {stats.shown}</span>
-                <span className="dot" aria-hidden="true" />
-                <span className={stats.done && stats.done === stats.shown ? "ok" : ""}>已有译文 {stats.done}</span>
+                <span className={stats.done && stats.done === stats.shown ? "ok" : ""}>已译 {stats.done} / {stats.shown}</span>
                 {stats.shown > 0 && <span className="meter" aria-hidden="true"><i style={{ width: `${percent}%` }} /></span>}
               </>
             )}
@@ -118,23 +111,6 @@ export default function WorkView({
               <button type="button" className="icon-btn" aria-label="清空搜索" onClick={() => onQuery("")}><X size={12} aria-hidden="true" /></button>
             )}
           </label>
-          <Menu
-            label={hiddenFilters ? `先别译 ${hiddenFilters}` : "先别译"}
-            icon={<ListFilter size={14} strokeWidth={1.8} aria-hidden="true" />}
-            title="哪些文字先不显示、不翻译"
-          >
-            <div className="menu-pad">
-              <p className="menu-title">这些先别译</p>
-              {FILTER_OPTIONS.map(([key, label, hint]) => (
-                <Check key={key} checked={filters[key]} hint={hint} onChange={(value) => onFilter(key, value)}>{label}</Check>
-              ))}
-            </div>
-          </Menu>
-          <Menu label="表格" icon={<Table2 size={14} strokeWidth={1.8} aria-hidden="true" />} disabled={locked} title="导出给别人改，改好再导回来">
-            <MenuItem onClick={() => onExportTable("xlsx")} hint="给同事改译文">导出 Excel</MenuItem>
-            <MenuItem onClick={() => onExportTable("csv")}>导出表格</MenuItem>
-            <MenuItem onClick={onImportTable} hint="填回译文">导入表格</MenuItem>
-          </Menu>
           <button
             type="button"
             className="tbtn"
@@ -144,6 +120,19 @@ export default function WorkView({
           >
             <Save size={14} strokeWidth={1.8} aria-hidden="true" />写出新文件
           </button>
+          <Menu ariaLabel="更多" title="先别译、表格" className="tbtn icon-only" caret={false} icon={<Ellipsis size={16} strokeWidth={1.8} aria-hidden="true" />}>
+            <div className="menu-pad">
+              <p className="menu-title">先别译</p>
+              {FILTER_OPTIONS.map(([key, label, hint]) => (
+                <Check key={key} checked={filters[key]} hint={hint} onChange={(value) => onFilter(key, value)}>{label}</Check>
+              ))}
+            </div>
+            <div className="menu-sep" />
+            <MenuItem onClick={() => onExportTable("xlsx")} disabled={locked} hint="给同事改译文">导出 Excel</MenuItem>
+            <MenuItem onClick={() => onExportTable("csv")} disabled={locked}>导出表格</MenuItem>
+            <MenuItem onClick={onImportTable} disabled={locked} hint="填回译文">导入表格</MenuItem>
+            {onWriteBackAll && <MenuItem onClick={onWriteBackAll} disabled={locked} hint="按表里的文件名">全部写回</MenuItem>}
+          </Menu>
         </div>
       </div>
 
@@ -155,7 +144,6 @@ export default function WorkView({
             <col style={{ width: 40 }} />
             <col />
             <col />
-            <col style={{ width: 150 }} />
           </colgroup>
           <thead>
             <tr>
@@ -171,19 +159,18 @@ export default function WorkView({
               </th>
               <th>原文</th>
               <th>译文</th>
-              <th>图层 · 类型</th>
             </tr>
           </thead>
           <tbody>
             {loading && !rows.length ? (
               Array.from({ length: 6 }, (_, index) => (
                 <tr key={`sk-${index}`} className="skeleton" aria-hidden="true">
-                  <td /><td><i /></td><td><i /></td><td><i /></td>
+                  <td /><td><i /></td><td><i /></td>
                 </tr>
               ))
             ) : visibleRows.length === 0 ? (
               <tr>
-                <td colSpan={4} className="empty-row">
+                <td colSpan={3} className="empty-row">
                   {query ? `没有找到「${query}」。` : rows.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。"}
                 </td>
               </tr>
@@ -228,10 +215,6 @@ export default function WorkView({
                       aria-label="译文"
                     />
                     {via && <span className={`via via-${row.via}`}>{via}</span>}
-                  </td>
-                  <td className="kind" title={`${asText(row.layer) || "0"} · ${asText(row.type)}`}>
-                    <span>{asText(row.layer) || "0"}</span>
-                    <span className="kind-type">{asText(row.type)}</span>
                   </td>
                 </tr>
               );

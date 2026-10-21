@@ -203,8 +203,6 @@ export default function SettingsView({
                     <button type="button" className="tbtn sm" onClick={onPickOutputDir}><FolderOpen size={12} aria-hidden="true" />选取文件夹</button>
                   </span>
                 </Field>
-                <Check checked={params.tree} title="输出目录按原来的文件夹一层层放" onChange={(value) => onParam("tree", value)}>按原来的文件夹放（一起译时）</Check>
-                <Check checked={params.odaDxf} title="没有 ODA 时，写不出 DWG 就改成 DXF" onChange={(value) => onParam("odaDxf", value)}>打不开 DWG 时改存成 DXF</Check>
               </div>
               <h2>导出 PDF</h2>
               <div className="card">

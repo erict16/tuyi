@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   asCount,
   asText,
-  batchSummary,
   carryTargets,
   editRow,
   engineFromConfig,
@@ -20,7 +19,6 @@ import {
   shortPath,
   sourceCounts,
   syncDuplicates,
-  taskStatus,
   termsCsv,
   tickRepeats,
   toggleRow,
@@ -203,19 +201,6 @@ describe("rows", () => {
     expect(viaLabel("edit")).toBe("手改");
     expect(viaLabel("deepl")).toBe("机翻");
     expect(viaLabel("")).toBe("");
-  });
-});
-
-describe("batch", () => {
-  it("speaks Chinese for queue states", () => {
-    expect(taskStatus("succeeded")[0]).toBe("已写出");
-    expect(taskStatus("failed")).toEqual(["没译成", "bad"]);
-    expect(taskStatus("weird")[0]).toBe("weird");
-  });
-
-  it("sums the queue", () => {
-    expect(batchSummary([{ status: "succeeded" }, { status: "failed" }, { status: "queued" }])).toMatchObject({ total: 3, done: 1, failed: 1, queued: 1 });
-    expect(batchSummary(null).total).toBe(0);
   });
 });
 

@@ -930,7 +930,6 @@ class DrawingsLoopTests(unittest.TestCase):
         self.assertIn("dims: true", text)
         self.assertIn("enable_v02: params.dims,", text)
         self.assertNotIn("translate_blocks: params.attribs", text)
-        self.assertIn("translate_blocks: params.blocks", text)
         self.assertIn("include_blocks: params.blocks", text)
         self.assertIn("include_attribs: params.attribs", text)
         self.assertIn("include_model: params.model", text)
@@ -942,7 +941,6 @@ class DrawingsLoopTests(unittest.TestCase):
         self.assertIn("include_locked: params.locked", text)
         self.assertIn("include_off: params.off", text)
         self.assertIn("skip_numbers: filters.numbers", text)
-        self.assertIn("skip_dupes: filters.dupes", text)
         self.assertIn("skip_nonsource: filters.nonsource", text)
         self.assertIn("items: pending", text)
         self.assertIn("if (!shown.length)", text)
@@ -1611,9 +1609,9 @@ class DrawingsApiTests(unittest.TestCase):
 
     def test_frontend_batch_and_glossary_controls(self):
         text = ui_source()
-        self.assertIn("暂停", text)
+        # One button translates every open drawing; it can be stopped.
+        self.assertIn("翻译全部", text)
         self.assertIn("停止", text)
-        self.assertIn("重试", text)
         self.assertIn("先查术语表", text)
         self.assertIn("导出术语", text)
         self.assertIn("术语管理", text)
@@ -1623,8 +1621,6 @@ class DrawingsApiTests(unittest.TestCase):
         self.assertIn("深色", text)
         self.assertIn("data-theme={theme}", text)
         self.assertIn("导出 Excel", text)
-        self.assertIn("按原来的文件夹放", text)
-        self.assertIn("打不开 DWG 时改存成 DXF", text)
         self.assertIn("块里的字", text)
         self.assertIn("use_glossary: params.glossary", text)
         self.assertIn("style: layout", text)

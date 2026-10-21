@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FilePlus2 } from "lucide-react";
 import "./App.css";
-import BatchView from "./components/BatchView";
 import Footer from "./components/Footer";
 import GlossaryView from "./components/GlossaryView";
 import Rail from "./components/Rail";
@@ -92,8 +91,7 @@ export default function App() {
   const [probe, setProbe] = useState({ busy: false, text: "", ok: false });
   const [oda, setOda] = useState({ installed: false, path: "" });
   const [terms, setTerms] = useState([]);
-  const [builtinTerms, setBuiltinTerms] = useState([]);
-  const [batch, setBatch] = useState({ tasks: [], started: false, paused: false, progress: 0 });
+  const [runAll, setRunAll] = useState(null);
   const [table, setTable] = useState(null);
 
   const [appVersion, setAppVersion] = useState("");
@@ -113,7 +111,8 @@ export default function App() {
   const pageReturn = useRef("work");
   const configLoaded = useRef(false);
   const dragDepth = useRef(0);
-  const batchNoticeKey = useRef("");
+  const stopAll = useRef(false);
+  const currentRef = useRef("");
   const stale = useRef(new Set());
 
   const mode = modeKey(sourceLang, targetLang);
@@ -147,6 +146,10 @@ export default function App() {
     });
   }, [current]);
 
+  useEffect(() => {
+    currentRef.current = current;
+  }, [current]);
+
   // ---------- theme, rail width ----------
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -165,7 +168,6 @@ export default function App() {
   const refreshAssets = useCallback(async () => {
     const assets = await api("/api/language-assets");
     setTerms(Array.isArray(assets.terms) ? assets.terms : []);
-    setBuiltinTerms(Array.isArray(assets.builtin_terms) ? assets.builtin_terms : []);
   }, []);
 
   useEffect(() => {
@@ -216,7 +218,6 @@ export default function App() {
     setRows(DEMO_ROWS);
     setOda({ installed: true, path: "" });
     setAppVersion("demo");
-    if (shot === "export") setView("batch");
     if (shot === "params") setView("settings");
     if (shot === "glossary") setView("glossary");
   }, []);
@@ -309,7 +310,7 @@ export default function App() {
 
   // ---------- pages ----------
   function goPage(next) {
-    if (view === "work" || view === "batch") pageReturn.current = view;
+    if (view === "work") pageReturn.current = view;
     if (next === "settings" && view !== "settings") extractSnap.current = extractKey(params);
     setView(next);
   }
@@ -347,48 +348,66 @@ export default function App() {
   }
 
   // ---------- drawings ----------
-  async function extractFile(path, { keep = null, langs = null } = {}) {
-    const seq = extractSeq.current + 1;
-    extractSeq.current = seq;
+  function selectFile(path) {
+    currentRef.current = path;
+    setCurrent(path);
+    setQuery("");
+  }
+
+  function showRows(path, items) {
+    if (currentRef.current === path) setRows(items);
+  }
+
+  // Read a drawing's text into the cache. Throws on a drawing that cannot be read.
+  async function readRows(path, { keep = null, langs = null } = {}) {
     const src = langs?.[0] || sourceLang;
     const dst = langs?.[1] || targetLang;
-    setBusy("extract");
-    setRows([]);
     patchFile(path, { status: "extracting", notice: null });
+    const data = await api("/api/drawings/extract", {
+      json: {
+        path,
+        include_blocks: params.blocks,
+        include_attribs: params.attribs,
+        include_model: params.model,
+        include_paper: params.paper,
+        include_frozen: params.frozen,
+        include_locked: params.locked,
+        include_off: params.off,
+        enable_v02: params.dims,
+        // Filters only hide rows on screen. Every copy stays so it can be written.
+        skip_numbers: false,
+        skip_dupes: false,
+        skip_nonsource: false,
+        translation_mode: modeKey(src, dst),
+      },
+    });
+    const items = carryTargets(tickRepeats(Array.isArray(data.items) ? data.items : []), keep);
+    stale.current.delete(path);
+    sheets.current.set(path, items);
+    patchFile(path, { status: "" });
+    if (!items.length) say(path, "info", "这张图没有可译文字。");
+    return items;
+  }
+
+  function readFailed(path, error) {
+    const dwgNoOda = /\.dwg$/i.test(path) && !oda.installed;
+    patchFile(path, { status: "error" });
+    say(path, "error", error.message, dwgNoOda ? {
+      actions: [{ label: "怎么装 ODA", onClick: () => toggleSettings("wr") }],
+    } : {});
+  }
+
+  async function extractFile(path, options = {}) {
+    const seq = extractSeq.current + 1;
+    extractSeq.current = seq;
+    setBusy("extract");
+    if (currentRef.current === path) setRows([]);
     try {
-      const data = await api("/api/drawings/extract", {
-        json: {
-          path,
-          include_blocks: params.blocks,
-          include_attribs: params.attribs,
-          include_model: params.model,
-          include_paper: params.paper,
-          include_frozen: params.frozen,
-          include_locked: params.locked,
-          include_off: params.off,
-          enable_v02: params.dims,
-          // Filters only hide rows on screen. Every copy stays so it can be written.
-          skip_numbers: false,
-          skip_dupes: false,
-          skip_nonsource: false,
-          translation_mode: modeKey(src, dst),
-        },
-      });
-      if (seq !== extractSeq.current) return [];
-      const items = carryTargets(tickRepeats(Array.isArray(data.items) ? data.items : []), keep);
-      stale.current.delete(path);
-      sheets.current.set(path, items);
-      setRows(items);
-      patchFile(path, { status: "" });
-      if (!items.length) say(path, "info", "这张图没有可译文字。");
+      const items = await readRows(path, options);
+      if (seq === extractSeq.current) showRows(path, items);
       return items;
     } catch (error) {
-      if (seq !== extractSeq.current) return [];
-      const dwgNoOda = /\.dwg$/i.test(path) && !oda.installed;
-      patchFile(path, { status: "error" });
-      say(path, "error", error.message, dwgNoOda ? {
-        actions: [{ label: "怎么装 ODA", onClick: () => toggleSettings("wr") }],
-      } : {});
+      if (seq === extractSeq.current) readFailed(path, error);
       return [];
     } finally {
       if (seq === extractSeq.current) setBusy("");
@@ -405,11 +424,8 @@ export default function App() {
       return;
     }
     if (added.length > 1) toast(`加了 ${added.length} 张图纸`, "ok");
-    if (!current || view === "work") {
-      setCurrent(added[0].path);
-      setQuery("");
-      await extractFile(added[0].path);
-    }
+    selectFile(added[0].path);
+    await extractFile(added[0].path);
   }
 
   async function uploadAndAdd(list) {
@@ -449,17 +465,12 @@ export default function App() {
   }
 
   function pickDrawing(path) {
-    if (path === current) {
-      if (view !== "work") setView("work");
-      return;
-    }
+    if (path === current) return;
     if (locked) {
-      toast("等这张译完再换。", "warn");
+      toast("等译完再换。", "warn");
       return;
     }
-    setCurrent(path);
-    setQuery("");
-    if (view !== "work") setView("work");
+    selectFile(path);
     openCached(path);
   }
 
@@ -471,8 +482,8 @@ export default function App() {
   }
 
   async function removeDrawing(path) {
-    if (locked && path === current) {
-      toast("等这张译完再去掉。", "warn");
+    if (locked) {
+      toast("等译完再去掉。", "warn");
       return;
     }
     const index = files.findIndex((file) => file.path === path);
@@ -488,40 +499,35 @@ export default function App() {
     if (current === path) {
       const neighbour = next[Math.min(index, next.length - 1)];
       if (neighbour) {
-        setCurrent(neighbour.path);
+        selectFile(neighbour.path);
         openCached(neighbour.path);
       } else {
-        setCurrent("");
+        selectFile("");
         setRows([]);
-        if (view === "batch") setView("work");
       }
     }
     try {
       await api("/api/drawings/close", { json: { path } });
     } catch {
-      /* queue already dropped it */
+      /* already gone */
     }
   }
 
   // ---------- translate + write ----------
-  async function runTranslate() {
-    if (!current) {
-      say("", "info", "先打开图纸。");
-      return;
-    }
-    if (locked) return;
-    const shown = filterRows(rows, filters, sourceLang);
+  // Translate what is still empty in one drawing, then write its new file.
+  // Returns { state: "written" | "empty" | "needs_engine" | "error" }.
+  async function translateFile(path, list) {
+    const shown = filterRows(list, filters, sourceLang);
     if (!shown.length) {
-      say(current, "info", rows.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。");
-      return;
+      say(path, "info", list.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。");
+      return { state: "empty" };
     }
     const pending = shown.filter((row) => row.selected !== false && !asText(row.target).trim());
-    let nextRows = rows;
+    let next = list;
     let summary = "";
     if (pending.length) {
-      setBusy("translate");
-      patchFile(current, { status: "translating" });
-      say(current, "busy", `正在译 ${pending.length} 句…`);
+      patchFile(path, { status: "translating" });
+      say(path, "busy", `正在译 ${pending.length} 句…`);
       try {
         const data = await api("/api/drawings/translate", {
           json: {
@@ -534,58 +540,46 @@ export default function App() {
             ...enginePayload(engine, config),
           },
         });
-        nextRows = mergeTranslated(rows, Array.isArray(data.items) ? data.items : []);
-        updateRows(() => nextRows);
+        next = mergeTranslated(list, Array.isArray(data.items) ? data.items : []);
+        sheets.current.set(path, next);
+        showRows(path, next);
         const bits = [`术语对上 ${asCount(data.glossary)}`];
         if (asCount(data.mt)) bits.push(`${engine === "cloud" ? "网上" : "接口"}译了 ${asCount(data.mt)}`);
         if (asCount(data.skipped)) bits.push(`未译 ${asCount(data.skipped)}`);
         summary = bits.join("，");
-        if (!hasWritable(nextRows)) {
+        if (!hasWritable(next)) {
           const hint = engine === "local"
             ? "请先启动 Ollama。"
             : engine === "custom"
               ? "无法连接自定义接口。"
               : "剩下的要填网上翻译的密钥，或手填译文。";
-          patchFile(current, { status: "" });
-          say(current, "warn", `${summary}。${hint}`, {
+          patchFile(path, { status: "" });
+          say(path, "warn", `${summary}。${hint}`, {
             actions: data.has_engine ? [] : [{ label: "去填密钥", primary: true, onClick: () => toggleSettings("tr") }],
           });
-          setBusy("");
-          return;
+          return { state: "needs_engine" };
         }
         if (asCount(data.skipped) && !data.has_engine) summary += "。没对上的先留原文，可以手填后再写出";
       } catch (error) {
-        patchFile(current, { status: "error" });
-        say(current, "error", error.message);
-        setBusy("");
-        return;
+        patchFile(path, { status: "error" });
+        say(path, "error", error.message);
+        return { state: "error" };
       }
     }
-    await writeBackRows(nextRows, summary);
+    return writeFile(path, next, summary);
   }
 
-  async function writeBack() {
-    if (locked) return;
-    await writeBackRows(rows, "");
-  }
-
-  async function writeBackRows(list, summary) {
-    if (!current) {
-      say("", "info", "先打开图纸。");
-      return;
-    }
+  async function writeFile(path, list, summary) {
     const items = writePayload(Array.isArray(list) ? list : []);
     if (!hasWritable(items)) {
-      say(current, "info", "没有可写回的译文。先点翻译，或手填译文。");
-      return;
+      say(path, "info", "没有可写回的译文。先点翻译，或手填译文。");
+      return { state: "empty" };
     }
-    const path = current;
-    setBusy("write");
     patchFile(path, { status: "writing" });
     say(path, "busy", "正在写出新文件…");
     try {
       const named = await api(
-        `/api/default-output-name?mode=${encodeURIComponent(mode)}&base=${encodeURIComponent(outputStem(selected?.name))}&translate_filename=${params.filename ? "true" : "false"}`
+        `/api/default-output-name?mode=${encodeURIComponent(mode)}&base=${encodeURIComponent(outputStem(fileName(path)))}&translate_filename=${params.filename ? "true" : "false"}`
       );
       const data = await api("/api/drawings/writeback", {
         json: {
@@ -604,13 +598,83 @@ export default function App() {
       patchFile(path, { status: "written", output: out });
       say(path, "ok", `${summary ? `${summary}。` : ""}已写出新文件，写了 ${asCount(data.written)} 句${missing}。`, {
         path: out,
-        actions: [
-          { label: "在文件夹中显示", onClick: () => reveal(out) },
-        ],
+        actions: [{ label: "在文件夹中显示", onClick: () => reveal(out) }],
       });
+      return { state: "written", path: out };
     } catch (error) {
       patchFile(path, { status: "error" });
       say(path, "error", error.message);
+      return { state: "error" };
+    }
+  }
+
+  // One button: the drawing on screen, or every open drawing when there are several.
+  async function runTranslate() {
+    if (!current) {
+      say("", "info", "先打开图纸。");
+      return;
+    }
+    if (locked) return;
+    if (files.length > 1) {
+      await translateAll();
+      return;
+    }
+    setBusy("translate");
+    try {
+      await translateFile(current, rows);
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function translateAll() {
+    stopAll.current = false;
+    setBusy("translate");
+    const queue = [...files];
+    const done = [];
+    const failed = [];
+    let stopped = false;
+    try {
+      for (let index = 0; index < queue.length; index += 1) {
+        if (stopAll.current) {
+          stopped = true;
+          break;
+        }
+        const file = queue[index];
+        setRunAll({ index: index + 1, total: queue.length, name: file.name });
+        selectFile(file.path);
+        let list = sheets.current.get(file.path);
+        if (!list || stale.current.has(file.path)) {
+          if (currentRef.current === file.path) setRows([]);
+          try {
+            list = await readRows(file.path, { keep: list });
+          } catch (error) {
+            readFailed(file.path, error);
+            failed.push(file.name);
+            continue;
+          }
+        }
+        showRows(file.path, list);
+        const result = await translateFile(file.path, list);
+        if (result.state === "written") done.push(file.name);
+        else if (result.state !== "empty") failed.push(file.name);
+      }
+    } finally {
+      setBusy("");
+      setRunAll(null);
+    }
+    if (stopped) toast(`已停止，写好 ${done.length} 张。`, "warn");
+    else if (failed.length) toast(`写好 ${done.length} 张，${failed.length} 张没写成。点左边的图纸看原因。`, "warn", { ttl: 9000 });
+    else if (done.length) toast(done.length > 1 ? `${done.length} 张都写好了。` : "写好了。", "ok", {
+      action: { label: "在文件夹中显示", onClick: () => reveal(fileState[queue[queue.length - 1].path]?.output || "") },
+    });
+  }
+
+  async function writeBack() {
+    if (locked || !current) return;
+    setBusy("write");
+    try {
+      await writeFile(current, rows, "");
     } finally {
       setBusy("");
     }
@@ -688,10 +752,6 @@ export default function App() {
 
   async function applyTable(next) {
     setTable(next);
-    if (view === "batch") {
-      toast(`已导入 ${next.name}。点「全部写回」写进每张图。`, "ok");
-      return;
-    }
     let items = rows;
     if (!items.length && current) items = await extractFile(current);
     if (!items.length) {
@@ -779,114 +839,6 @@ export default function App() {
       toast(error.message, "error");
     } finally {
       setBusy("");
-    }
-  }
-
-  // ---------- batch ----------
-  const batchWasRunning = useRef(false);
-  const refreshBatch = useCallback(async () => {
-    try {
-      const data = await api("/api/batch");
-      setBatch(data);
-      if (batchWasRunning.current && !data.started) {
-        const tasks = data.tasks || [];
-        const done = tasks.filter((task) => task.status === "succeeded");
-        const failed = tasks.filter((task) => task.status === "failed").length;
-        const stopped = tasks.some((task) => task.status === "cancelled" || task.status === "queued");
-        const last = done[done.length - 1]?.output_file;
-        const text = stopped
-          ? `已停止：写出 ${done.length} 张。`
-          : failed
-            ? `译完了：写出 ${done.length} 张，${failed} 张没译成，可以点重试。`
-            : `全部译完，写出 ${done.length} 张新图纸。`;
-        say(batchNoticeKey.current, failed || stopped ? "warn" : "ok", text, last ? {
-          actions: [{ label: "在文件夹中显示", onClick: () => reveal(last) }],
-        } : {});
-      }
-      batchWasRunning.current = Boolean(data.started);
-      (data.tasks || []).forEach((task) => {
-        if (task.status === "succeeded" && task.output_file) {
-          setFileState((prev) => (prev[task.input_file]?.output === task.output_file ? prev : {
-            ...prev,
-            [task.input_file]: { ...(prev[task.input_file] || {}), status: "written", output: task.output_file },
-          }));
-        }
-      });
-    } catch { /* next tick */ }
-  }, [say]);
-
-  useEffect(() => {
-    if (view !== "batch") return undefined;
-    refreshBatch();
-    const timer = setInterval(refreshBatch, 1200);
-    return () => clearInterval(timer);
-  }, [view, refreshBatch]);
-
-  async function startExport() {
-    const paths = files.map((item) => item.path);
-    if (!paths.length) {
-      say("", "info", "先打开图纸。");
-      return;
-    }
-    try {
-      // Drop leftovers from an earlier session that are no longer in the list.
-      const wanted = new Set(paths);
-      for (const task of batch.tasks || []) {
-        if (!wanted.has(task.input_file) && task.status !== "running") {
-          await api(`/api/batch/${task.id}/remove`, { method: "POST" }).catch(() => {});
-        }
-      }
-      await api("/api/batch/add", { json: { files: paths } });
-      const started = await api("/api/batch/start", {
-        json: {
-          output_dir: config.output_dir,
-          translation_mode: mode,
-          translate_blocks: params.blocks,
-          include_attribs: params.attribs,
-          enable_v02: params.dims,
-          include_model: params.model,
-          include_paper: params.paper,
-          include_frozen: params.frozen,
-          include_locked: params.locked,
-          include_off: params.off,
-          skip_numbers: filters.numbers,
-          skip_dupes: filters.dupes,
-          skip_nonsource: filters.nonsource,
-          translate_filename: params.filename,
-          use_glossary: params.glossary,
-          preserve_tree: params.tree,
-          oda_fallback_dxf: params.odaDxf,
-          output_format: "source",
-          style: layout,
-          ...enginePayload(engine, config),
-        },
-      });
-      setBatch(started);
-      batchWasRunning.current = Boolean(started.started);
-      batchNoticeKey.current = current || "";
-      say(batchNoticeKey.current, "busy", started.message || "正在一起译。可以先去做别的，译完会在这里显示。");
-    } catch (error) {
-      toast(error.message, "error");
-    }
-  }
-
-  async function batchCall(path, message, tone = "info") {
-    try {
-      const data = await api(path, { method: "POST" });
-      setBatch(data);
-      if (message) toast(message, tone);
-    } catch (error) {
-      toast(error.message, "error");
-    }
-  }
-
-  async function pauseExport(paused) {
-    try {
-      const data = await api("/api/batch/pause", { json: { paused } });
-      setBatch(data);
-      toast(paused ? "已暂停。" : "继续导出。");
-    } catch (error) {
-      toast(error.message, "error");
     }
   }
 
@@ -1102,7 +1054,7 @@ export default function App() {
     if (kind === "max") native?.toggle_maximize?.();
   }
 
-  const onWorkPage = view === "work" || view === "batch";
+  const onWorkPage = view === "work";
 
   return (
     <div
@@ -1135,20 +1087,21 @@ export default function App() {
 
       {onWorkPage && (
         <div className="body page-enter">
+          {files.length > 0 && <>
           <div className="rail-wrap" style={{ width: railW }}>
             <Rail
               files={files}
               current={current}
               fileState={fileState}
               locked={locked}
-              view={view}
               translating={translating || busy === "write"}
+              runAll={runAll}
               canTranslate={Boolean(current) && !locked}
               onAdd={openDrawings}
               onPick={pickDrawing}
               onRemove={removeDrawing}
-              onTranslate={view === "work" ? runTranslate : null}
-              onToggleBatch={() => setView(view === "batch" ? "work" : "batch")}
+              onTranslate={runTranslate}
+              onStop={() => { stopAll.current = true; }}
             />
           </div>
           <div
@@ -1172,7 +1125,7 @@ export default function App() {
               window.addEventListener("pointerup", up);
             }}
           />
-          {view === "work" ? (
+          </>}
             <WorkView
               file={selected}
               rows={rows}
@@ -1203,34 +1156,8 @@ export default function App() {
               onWriteBack={writeBack}
               onExportTable={exportTable}
               onImportTable={importTable}
+              onWriteBackAll={files.length > 1 ? writeBackAll : null}
             />
-          ) : (
-            <BatchView
-              files={files}
-              batch={batch}
-              layout={layout}
-              onLayout={(value) => setPrefs({ layout: value })}
-              outputDir={asText(config.output_dir)}
-              onPickOutputDir={pickOutputDir}
-              params={params}
-              onParam={setParam}
-              filters={filters}
-              onFilter={setFilter}
-              notice={notice}
-              onCloseNotice={() => say(current, "", "")}
-              busy={Boolean(busy)}
-              tableName={table?.name || ""}
-              onStart={startExport}
-              onPause={pauseExport}
-              onStop={() => batchCall("/api/batch/stop", "已停止。")}
-              onClear={() => batchCall("/api/batch/clear", "列表清空了。")}
-              onRetry={(id) => batchCall(`/api/batch/${id}/retry`, "已重新排队。")}
-              onRemoveTask={(id) => batchCall(`/api/batch/${id}/remove`, "")}
-              onImportTable={importTable}
-              onWriteBackAll={writeBackAll}
-              onReveal={reveal}
-            />
-          )}
           {dropOver && (
             <div className="drop-veil" aria-hidden="true">
               <div><FilePlus2 size={34} strokeWidth={1.5} /><strong>松手就加进来</strong><span>DWG、DXF，一次可以多张</span></div>
@@ -1281,7 +1208,6 @@ export default function App() {
       {view === "glossary" && (
         <GlossaryView
           terms={terms}
-          builtinTerms={builtinTerms}
           onBack={leavePage}
           onAdd={(term) => saveTerm({ ...term, scope: "global" })}
           onSave={(term) => saveTerm(term, { quiet: true })}
@@ -1322,6 +1248,7 @@ export default function App() {
         }}
         view={view}
         canPdf={Boolean(current) && !busy}
+        hasFile={Boolean(current)}
         pdf={{
           appearance,
           paper: pdfPaper,

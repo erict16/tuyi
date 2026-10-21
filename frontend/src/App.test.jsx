@@ -21,7 +21,10 @@ describe("work view", () => {
     fakeBackend();
     render(<App />);
     expect(screen.getByText("把 DWG / DXF 拖到这里")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /快速翻译/ })).toBeDisabled();
+    // One drop target, nothing greyed out: no rail, no translate button, no PDF yet.
+    expect(screen.getAllByRole("button", { name: /添加图纸/ })).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: /快速翻译/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /导出 PDF/ })).not.toBeInTheDocument();
     await screen.findByText("ODA 已安装");
     await screen.findByText("v9.9.9");
   });
@@ -178,7 +181,7 @@ describe("work view", () => {
     const user = userEvent.setup();
     render(<App />);
     await openFloorPlan(user, backend);
-    await user.click(screen.getByRole("button", { name: /先别译 3/ }));
+    await user.click(screen.getByRole("button", { name: "更多" }));
     await user.click(screen.getByRole("checkbox", { name: /^数字、尺寸/ }));
     expect(screen.queryByText("1200")).not.toBeInTheDocument();
     await user.click(screen.getByRole("checkbox", { name: /^已经是外文的/ }));
@@ -353,17 +356,16 @@ describe("glossary", () => {
     await screen.findByText("还没有自己定的译法。上面填一行再点加上。");
   });
 
-  it("lists built-in terms on demand and searches them", async () => {
+  it("does not list the built-in vocabulary", async () => {
     fakeBackend();
     fakeNative();
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: /术语管理/ }));
+    await screen.findByText("还没有自己定的译法。上面填一行再点加上。");
     expect(screen.queryByText("grounding")).not.toBeInTheDocument();
-    await user.click(await screen.findByRole("button", { name: /软件自带 1 条/ }));
-    expect(screen.getByText("grounding")).toBeInTheDocument();
-    await user.type(screen.getByRole("searchbox", { name: "搜译法" }), "不存在");
-    expect(screen.queryByText("grounding")).not.toBeInTheDocument();
+    expect(screen.queryByText(/软件自带/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("searchbox", { name: "搜译法" })).not.toBeInTheDocument();
   });
 
   it("exports terms as a CSV through the native dialog", async () => {
@@ -379,41 +381,60 @@ describe("glossary", () => {
   });
 });
 
-describe("batch", () => {
-  it("drops leftovers, starts the queue and speaks Chinese", async () => {
+describe("translate all", () => {
+  function twoDrawings(extra = {}) {
+    return fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }), ...extra });
+  }
+
+  it("one button translates every open drawing and writes each one", async () => {
     const backend = fakeBackend();
-    backend.state.batch.tasks = [{ id: "old", input_file: "/gone/junk.dxf", status: "failed", progress: 0, message: "图纸不存在" }];
-    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    twoDrawings();
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: /添加图纸/ }));
-    await screen.findByRole("heading", { name: "floor.dxf" });
-    await user.click(screen.getByRole("button", { name: /一起译 2 张/ }));
-    expect(await screen.findByText("junk.dxf")).toBeInTheDocument();
-    expect(screen.getByText("没译成")).toBeInTheDocument();
+    await screen.findByText("天花图");
+    expect(screen.queryByRole("button", { name: /快速翻译/ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /翻译全部 2 张/ }));
+    await screen.findByText("2 张都写好了。");
+    const written = backend.called("POST", "/api/drawings/writeback").map((call) => call.body.input_file);
+    expect(written).toEqual(["/d/floor.dxf", "/d/second.dxf"]);
+    expect(within(screen.getByRole("listbox")).getAllByText("已写出")).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "second.dxf" })).toBeInTheDocument();
+  });
 
-    await user.click(screen.getByRole("button", { name: /快速翻译这几张/ }));
-    await waitFor(() => expect(backend.called("POST", "/api/batch/start")).toHaveLength(1));
-    expect(backend.called("POST", "/api/batch/old/remove")).toHaveLength(1);
-    expect(backend.last("POST", "/api/batch/add").body.files).toEqual(["/d/floor.dxf", "/d/second.dxf"]);
-    expect(backend.last("POST", "/api/batch/start").body).toMatchObject({ style: "纯译文", translation_mode: "zh_to_en", output_format: "source" });
-    expect(await screen.findByRole("button", { name: /暂停/ })).toBeInTheDocument();
+  it("keeps going past a drawing that cannot be read", async () => {
+    const backend = fakeBackend();
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/broken.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: /翻译全部 3 张/ }));
+    await screen.findByText(/写好 2 张，1 张没写成/);
+    expect(backend.called("POST", "/api/drawings/writeback")).toHaveLength(2);
+    expect(within(screen.getByRole("listbox")).getByText("出错了")).toBeInTheDocument();
+  });
 
-    await act(async () => {
-      backend.state.batch = {
-        started: false,
-        paused: false,
-        progress: 100,
-        tasks: [
-          { id: "task-0", input_file: "/d/floor.dxf", status: "succeeded", progress: 100, output_file: "/out/en_floor.dxf" },
-          { id: "task-1", input_file: "/d/second.dxf", status: "failed", progress: 0, message: "翻译失败" },
-        ],
-      };
-      await new Promise((resolve) => setTimeout(resolve, 1400));
+  it("stop finishes the current drawing and leaves the rest", async () => {
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const backend = fakeBackend({
+      "POST /api/drawings/translate": async (body) => {
+        await gate;
+        return { items: body.items.map((item) => ({ ...item, target: "x", via: "glossary" })), glossary: body.items.length, mt: 0, skipped: 0, has_engine: false };
+      },
     });
-    await screen.findByText(/写出 1 张，1 张没译成/);
-    expect(screen.getByRole("button", { name: /重试/ })).toBeInTheDocument();
-    expect(within(screen.getByRole("listbox")).getByText("已写出")).toBeInTheDocument();
+    twoDrawings();
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: /翻译全部 2 张/ }));
+    expect(await screen.findByText(/正在译第 1 \/ 2 张/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "停止" }));
+    release();
+    await screen.findByText("已停止，写好 1 张。");
+    expect(backend.called("POST", "/api/drawings/writeback")).toHaveLength(1);
   });
 });
 
@@ -443,20 +464,6 @@ describe("review regressions", () => {
     await user.type(screen.getByLabelText("DeepL 密钥"), "k");
     await new Promise((resolve) => setTimeout(resolve, 700));
     expect(backend.called("POST", "/api/config")).toHaveLength(0);
-  });
-
-  it("gets back from 一起译 after the list shrinks to one drawing", async () => {
-    fakeBackend();
-    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
-    const user = userEvent.setup();
-    render(<App />);
-    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
-    await screen.findByRole("heading", { name: "floor.dxf" });
-    await user.click(screen.getByRole("button", { name: /一起译 2 张/ }));
-    await user.click(screen.getByRole("button", { name: "从队列去掉 second.dxf" }));
-    expect(screen.getByRole("button", { name: /回到单张/ })).toBeInTheDocument();
-    await user.click(screen.getByRole("option", { name: /floor\.dxf/ }));
-    expect(await screen.findByRole("heading", { name: "floor.dxf" })).toBeInTheDocument();
   });
 
   it("re-reads after scan options change even when 设置 is left via 术语管理", async () => {
@@ -498,7 +505,7 @@ describe("review regressions", () => {
     const user = userEvent.setup();
     render(<App />);
     await openFloorPlan(user, backend);
-    await user.click(screen.getByRole("button", { name: /先别译 3/ }));
+    await user.click(screen.getByRole("button", { name: "更多" }));
     await user.click(screen.getByRole("checkbox", { name: /^重复的句子/ }));
     await user.keyboard("{Escape}");
     const ticks = screen.getAllByRole("checkbox", { name: /翻译这一句：平面布置图/ });

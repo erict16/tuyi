@@ -56,8 +56,6 @@ export const DEFAULT_PARAMS = {
   filename: true,
   glossary: true,
   blocks: true,
-  tree: true,
-  odaDxf: true,
 };
 
 export const DEFAULT_PREFS = {
@@ -68,16 +66,6 @@ export const DEFAULT_PREFS = {
   pdfPaper: "a4",
   filters: DEFAULT_FILTERS,
   params: DEFAULT_PARAMS,
-};
-
-// Queue status → what the user reads.
-export const TASK_STATUS = {
-  queued: ["排队", "idle"],
-  running: ["正在译", "run"],
-  succeeded: ["已写出", "ok"],
-  failed: ["没译成", "bad"],
-  cancelled: ["已停止", "idle"],
-  paused: ["已暂停", "idle"],
 };
 
 // Where a row's 译文 came from.

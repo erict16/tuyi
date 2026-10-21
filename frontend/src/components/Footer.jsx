@@ -67,6 +67,7 @@ export default function Footer({
   lang,
   view,
   canPdf,
+  hasFile,
   pdf,
   onExportPdf,
   onOpenGlossary,
@@ -87,7 +88,7 @@ export default function Footer({
       <span className="sep" aria-hidden="true" />
       <LangPicker {...lang} />
       <span className="grow" />
-      <Menu
+      {hasFile && <Menu
         label="导出 PDF"
         className="tbtn ico"
         up
@@ -106,7 +107,7 @@ export default function Footer({
             <button type="button" className="tbtn" data-close onClick={() => onExportPdf(true)}><Printer size={13} aria-hidden="true" />打印</button>
           </div>
         </div>
-      </Menu>
+      </Menu>}
       <button type="button" className={`tbtn ico${view === "glossary" ? " on" : ""}`} onClick={onOpenGlossary}>
         <BookOpen size={14} strokeWidth={1.5} aria-hidden="true" />术语管理
       </button>

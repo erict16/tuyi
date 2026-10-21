@@ -75,7 +75,7 @@ export function Banner({ tone = "info", children, actions, onClose }) {
 }
 
 // Small popover menu anchored to a trigger button.
-export function Menu({ label, icon, children, align = "end", up = false, className = "tbtn", disabled, title }) {
+export function Menu({ label, icon, children, align = "end", up = false, className = "tbtn", disabled, title, ariaLabel, caret = true }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const close = useCallback(() => setOpen(false), []);
@@ -86,6 +86,7 @@ export function Menu({ label, icon, children, align = "end", up = false, classNa
         type="button"
         className={`${className}${open ? " on" : ""}`}
         aria-haspopup="menu"
+        aria-label={ariaLabel}
         aria-expanded={open}
         disabled={disabled}
         title={title}
@@ -93,7 +94,7 @@ export function Menu({ label, icon, children, align = "end", up = false, classNa
       >
         {icon}
         {label}
-        <ChevronDown size={12} strokeWidth={2} aria-hidden="true" className="caret" />
+        {caret && <ChevronDown size={12} strokeWidth={2} aria-hidden="true" className="caret" />}
       </button>
       {open && (
         <div className={`menu menu-${align}${up ? " menu-up" : ""}`} role="menu" onClick={(event) => {

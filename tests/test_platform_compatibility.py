@@ -121,10 +121,10 @@ class PlatformCompatibilityTests(unittest.TestCase):
     def test_translate_button_writes_when_glossary_hits_and_some_rows_are_skipped(self):
         root = Path(__file__).resolve().parents[1]
         source = ui_source()
-        start = source.index("async function runTranslate")
-        body = source[start:source.index("async function writeBack", start)]
+        start = source.index("async function translateFile")
+        body = source[start:source.index("async function writeFile", start)]
         self.assertNotIn("if (data.skipped && !data.has_engine)", body)
-        self.assertIn("writeBackRows(nextRows", body)
+        self.assertIn("return writeFile(path, next, summary)", body)
         self.assertIn("asText(row.target).trim()", body)
 
     def test_changelog_leads_with_app_version(self):
@@ -431,7 +431,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("外观和更新", ui)
         self.assertIn("图上怎么写", ui)
         self.assertIn("调整左右宽度", ui)
-        self.assertIn("writeBackRows", ui)
+        self.assertIn("writeFile(", ui)
         self.assertIn("/api/drawings/close", ui)
         self.assertIn("去掉", ui)
         self.assertIn("style: layout", ui)
