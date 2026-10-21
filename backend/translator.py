@@ -1447,6 +1447,9 @@ class CADChineseTranslator:
         try:
             wait_for_translation(resume_event, cancel_event)
             rewrite_shx_styles(doc, self.safe_log)
+            if style == "纯译文":
+                from backend.text_layout import fit_translated_labels
+                fit_translated_labels(doc, bilingual)
             if output_version and output_file.lower().endswith(".dxf"):
                 doc.dxfversion = output_version
             with atomic_output_path(output_file) as temporary_output:

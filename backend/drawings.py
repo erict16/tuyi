@@ -49,7 +49,7 @@ ENGINE_KEYS = (
 )
 # 常规处理 defaults (App.jsx params + filters).
 REGULAR_EXTRACT = {
-    "include_blocks": False,
+    "include_blocks": True,
     "include_model": True,
     "include_paper": True,
     "include_attribs": True,
@@ -58,7 +58,7 @@ REGULAR_EXTRACT = {
     "include_off": False,
     "enable_v02": True,
     "skip_numbers": True,
-    "skip_dupes": True,
+    "skip_dupes": False,
     "skip_nonsource": True,
 }
 
@@ -557,6 +557,8 @@ def writeback_rows(
                     translator._sync_attrib_tags(doc, item.get("source") or "", target)
                 written += 1
         rewrite_shx_styles(doc, translator.safe_log)
+        from backend.text_layout import fit_translated_labels
+        fit_translated_labels(doc, writable)
         try:
             with atomic_output_path(work_output) as temporary_output:
                 doc.saveas(temporary_output)
