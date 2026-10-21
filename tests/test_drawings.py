@@ -1591,8 +1591,8 @@ class DrawingsApiTests(unittest.TestCase):
 
     def test_frontend_empty_filter_is_calm(self):
         text = ui_source()
-        self.assertIn("过滤后没有可显示的文字。", text)
-        self.assertIn("这张图没有可译文字。", text)
+        self.assertIn("要译的字都被「先别译」藏起来了", text)
+        self.assertIn("这张图没有要翻译的文字，不用译。", text)
         self.assertIn("把 DWG / DXF 拖到这里", text)
         self.assertIn("function asCount(value)", text)
         self.assertIn("function asText(value)", text)

@@ -95,9 +95,13 @@ export default function WorkView({
           <p className="work-meta">
             {loading ? "正在读图纸里的文字…" : (
               <>
-                <span>这张图有 {stats.unique} 句</span>
-                <span className="dot" aria-hidden="true" />
-                <span className={stats.done && stats.done === stats.shown ? "ok" : ""}>已译 {stats.done} / {stats.shown}</span>
+                {stats.total ? (
+                  <>
+                    <span>这张图有 {stats.unique} 句要译</span>
+                    <span className="dot" aria-hidden="true" />
+                    <span className={stats.done && stats.done === stats.shown ? "ok" : ""}>已译 {stats.done} / {stats.shown}</span>
+                  </>
+                ) : <span>没有要翻译的文字</span>}
                 {stats.shown > 0 && <span className="meter" aria-hidden="true"><i style={{ width: `${percent}%` }} /></span>}
               </>
             )}
@@ -171,7 +175,7 @@ export default function WorkView({
             ) : visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={3} className="empty-row">
-                  {query ? `没有找到「${query}」。` : rows.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。"}
+                  {query ? `没有找到「${query}」。` : stats.total ? "要译的字都被「先别译」藏起来了。" : "这张图没有要翻译的文字，不用译。"}
                 </td>
               </tr>
             ) : visibleRows.map((row, index) => {

@@ -7,6 +7,7 @@ const FILE_STATUS = {
   translating: ["正在译", "run"],
   writing: ["正在写", "run"],
   written: ["已写出", "ok"],
+  skip: ["不用译", "idle"],
   error: ["出错了", "bad"],
 };
 

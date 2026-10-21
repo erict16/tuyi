@@ -118,7 +118,11 @@ export default function App() {
   const mode = modeKey(sourceLang, targetLang);
   const selected = files.find((item) => item.path === current);
   const visibleRows = useMemo(() => filterRows(rows, filters, sourceLang, query), [rows, filters, sourceLang, query]);
-  const stats = useMemo(() => rowStats(rows, filterRows(rows, filters, sourceLang)), [rows, filters, sourceLang]);
+  // Count only text in the source language: an English schematic has nothing to translate.
+  const stats = useMemo(
+    () => rowStats(filterRows(rows, { ...filters, dupes: false }, sourceLang), filterRows(rows, filters, sourceLang)),
+    [rows, filters, sourceLang],
+  );
   const counts = useMemo(() => sourceCounts(rows), [rows]);
   const curState = fileState[current] || {};
   const notice = curState.notice || fileState[""]?.notice || null;
@@ -384,8 +388,8 @@ export default function App() {
     const items = carryTargets(tickRepeats(Array.isArray(data.items) ? data.items : []), keep);
     stale.current.delete(path);
     sheets.current.set(path, items);
-    patchFile(path, { status: "" });
-    if (!items.length) say(path, "info", "这张图没有可译文字。");
+    patchFile(path, { status: items.length ? "" : "skip" });
+    if (!items.length) say(path, "info", "这张图没有要翻译的文字，不用译。");
     return items;
   }
 
@@ -519,7 +523,13 @@ export default function App() {
   async function translateFile(path, list) {
     const shown = filterRows(list, filters, sourceLang);
     if (!shown.length) {
-      say(path, "info", list.length ? "过滤后没有可显示的文字。" : "这张图没有可译文字。");
+      const anySource = filterRows(list, { numbers: true, dupes: false, nonsource: true }, sourceLang).length > 0;
+      if (anySource) {
+        say(path, "info", "要译的字都被「先别译」藏起来了。在 ⋯ 菜单里改。");
+      } else {
+        patchFile(path, { status: "skip" });
+        say(path, "info", `这张图没有${langLabel(sourceLang)}，不用译。`);
+      }
       return { state: "empty" };
     }
     const pending = shown.filter((row) => row.selected !== false && !asText(row.target).trim());

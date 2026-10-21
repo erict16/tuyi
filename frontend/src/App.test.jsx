@@ -50,7 +50,7 @@ describe("work view", () => {
     expect(screen.queryByText("1200")).not.toBeInTheDocument();
     expect(dstInputs()).toHaveLength(3);
     expect(screen.getByTitle(/图上出现 2 次/)).toHaveTextContent("×2");
-    expect(screen.getByText("这张图有 4 句")).toBeInTheDocument();
+    expect(screen.getByText("这张图有 3 句要译")).toBeInTheDocument();
   });
 
   it("quick translate sends only the shown rows and writes every copy", async () => {
@@ -533,3 +533,24 @@ describe("review regressions", () => {
   });
 });
 
+
+describe("drawings with nothing to translate", () => {
+  it("says an English schematic needs no translation and marks it 不用译", async () => {
+    const backend = fakeBackend();
+    backend.state.rows["/d/cma7.dxf"] = [
+      { id: 0, source: "Motor drive unit", handle: "C1", field: "text", layer: "0", type: "TEXT", duplicate: false, selected: true, target: "", via: "" },
+      { id: 1, source: "AC400V", handle: "C2", field: "text", layer: "0", type: "TEXT", duplicate: false, selected: true, target: "", via: "" },
+    ];
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/cma7.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.click(screen.getByRole("button", { name: /翻译全部 2 张/ }));
+    await screen.findByText("写好了。");
+    expect(screen.getByText("这张图没有中文，不用译。")).toBeInTheDocument();
+    expect(within(screen.getByRole("listbox")).getByText("不用译")).toBeInTheDocument();
+    expect(screen.getByText("没有要翻译的文字")).toBeInTheDocument();
+    expect(backend.called("POST", "/api/drawings/writeback")).toHaveLength(1);
+  });
+});
