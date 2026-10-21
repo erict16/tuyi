@@ -144,8 +144,8 @@ export default function BatchView({
           <section>
             <h3>先别译</h3>
             <Check checked={filters.numbers} title="尺寸数字、纯符号，一般不用译" onChange={(value) => onFilter("numbers", value)}>数字、尺寸</Check>
-            <Check checked={filters.dupes} title="同一句在图上出现多次，只译一次" onChange={(value) => onFilter("dupes", value)}>重复的句子</Check>
             <Check checked={filters.nonsource} title="已经是目标语言或夹杂别的文字，先跳过" onChange={(value) => onFilter("nonsource", value)}>不是原文那种语言</Check>
+            <p className="note">重复的句子只译一次，图上每一处都会写。</p>
           </section>
           <section>
             <h3>用表格回填</h3>

@@ -22,7 +22,10 @@ import {
   syncDuplicates,
   taskStatus,
   termsCsv,
+  tickRepeats,
+  toggleRow,
   viaLabel,
+  writePayload,
 } from "./core";
 
 const FILTERS_ON = { numbers: true, dupes: true, nonsource: true };
@@ -166,8 +169,28 @@ describe("rows", () => {
   it("knows when there is something to write", () => {
     expect(hasWritable(rows)).toBe(false);
     expect(hasWritable([row(0, "a", { target: "x", selected: false })])).toBe(false);
-    expect(hasWritable([row(0, "a", { target: "x", selected: false, duplicate: true })])).toBe(true);
+    expect(hasWritable([row(0, "a", { target: "x", selected: false, duplicate: true })])).toBe(false);
     expect(hasWritable([row(0, "a", { target: " x " })])).toBe(true);
+  });
+
+  it("starts repeats ticked and lets the first copy carry the tick", () => {
+    const list = tickRepeats([row(0, "a"), row(1, "a", { duplicate: true, selected: false })]);
+    expect(list[1].selected).toBe(true);
+    const off = toggleRow(list, 0, false);
+    expect(off.map((r) => r.selected)).toEqual([false, false]);
+    const one = toggleRow(list, 1, false);
+    expect(one.map((r) => r.selected)).toEqual([true, false]);
+  });
+
+  it("does not hand an unticked first copy's 译文 to its repeats", () => {
+    const out = syncDuplicates([row(0, "a", { target: "x", selected: false }), row(1, "a", { duplicate: true })]);
+    expect(out[1].target).toBe("");
+  });
+
+  it("marks unticked rows excluded for write-back", () => {
+    const out = writePayload([row(0, "a", { target: "x" }), row(1, "a", { duplicate: true, selected: false })]);
+    expect(out.map((r) => r.excluded)).toEqual([false, true]);
+    expect(out[1].target).toBe("x");
   });
 
   it("counts what is shown and done", () => {

@@ -151,7 +151,7 @@ export function syncDuplicates(rows) {
   return list.map((row) => {
     if (!row.duplicate) return row;
     const lead = master.get(asText(row.source));
-    if (!lead || !asText(lead.target).trim()) return row;
+    if (!lead || lead.selected === false || !asText(lead.target).trim()) return row;
     if (row.via === "edit" && asText(row.target).trim()) return row;
     if (row.target === lead.target && row.target_raw === lead.target_raw && row.via === lead.via) return row;
     return { ...row, target: lead.target, target_raw: lead.target_raw, via: lead.via };
@@ -207,8 +207,32 @@ export function editRow(rows, id, target) {
   });
 }
 
+// Extract unticks repeats; on screen every copy starts ticked like its first copy.
+export function tickRepeats(rows) {
+  return (rows || []).map((row) => (row.duplicate && row.selected === false ? { ...row, selected: true } : row));
+}
+
+// Ticking the first copy ticks its repeats; a repeat can be unticked on its own.
+export function toggleRow(rows, id, checked) {
+  const list = Array.isArray(rows) ? rows : [];
+  const row = list.find((item) => item.id === id);
+  if (!row) return list;
+  const source = asText(row.source);
+  return list.map((item) => {
+    if (item.id === id) return { ...item, selected: checked };
+    if (!row.duplicate && item.duplicate && asText(item.source) === source) return { ...item, selected: checked };
+    return item;
+  });
+}
+
+// What write-back receives: repeats filled, unticked rows marked so the
+// backend leaves those copies alone.
+export function writePayload(rows) {
+  return syncDuplicates(rows).map((row) => ({ ...row, excluded: row.selected === false }));
+}
+
 export function hasWritable(rows) {
-  return (rows || []).some((row) => (row.selected !== false || row.duplicate) && asText(row.target).trim());
+  return (rows || []).some((row) => row.selected !== false && asText(row.target).trim());
 }
 
 export function rowStats(rows, visible) {

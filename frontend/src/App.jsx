@@ -36,6 +36,9 @@ import {
   sourceCounts,
   syncDuplicates,
   termsCsv,
+  tickRepeats,
+  toggleRow,
+  writePayload,
 } from "./lib/core";
 import { usePrefs, useTheme, useToasts } from "./lib/hooks";
 import { hasNativeTitlebar, py, reveal, saveFile } from "./lib/native";
@@ -111,6 +114,7 @@ export default function App() {
   const configLoaded = useRef(false);
   const dragDepth = useRef(0);
   const batchNoticeKey = useRef("");
+  const stale = useRef(new Set());
 
   const mode = modeKey(sourceLang, targetLang);
   const selected = files.find((item) => item.path === current);
@@ -177,12 +181,12 @@ export default function App() {
         const safe = cfg && typeof cfg === "object" && !Array.isArray(cfg) ? cfg : {};
         setConfig(safe);
         setEngine(engineFromConfig(safe));
+        // Only now may edits save: saving before the real config loads would wipe keys.
+        configLoaded.current = true;
         if (health?.version) setAppVersion(asText(health.version));
         await refreshAssets();
       } catch (error) {
         say("", "error", error.message);
-      } finally {
-        configLoaded.current = true;
       }
     })();
   }, [refreshAssets, say]);
@@ -311,15 +315,22 @@ export default function App() {
   }
 
   function leavePage() {
-    const fromSettings = view === "settings";
-    const back = pageReturn.current || "work";
-    setView(back);
-    if (fromSettings && extractSnap.current && extractSnap.current !== extractKey(params)) {
-      extractSnap.current = "";
-      sheets.current.clear();
-      if (current) extractFile(current, { keep: rows });
-    }
+    setView(pageReturn.current || "work");
   }
+
+  // Leaving 设置 by any route (返回, 术语管理, 检查更新) re-reads if scan options changed.
+  const lastView = useRef(view);
+  useEffect(() => {
+    const was = lastView.current;
+    lastView.current = view;
+    if (was !== "settings" || view === "settings") return;
+    if (!extractSnap.current || extractSnap.current === extractKey(params)) return;
+    extractSnap.current = "";
+    // Other drawings re-read when next opened, keeping their 译文.
+    sheets.current.forEach((cached, path) => stale.current.add(path));
+    if (current) extractFile(current, { keep: rows });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
 
   function toggleSettings(tab = "tr") {
     if (view === "settings") {
@@ -364,7 +375,8 @@ export default function App() {
         },
       });
       if (seq !== extractSeq.current) return [];
-      const items = carryTargets(Array.isArray(data.items) ? data.items : [], keep);
+      const items = carryTargets(tickRepeats(Array.isArray(data.items) ? data.items : []), keep);
+      stale.current.delete(path);
       sheets.current.set(path, items);
       setRows(items);
       patchFile(path, { status: "" });
@@ -437,7 +449,10 @@ export default function App() {
   }
 
   function pickDrawing(path) {
-    if (path === current) return;
+    if (path === current) {
+      if (view !== "work") setView("work");
+      return;
+    }
     if (locked) {
       toast("等这张译完再换。", "warn");
       return;
@@ -445,8 +460,13 @@ export default function App() {
     setCurrent(path);
     setQuery("");
     if (view !== "work") setView("work");
+    openCached(path);
+  }
+
+  function openCached(path) {
     const cached = sheets.current.get(path);
-    if (cached) setRows(cached);
+    if (cached && stale.current.has(path)) extractFile(path, { keep: cached });
+    else if (cached) setRows(cached);
     else extractFile(path);
   }
 
@@ -459,6 +479,7 @@ export default function App() {
     const next = files.filter((file) => file.path !== path);
     setFiles(next);
     sheets.current.delete(path);
+    stale.current.delete(path);
     setFileState((prev) => {
       const copy = { ...prev };
       delete copy[path];
@@ -468,9 +489,7 @@ export default function App() {
       const neighbour = next[Math.min(index, next.length - 1)];
       if (neighbour) {
         setCurrent(neighbour.path);
-        const cached = sheets.current.get(neighbour.path);
-        if (cached) setRows(cached);
-        else extractFile(neighbour.path);
+        openCached(neighbour.path);
       } else {
         setCurrent("");
         setRows([]);
@@ -555,7 +574,7 @@ export default function App() {
       say("", "info", "先打开图纸。");
       return;
     }
-    const items = syncDuplicates(Array.isArray(list) ? list : []);
+    const items = writePayload(Array.isArray(list) ? list : []);
     if (!hasWritable(items)) {
       say(current, "info", "没有可写回的译文。先点翻译，或手填译文。");
       return;
@@ -622,7 +641,7 @@ export default function App() {
           style: layout,
           appearance,
           paper: pdfPaper,
-          items: fromWriteback ? [] : syncDuplicates(rows),
+          items: fromWriteback ? [] : writePayload(rows),
         },
       });
       const out = asText(data.path);
@@ -923,7 +942,9 @@ export default function App() {
       const picked = await native.pick_term_package();
       if (picked?.path) {
         try {
-          await api("/api/language-assets/project", { json: { path: picked.path, create: false } });
+          const project = await api("/api/language-assets/project", { json: { path: picked.path, create: false } });
+          // The server saved the path; keep it here too or the next autosave erases it.
+          setConfig((prev) => ({ ...prev, project_package_path: asText(project.path) || picked.path }));
           await refreshAssets();
           toast("已加载术语表。", "ok");
         } catch (error) {
@@ -998,7 +1019,9 @@ export default function App() {
   function changeLangs(src, dst) {
     if (src === sourceLang && dst === targetLang) return;
     setPrefs({ sourceLang: src, targetLang: dst });
+    // 译文 belong to the old language pair; every drawing is read again.
     sheets.current.clear();
+    stale.current.clear();
     if (current && !locked) extractFile(current, { langs: [src, dst] });
   }
 
@@ -1169,10 +1192,13 @@ export default function App() {
               dropOver={dropOver}
               onAdd={openDrawings}
               onEditRow={(id, value) => updateRows((prev) => editRow(prev, id, value))}
-              onToggleRow={(id, checked) => updateRows((prev) => prev.map((item) => (item.id === id ? { ...item, selected: checked } : item)))}
+              onToggleRow={(id, checked) => updateRows((prev) => toggleRow(prev, id, checked))}
               onToggleAll={(checked) => {
                 const ids = new Set(visibleRows.map((row) => row.id));
-                updateRows((prev) => prev.map((item) => (ids.has(item.id) ? { ...item, selected: checked } : item)));
+                const sources = new Set(visibleRows.filter((row) => !row.duplicate).map((row) => row.source));
+                updateRows((prev) => prev.map((item) => (
+                  ids.has(item.id) || (item.duplicate && sources.has(item.source)) ? { ...item, selected: checked } : item
+                )));
               }}
               onWriteBack={writeBack}
               onExportTable={exportTable}

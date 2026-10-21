@@ -68,6 +68,8 @@ export default function Rail({
                 title={file.path}
                 onClick={() => onPick(file.path)}
                 onKeyDown={(event) => {
+                  // Keys on the inner 去掉 button belong to that button.
+                  if (event.target !== event.currentTarget) return;
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
                     onPick(file.path);
@@ -94,7 +96,7 @@ export default function Rail({
         </ul>
       )}
       <div className="rail-go">
-        {files.length > 1 && (
+        {(files.length > 1 || view === "batch") && (
           <button
             type="button"
             className={`tbtn wide${view === "batch" ? " on" : ""}`}

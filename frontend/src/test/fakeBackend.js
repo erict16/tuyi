@@ -51,12 +51,16 @@ export function fakeBackend(overrides = {}) {
     "GET /api/default-output-name": () => ({ name: "en_floor_1200" }),
     "POST /api/drawings/writeback": (body) => ({
       path: `/out/${body.output_name}.dxf`,
-      written: body.items.filter((item) => (item.target || "").trim() && (item.selected !== false || item.duplicate)).length,
+      written: body.items.filter((item) => (item.target || "").trim() && !item.excluded && (item.selected !== false || item.duplicate)).length,
       missing: 0,
     }),
     "POST /api/drawings/export-pdf": (body) => ({ path: `/out/${body.output_name}` }),
     "POST /api/drawings/export-table": () => ({ filename: "表格.csv", csv: "a,b\n", count: 3 }),
     "POST /api/drawings/close": () => ({ ok: true }),
+    "POST /api/language-assets/project": (body) => {
+      state.config = { ...state.config, project_package_path: body.path };
+      return { path: body.path, name: "项目", terms: [] };
+    },
     "POST /api/language-assets/terms": (body) => {
       const id = body.id || `t${state.terms.length + 1}`;
       state.terms = [...state.terms.filter((term) => term.id !== id), { ...body, id }];

@@ -493,13 +493,20 @@ def fill_duplicate_targets(items: list[dict]) -> list[dict]:
     lead: dict[str, dict] = {}
     for item in items:
         source = _as_text(item.get("source"))
-        if not item.get("duplicate") and (item.get("target") or "").strip() and source not in lead:
-            lead[source] = item
+        if item.get("duplicate") or source in lead:
+            continue
+        lead[source] = item
     out = []
     for item in items:
         source = _as_text(item.get("source"))
         master = lead.get(source)
-        if item.get("duplicate") and master is not None and not (item.get("target") or "").strip():
+        usable = (
+            master is not None
+            and (master.get("target") or "").strip()
+            and master.get("selected", True) is not False
+            and not master.get("excluded")
+        )
+        if item.get("duplicate") and usable and not item.get("excluded") and not (item.get("target") or "").strip():
             item = {
                 **item,
                 "target": master.get("target") or "",
@@ -528,6 +535,9 @@ def writeback_rows(
 
     def _should_write(item: dict) -> bool:
         if not (item.get("target") or "").strip():
+            return False
+        # The desktop grid marks rows the user unticked, including single copies.
+        if item.get("excluded"):
             return False
         if item.get("selected", True):
             return True

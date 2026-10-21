@@ -55,6 +55,17 @@ class FillDuplicateTargetsTests(unittest.TestCase):
         self.assertEqual(out[3]["target"], "")
         self.assertEqual(rows[1]["target"], "", "input rows must not be mutated")
 
+    def test_unticked_lead_or_excluded_copy_is_not_filled(self):
+        rows = [
+            {"source": "配电箱", "target": "distribution board", "duplicate": False, "selected": False},
+            {"source": "配电箱", "target": "", "duplicate": True},
+            {"source": "接地", "target": "grounding", "duplicate": False},
+            {"source": "接地", "target": "", "duplicate": True, "excluded": True},
+        ]
+        out = fill_duplicate_targets(rows)
+        self.assertEqual(out[1]["target"], "")
+        self.assertEqual(out[3]["target"], "")
+
     def test_a_hand_edited_duplicate_keeps_its_own_text(self):
         rows = [
             {"source": "配电箱", "target": "distribution board", "duplicate": False},
@@ -87,6 +98,15 @@ class DuplicateWritebackTests(unittest.TestCase):
         texts = _all_texts(Path(output["path"]))
         self.assertEqual([text for text in texts if CJK.search(text)], [])
         self.assertGreaterEqual(texts.count("floor plan"), 2)
+
+    def test_an_excluded_copy_stays_as_it_was(self):
+        preview = extract_preview(str(self.dxf), include_blocks=True, enable_v02=True)
+        rows = translate_rows(preview["items"], mode="zh_to_en", provider="deepl", engine={})["items"]
+        repeat = next(row for row in rows if row["duplicate"])
+        rows = [dict(row, excluded=True) if row is repeat else row for row in rows]
+        output = writeback_rows(str(self.dxf), rows, output_dir=str(self.root), output_name="en_skip", mode="zh_to_en")
+        self.assertEqual(output["written"], len(rows) - 1)
+        self.assertIn(repeat["source"], _all_texts(Path(output["path"])))
 
 
 class BatchDuplicateTests(unittest.TestCase):

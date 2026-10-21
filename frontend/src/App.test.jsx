@@ -416,3 +416,113 @@ describe("batch", () => {
     expect(within(screen.getByRole("listbox")).getByText("已写出")).toBeInTheDocument();
   });
 });
+
+describe("review regressions", () => {
+  it("keeps a loaded term package when settings save later", async () => {
+    const backend = fakeBackend();
+    fakeNative({ pick_term_package: async () => ({ path: "/p/项目.hcterms.json" }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await waitFor(() => expect(backend.called("GET", "/api/config")).toHaveLength(1));
+    await user.click(screen.getByRole("button", { name: /术语管理/ }));
+    await user.click(screen.getByRole("button", { name: "加载术语表" }));
+    await screen.findByText("已加载术语表。");
+    await user.click(screen.getByRole("button", { name: /设置/ }));
+    await user.type(screen.getByLabelText("DeepL 密钥"), "k");
+    await waitFor(() => expect(backend.last("POST", "/api/config")?.body.deepl_key).toBe("k"), { timeout: 2000 });
+    expect(backend.last("POST", "/api/config").body.project_package_path).toBe("/p/项目.hcterms.json");
+  });
+
+  it("never saves settings when the saved config could not be read", async () => {
+    const backend = fakeBackend({ "GET /api/config": () => new Response("boom", { status: 500 }) });
+    fakeNative();
+    const user = userEvent.setup();
+    render(<App />);
+    await waitFor(() => expect(backend.called("GET", "/api/config")).toHaveLength(1));
+    await user.click(screen.getByRole("button", { name: /设置/ }));
+    await user.type(screen.getByLabelText("DeepL 密钥"), "k");
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    expect(backend.called("POST", "/api/config")).toHaveLength(0);
+  });
+
+  it("gets back from 一起译 after the list shrinks to one drawing", async () => {
+    fakeBackend();
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByRole("heading", { name: "floor.dxf" });
+    await user.click(screen.getByRole("button", { name: /一起译 2 张/ }));
+    await user.click(screen.getByRole("button", { name: "从队列去掉 second.dxf" }));
+    expect(screen.getByRole("button", { name: /回到单张/ })).toBeInTheDocument();
+    await user.click(screen.getByRole("option", { name: /floor\.dxf/ }));
+    expect(await screen.findByRole("heading", { name: "floor.dxf" })).toBeInTheDocument();
+  });
+
+  it("re-reads after scan options change even when 设置 is left via 术语管理", async () => {
+    const backend = fakeBackend();
+    fakeNative();
+    const user = userEvent.setup();
+    render(<App />);
+    await openFloorPlan(user, backend);
+    await user.click(screen.getByRole("button", { name: /设置/ }));
+    await user.click(screen.getByText("高级翻译设置"));
+    await user.click(screen.getByRole("checkbox", { name: "块里的字" }));
+    await user.click(screen.getByRole("button", { name: /术语管理/ }));
+    await waitFor(() => expect(backend.called("POST", "/api/drawings/extract")).toHaveLength(2));
+    expect(backend.last("POST", "/api/drawings/extract").body.include_blocks).toBe(false);
+  });
+
+  it("keeps hand edits on other drawings when scan options change", async () => {
+    const backend = fakeBackend();
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByText("天花图");
+    await user.type(dstInputs()[1], "RCP");
+    await user.click(screen.getByRole("option", { name: /second\.dxf/ }));
+    await screen.findByRole("heading", { name: "second.dxf" });
+    await user.click(screen.getByRole("button", { name: /设置/ }));
+    await user.click(screen.getByText("高级翻译设置"));
+    await user.click(screen.getByRole("checkbox", { name: "块属性" }));
+    await user.click(screen.getByRole("button", { name: "返回" }));
+    await user.click(screen.getByRole("option", { name: /floor\.dxf/ }));
+    expect(await screen.findByDisplayValue("RCP")).toBeInTheDocument();
+    expect(backend.last("POST", "/api/drawings/extract").body).toMatchObject({ path: "/d/floor.dxf", include_attribs: false });
+  });
+
+  it("an unticked repeat is sent as excluded", async () => {
+    const backend = fakeBackend();
+    fakeNative();
+    const user = userEvent.setup();
+    render(<App />);
+    await openFloorPlan(user, backend);
+    await user.click(screen.getByRole("button", { name: /先别译 3/ }));
+    await user.click(screen.getByRole("checkbox", { name: /^重复的句子/ }));
+    await user.keyboard("{Escape}");
+    const ticks = screen.getAllByRole("checkbox", { name: /翻译这一句：平面布置图/ });
+    expect(ticks).toHaveLength(2);
+    expect(ticks[1]).toBeChecked();
+    await user.click(ticks[1]);
+    await user.click(screen.getByRole("button", { name: /快速翻译/ }));
+    await screen.findByText(/已写出新文件，写了 3 句/);
+    const items = backend.last("POST", "/api/drawings/writeback").body.items;
+    expect(items.find((item) => item.handle === "B1")).toMatchObject({ excluded: true });
+    expect(items.find((item) => item.handle === "A1")).toMatchObject({ excluded: false, target: "floor plan" });
+  });
+
+  it("Enter on a file's 去掉 button removes it instead of opening it", async () => {
+    const backend = fakeBackend();
+    fakeNative({ pick_cad_files: async () => ({ paths: ["/d/floor.dxf", "/d/second.dxf"] }) });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /添加图纸/ }));
+    await screen.findByRole("heading", { name: "floor.dxf" });
+    screen.getByRole("button", { name: "从队列去掉 second.dxf" }).focus();
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(1));
+    expect(backend.last("POST", "/api/drawings/close").body).toEqual({ path: "/d/second.dxf" });
+  });
+});
+
