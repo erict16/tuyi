@@ -78,7 +78,7 @@
     const FALLBACK = {
       win: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe",
       macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_x86_64.dmg",
+      macIntel: "",
     };
     window.DL = { ...FALLBACK };
     window.DL_META = { version: "v0.1.12", winSize: "约 64 MB" };
@@ -249,20 +249,15 @@
 
           <article class="dl-card rounded-3xl bg-mist p-6 text-left" data-os="mac">
             <h3 class="text-xl font-semibold">Mac</h3>
-            <div class="mt-3 inline-flex self-start rounded-full bg-white p-1" role="radiogroup" aria-label="Mac 芯片">
-              <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="true" data-chip="arm">Apple 芯片</button>
-              <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="false" data-chip="intel">Intel</button>
-            </div>
             <p id="mac-hint" class="mac-hint mt-3 text-sm text-slate-600">
               <span data-mac-hint="arm" data-active>M1 到 M4 都选这个。不确定就看苹果菜单里的「关于本机」。</span>
-              <span data-mac-hint="intel" aria-hidden="true">老一点的 Intel Mac 选这个。和 Apple 芯片的不能混用。</span>
+              <span data-mac-hint="intel" aria-hidden="true">这台是 Intel Mac。图译只支持 Apple 芯片（M1 及以后）的 Mac。</span>
             </p>
             <div class="dl-foot">
               <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg" rel="noopener" aria-label="下载 Mac 版（Apple 芯片）">
                 <span data-mac-label="arm" data-active>下载 Mac 版（Apple 芯片）</span>
-                <span data-mac-label="intel" aria-hidden="true">下载 Mac 版（Intel）</span>
                 <span data-mac-label="arm-missing" aria-hidden="true">Apple 芯片安装包还没放上来</span>
-                <span data-mac-label="intel-missing" aria-hidden="true">Intel 安装包还没打出来</span>
+                <span data-mac-label="intel-missing" aria-hidden="true">Intel Mac 不支持</span>
               </a>
               <p class="mt-3 text-xs leading-5 text-slate-500">打开 DMG，把图译拖进应用程序。第一次打开时右键图标，选「打开」。</p>
             </div>
@@ -297,7 +292,7 @@
       winMissing: "Windows 安装包还没放上来",
       heroWin: "下载 Windows 版",
       heroArm: "下载 Mac 版（Apple 芯片）",
-      heroIntel: "下载 Mac 版（Intel）",
+      heroIntel: "Intel Mac 不支持，看下面说明",
       osWin: "这台电脑是 Windows，下左边这份。",
       osMac: "这台电脑是 Mac，下右边这份。先看芯片。",
     };
@@ -408,7 +403,7 @@
         const res = await fetch("https://api.github.com/repos/erict16/tuyi/releases/latest");
         if (!res.ok) return;
         const data = await res.json();
-        let win = "", macArm = "", macIntel = "", winBytes = 0;
+        let win = "", macArm = "", winBytes = 0;
         for (const asset of data.assets || []) {
           const name = asset.name || "";
           const url = asset.browser_download_url || "";
@@ -417,13 +412,10 @@
             winBytes = asset.size || 0;
           } else if (/macOS_arm64\.dmg$/i.test(name)) {
             macArm = url;
-          } else if (/macOS_x86_64\.dmg$/i.test(name)) {
-            macIntel = url;
           }
         }
         if (win) window.DL.win = win;
         if (macArm) window.DL.macArm = macArm;
-        if (macIntel) window.DL.macIntel = macIntel;
         if (data.tag_name) {
           window.DL_META.version = data.tag_name;
           document.getElementById("dl-ver").textContent = T.ver(data.tag_name);
@@ -446,8 +438,9 @@
       let url = "", label = "";
       if (os === "win") [url, label] = [window.DL.win, T.heroWin];
       if (os === "mac") [url, label] = chip === "intel" ? [window.DL.macIntel, T.heroIntel] : [window.DL.macArm, T.heroArm];
-      if (url) {
-        heroDl.href = url;
+      if (url || (os === "mac" && chip === "intel")) {
+        // Intel Mac: no package to offer, so point at the explanation instead.
+        heroDl.href = url || "#download";
         heroDl.textContent = label;
       }
     }

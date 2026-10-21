@@ -10,16 +10,15 @@
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon-orange?style=flat-square">
 </p>
 
 Tuyi는 DWG / DXF 도면을 열어 글자를 번역하고, 도면에 다시 써서 새 파일로 저장합니다. 원본 도면은 그대로이고 AutoCAD도 필요 없습니다. 표제란, 주석, 블록 속성, 치수, 표 안의 글자도 번역합니다.
 
-## 다운로드 (v0.1.11, 무료)
+## 다운로드 (v0.1.12, 무료)
 
-- **Windows 10 / 11 (64비트)**: [Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
-- **Mac (Apple 실리콘, M1~M4)**: [Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
-- **Mac (Intel)**: [Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+- **Windows 10 / 11 (64비트)**: [Tuyi_v0.1.12_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe)
+- **Mac (Apple 실리콘, M1~M4)**: [Tuyi_v0.1.12_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg)
 
 어떤 Mac인지 모르겠다면 Apple 메뉴의 "이 Mac에 관하여"에서 확인하세요. 새 버전은 [Releases](https://github.com/erict16/tuyi/releases/latest)에 올라옵니다.
 

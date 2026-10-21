@@ -10,16 +10,15 @@
 <p align="center">
   <a href="https://github.com/erict16/tuyi/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/erict16/tuyi?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%2F11%20x64-blue?style=flat-square">
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon%20%2B%20Intel-orange?style=flat-square">
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon-orange?style=flat-square">
 </p>
 
 Tuyi abre un plano DWG o DXF, traduce el texto, lo vuelve a escribir en el plano y guarda un archivo nuevo. El original no se toca y no hace falta AutoCAD. Traduce cajetines, notas, atributos de bloque, cotas y tablas.
 
-## Descarga (v0.1.11, gratis)
+## Descarga (v0.1.12, gratis)
 
-- **Windows 10 / 11 (64 bits):** [Tuyi_v0.1.11_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_Setup.exe)
-- **Mac con Apple Silicon (M1 a M4):** [Tuyi_v0.1.11_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_arm64.dmg)
-- **Mac con Intel:** [Tuyi_v0.1.11_macOS_x86_64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.11/Tuyi_v0.1.11_macOS_x86_64.dmg)
+- **Windows 10 / 11 (64 bits):** [Tuyi_v0.1.12_Setup.exe](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe)
+- **Mac con Apple Silicon (M1 a M4):** [Tuyi_v0.1.12_macOS_arm64.dmg](https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg)
 
 ¿No sabes qué Mac tienes? Míralo en Acerca de este Mac, en el menú Apple. Las versiones nuevas salen en [Releases](https://github.com/erict16/tuyi/releases/latest).
 

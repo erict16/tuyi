@@ -186,8 +186,10 @@ class PlatformCompatibilityTests(unittest.TestCase):
         for name in ("README.md", "README.en.md", "README.ja.md", "README.ko.md", "README.es.md"):
             text = (root / name).read_text(encoding="utf-8")
             self.assertTrue(text.split("<h1")[0].count('src="landing/shots/og.png"') == 1, name)
-            for who in ("WorkBuddy", "ChatGPT", "Claude", "_Setup.exe", "macOS_arm64.dmg", "macOS_x86_64.dmg"):
+            for who in ("WorkBuddy", "ChatGPT", "Claude", "_Setup.exe", "macOS_arm64.dmg"):
                 self.assertIn(who, text, f"{name}: {who}")
+            # Apple silicon only since v0.1.13.
+            self.assertNotIn("macOS_x86_64.dmg", text, name)
             self.assertNotIn("open source", text.lower(), name)
             self.assertNotIn("open-source", text.lower(), name)
         self.assertIn("docs/screenshots/app-glossary.png", readme)
@@ -214,7 +216,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn("v0.1.2", win)
         self.assertNotIn("|| 'v0.1.2'", win)
         self.assertIn("macos-latest", mac)
-        self.assertIn("macos-15-intel", mac)
+        self.assertNotIn("macos-15-intel", mac)
+        self.assertNotIn("x86_64", mac)
         self.assertNotIn("macos-13", mac)
         self.assertIn("build_macos.py", mac)
         self.assertIn("unittest discover", win)
@@ -250,11 +253,11 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("Windows 10 或 11", html)
         self.assertIn("64 位", html)
         self.assertIn("Apple 芯片", html)
-        self.assertIn("Intel", html)
+        self.assertIn("Intel Mac 不支持", html)
         self.assertIn("macArm", html)
-        self.assertIn("macIntel", html)
         self.assertIn("macOS_arm64.dmg", html)
-        self.assertIn("macOS_x86_64.dmg", html)
+        self.assertNotIn("macOS_x86_64.dmg", html)
+        self.assertNotIn('data-chip="intel"', html)
         self.assertIn("关于本机", html)
         self.assertIn("仍要运行", html)
         self.assertIn("ODA File Converter", html)
