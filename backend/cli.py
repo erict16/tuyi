@@ -38,13 +38,20 @@ def _configure_stdio() -> None:
             pass
 
 
-def _emit_result(result: dict) -> None:
+def _emit_result(result: dict, source: str = "") -> None:
+    if result.get("nothing_to_translate"):
+        print(f"skipped: 没有要翻译的原文，未生成新文件 ({Path(source).name})")
+        return
     print(result["path"])
     print(f"extracted: {result['extracted']}")
     print(f"translated: {result['translated']}")
+    left = result.get("untranslated") or []
+    if left:
+        # Still in the source language: needs an engine, or add it to the glossary.
+        print(f"untranslated: {len(left)}")
+        for text in left:
+            print(f"  - {text}")
     skipped = result.get("skipped", 0)
-    if skipped:
-        print(f"skipped: {skipped}", file=sys.stderr)
     if not result.get("has_engine", True) and skipped:
         provider = result.get("provider") or "deepl"
         hint = "在图译「设置」里填 DeepL Key，或设置环境变量 DEEPL_API_KEY"
@@ -193,6 +200,7 @@ def main(argv: list[str] | None = None) -> int:
         print(_chinese_error(exc, "翻译失败"), file=sys.stderr)
         return 1
 
+    failed = 0
     for index, raw in enumerate(args.inputs):
         path = os.path.abspath(raw)
         output_name = args.output if index == 0 else ""
@@ -222,13 +230,16 @@ def main(argv: list[str] | None = None) -> int:
                 style=args.style,
             )
         except FileNotFoundError as exc:
-            print(_chinese_error(exc, "图纸不存在"), file=sys.stderr)
-            return 1
+            print(f"{_chinese_error(exc, '图纸不存在')} ({Path(path).name})", file=sys.stderr)
+            failed += 1
+            continue
         except Exception as exc:
-            print(_chinese_error(exc, "翻译失败"), file=sys.stderr)
-            return 1
-        _emit_result(result)
-    return 0
+            print(f"{_chinese_error(exc, '翻译失败')} ({Path(path).name})", file=sys.stderr)
+            failed += 1
+            continue
+        _emit_result(result, path)
+    # One bad drawing must not stop the rest of a batch; report it at the end.
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

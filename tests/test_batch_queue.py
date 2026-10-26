@@ -438,7 +438,7 @@ class BatchApiTests(unittest.TestCase):
         self.assertIn("reflected ceiling plan", sources)
         self.assertIn("floor plan", sources)
         self.assertNotIn("天花图", sources)
-        self.assertIn("平面布置图", sources)
+        self.assertNotIn("平面布置图", sources)
         mtext = next(item for item in preview["items"] if item["type"] == "MTEXT")
         self.assertIn("partition", mtext["source"].lower())
         self.assertIn("\\C1;", mtext["raw"])
@@ -667,8 +667,9 @@ class BatchApiTests(unittest.TestCase):
             for entity in ezdxf.readfile(task["output_file"]).modelspace()
             if entity.dxftype() == "TEXT"
         ]
-        self.assertEqual(texts.count("reflected ceiling plan"), 1, texts)
-        self.assertEqual(texts.count("天花图"), 1, texts)
+        # 重复的句子只译一次, but both copies on the drawing are written.
+        self.assertEqual(texts.count("reflected ceiling plan"), 2, texts)
+        self.assertEqual(texts.count("天花图"), 0, texts)
         self.assertIn("1234", texts)
         self.assertIn("HELLO", texts)
 

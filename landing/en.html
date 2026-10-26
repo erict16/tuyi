@@ -78,7 +78,7 @@
     const FALLBACK = {
       win: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_Setup.exe",
       macArm: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg",
-      macIntel: "https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_x86_64.dmg",
+      macIntel: "",
     };
     window.DL = { ...FALLBACK };
     window.DL_META = { version: "v0.1.12", winSize: "about 64 MB" };
@@ -249,20 +249,15 @@
 
           <article class="dl-card rounded-3xl bg-mist p-6 text-left" data-os="mac">
             <h3 class="text-xl font-semibold">Mac</h3>
-            <div class="mt-3 inline-flex self-start rounded-full bg-white p-1" role="radiogroup" aria-label="Mac chip">
-              <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="true" data-chip="arm">Apple silicon</button>
-              <button type="button" class="chip rounded-full px-3 py-1.5 text-sm font-semibold text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" role="radio" aria-checked="false" data-chip="intel">Intel</button>
-            </div>
             <p id="mac-hint" class="mac-hint mt-3 text-sm text-slate-600">
               <span data-mac-hint="arm" data-active>Pick this for M1 to M4. Not sure? Check About This Mac in the Apple menu.</span>
-              <span data-mac-hint="intel" aria-hidden="true">For older Intel Macs. It won't run on Apple silicon, and the other one won't run here.</span>
+              <span data-mac-hint="intel" aria-hidden="true">This is an Intel Mac. Tuyi runs on Apple silicon Macs (M1 and later) only.</span>
             </p>
             <div class="dl-foot">
               <a id="btn-mac" class="dl-link inline-grid min-h-12 w-full place-items-center rounded-2xl bg-accent px-5 py-3 text-center text-base font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy" href="https://github.com/erict16/tuyi/releases/download/v0.1.12/Tuyi_v0.1.12_macOS_arm64.dmg" rel="noopener" aria-label="Download for Mac (Apple silicon)">
                 <span data-mac-label="arm" data-active>Download for Mac (Apple silicon)</span>
-                <span data-mac-label="intel" aria-hidden="true">Download for Mac (Intel)</span>
                 <span data-mac-label="arm-missing" aria-hidden="true">The Apple silicon build isn't up yet</span>
-                <span data-mac-label="intel-missing" aria-hidden="true">The Intel build isn't up yet</span>
+                <span data-mac-label="intel-missing" aria-hidden="true">Intel Macs aren't supported</span>
               </a>
               <p class="mt-3 text-xs leading-5 text-slate-500">Open the DMG and drag Tuyi into Applications. The first time, right-click the icon and choose Open.</p>
             </div>
@@ -297,7 +292,7 @@
       winMissing: "The Windows build isn't up yet",
       heroWin: "Download for Windows",
       heroArm: "Download for Mac (Apple silicon)",
-      heroIntel: "Download for Mac (Intel)",
+      heroIntel: "Intel Macs aren't supported",
       osWin: "You're on Windows. Use the one on the left.",
       osMac: "You're on a Mac. Use the one on the right, and check the chip.",
     };
@@ -408,7 +403,7 @@
         const res = await fetch("https://api.github.com/repos/erict16/tuyi/releases/latest");
         if (!res.ok) return;
         const data = await res.json();
-        let win = "", macArm = "", macIntel = "", winBytes = 0;
+        let win = "", macArm = "", winBytes = 0;
         for (const asset of data.assets || []) {
           const name = asset.name || "";
           const url = asset.browser_download_url || "";
@@ -417,13 +412,10 @@
             winBytes = asset.size || 0;
           } else if (/macOS_arm64\.dmg$/i.test(name)) {
             macArm = url;
-          } else if (/macOS_x86_64\.dmg$/i.test(name)) {
-            macIntel = url;
           }
         }
         if (win) window.DL.win = win;
         if (macArm) window.DL.macArm = macArm;
-        if (macIntel) window.DL.macIntel = macIntel;
         if (data.tag_name) {
           window.DL_META.version = data.tag_name;
           document.getElementById("dl-ver").textContent = T.ver(data.tag_name);
@@ -446,8 +438,9 @@
       let url = "", label = "";
       if (os === "win") [url, label] = [window.DL.win, T.heroWin];
       if (os === "mac") [url, label] = chip === "intel" ? [window.DL.macIntel, T.heroIntel] : [window.DL.macArm, T.heroArm];
-      if (url) {
-        heroDl.href = url;
+      if (url || (os === "mac" && chip === "intel")) {
+        // Intel Mac: no package to offer, so point at the explanation instead.
+        heroDl.href = url || "#download";
         heroDl.textContent = label;
       }
     }

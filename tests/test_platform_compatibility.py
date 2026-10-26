@@ -19,6 +19,7 @@ from backend.app_meta import (
     migrate_legacy_dir,
     migrate_user_data,
 )
+from tests.frontend_source import ui_css, ui_source
 
 
 class PlatformCompatibilityTests(unittest.TestCase):
@@ -81,8 +82,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("/api/health", launcher)
         self.assertNotIn("server.started", launcher)
         self.assertIn("OPEN_EXTERNAL_LINKS_IN_BROWSER", launcher)
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
-        css = (root / "frontend" / "src" / "App.css").read_text(encoding="utf-8")
+        ui = ui_source()
+        css = ui_css()
         self.assertIn("isMacChrome", ui)
         self.assertIn("hasNativeTitlebar", ui)
         self.assertIn("data-native-titlebar", ui)
@@ -119,11 +120,11 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_translate_button_writes_when_glossary_hits_and_some_rows_are_skipped(self):
         root = Path(__file__).resolve().parents[1]
-        source = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
-        start = source.index("async function runTranslate")
-        body = source[start:source.index("async function writeBack", start)]
+        source = ui_source()
+        start = source.index("async function translateFile")
+        body = source[start:source.index("async function writeFile", start)]
         self.assertNotIn("if (data.skipped && !data.has_engine)", body)
-        self.assertIn("writeBackRows(nextRows)", body)
+        self.assertIn("return writeFile(path, next, summary)", body)
         self.assertIn("asText(row.target).trim()", body)
 
     def test_changelog_leads_with_app_version(self):
@@ -185,8 +186,10 @@ class PlatformCompatibilityTests(unittest.TestCase):
         for name in ("README.md", "README.en.md", "README.ja.md", "README.ko.md", "README.es.md"):
             text = (root / name).read_text(encoding="utf-8")
             self.assertTrue(text.split("<h1")[0].count('src="landing/shots/og.png"') == 1, name)
-            for who in ("WorkBuddy", "ChatGPT", "Claude", "_Setup.exe", "macOS_arm64.dmg", "macOS_x86_64.dmg"):
+            for who in ("WorkBuddy", "ChatGPT", "Claude", "_Setup.exe", "macOS_arm64.dmg"):
                 self.assertIn(who, text, f"{name}: {who}")
+            # Apple silicon only since v0.1.13.
+            self.assertNotIn("macOS_x86_64.dmg", text, name)
             self.assertNotIn("open source", text.lower(), name)
             self.assertNotIn("open-source", text.lower(), name)
         self.assertIn("docs/screenshots/app-glossary.png", readme)
@@ -213,7 +216,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertNotIn("v0.1.2", win)
         self.assertNotIn("|| 'v0.1.2'", win)
         self.assertIn("macos-latest", mac)
-        self.assertIn("macos-15-intel", mac)
+        self.assertNotIn("macos-15-intel", mac)
+        self.assertNotIn("x86_64", mac)
         self.assertNotIn("macos-13", mac)
         self.assertIn("build_macos.py", mac)
         self.assertIn("unittest discover", win)
@@ -238,7 +242,7 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("apply_chrome_theme", launch)
         self.assertIn("read_saved_dark", launch)
         self.assertIn("NSRequiresAquaSystemAppearance", (root / "Tuyi_macos.spec").read_text(encoding="utf-8"))
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        ui = ui_source()
         self.assertIn("pywebviewready", ui)
         self.assertIn("windows-latest", ci)
         self.assertIn("macos-latest", ci)
@@ -249,11 +253,11 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("Windows 10 或 11", html)
         self.assertIn("64 位", html)
         self.assertIn("Apple 芯片", html)
-        self.assertIn("Intel", html)
+        self.assertIn("Intel Mac 不支持", html)
         self.assertIn("macArm", html)
-        self.assertIn("macIntel", html)
         self.assertIn("macOS_arm64.dmg", html)
-        self.assertIn("macOS_x86_64.dmg", html)
+        self.assertNotIn("macOS_x86_64.dmg", html)
+        self.assertNotIn('data-chip="intel"', html)
         self.assertIn("关于本机", html)
         self.assertIn("仍要运行", html)
         self.assertIn("ODA File Converter", html)
@@ -361,12 +365,12 @@ class PlatformCompatibilityTests(unittest.TestCase):
     def test_cad_picker_is_dwg_dxf_and_multiple(self):
         root = Path(__file__).resolve().parents[1]
         bridge = (root / "desktop" / "native_bridge.py").read_text(encoding="utf-8")
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
+        ui = ui_source()
         self.assertIn('file_types=("图纸 (*.dwg;*.dxf)",)', bridge)
         self.assertIn("multiple=True", bridge)
         self.assertIn('accept=".dwg,.dxf"', ui)
         self.assertIn("multiple hidden", ui)
-        self.assertIn("onClick={openDrawings}", ui)
+        self.assertIn("onAdd={openDrawings}", ui)
         self.assertIn("添加图纸", ui)
         self.assertIn("className=\"plus\"", ui)
         self.assertIn("rail-go", ui)
@@ -377,8 +381,8 @@ class PlatformCompatibilityTests(unittest.TestCase):
 
     def test_frontend_ui_uses_os_titlebar_not_mac_lights_on_windows(self):
         root = Path(__file__).resolve().parents[1]
-        ui = (root / "frontend" / "src" / "App.jsx").read_text(encoding="utf-8")
-        css = (root / "frontend" / "src" / "App.css").read_text(encoding="utf-8")
+        ui = ui_source()
+        css = ui_css()
         launcher = (root / "desktop" / "launcher.py").read_text(encoding="utf-8")
         self.assertIn("frameless=False", launcher)
         self.assertIn("/Win/i.test(platform)", ui)
@@ -398,10 +402,10 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("快速翻译", ui)
         self.assertIn("检测", ui)
         self.assertIn("lang-pop", ui)
-        self.assertIn("openOdaSettings", ui)
+        self.assertIn('onOdaHelp={() => toggleSettings("wr")}', ui)
         self.assertIn("live missing", ui)
         self.assertIn('if (view === "glossary")', ui)
-        self.assertIn("await closePage();", ui)
+        self.assertIn("leavePage();", ui)
         self.assertIn("lucide-react", ui)
         self.assertIn("越南语", ui)
         self.assertIn("disabled={code === targetLang}", ui)
@@ -423,11 +427,11 @@ class PlatformCompatibilityTests(unittest.TestCase):
         self.assertIn("/api/updates/cancel", ui)
         self.assertIn("检查更新", ui)
         self.assertNotIn(">全部文字", ui)
-        self.assertIn("set-tabs", ui)
+        self.assertIn("set-nav", ui)
         self.assertIn("外观和更新", ui)
         self.assertIn("图上怎么写", ui)
         self.assertIn("调整左右宽度", ui)
-        self.assertIn("writeBackRows", ui)
+        self.assertIn("writeFile(", ui)
         self.assertIn("/api/drawings/close", ui)
         self.assertIn("去掉", ui)
         self.assertIn("style: layout", ui)

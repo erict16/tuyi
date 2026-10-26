@@ -19,10 +19,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Apple silicon only. The Intel build was dropped in v0.1.13.
           - os: macos-latest
             arch: arm64
-          - os: macos-15-intel
-            arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
