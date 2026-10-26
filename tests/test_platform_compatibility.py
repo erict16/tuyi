@@ -573,6 +573,31 @@ class PlatformCompatibilityTests(unittest.TestCase):
             self.assertEqual(command[-1], "input.dwg")
             self.assertEqual(destination.read_bytes(), b"dxf")
 
+    def test_same_dwg_launches_oda_once(self):
+        with tempfile.TemporaryDirectory() as root:
+            source = Path(root) / "plan.dwg"
+            source.write_bytes(b"dwg v1")
+            launches = []
+
+            def fake_convert(src, dest, **_):
+                launches.append(src)
+                Path(dest).write_bytes(b"dxf of " + Path(src).read_bytes())
+
+            with (
+                patch("backend.app_meta.ODA_CACHE_DIR", Path(root) / "cache"),
+                patch("backend.cad.require_odafc"),
+                patch("backend.cad.convert_with_odafc", side_effect=fake_convert),
+            ):
+                for name in ("extract.dxf", "writeback.dxf"):
+                    cad.dwg_to_work_dxf(str(source), str(Path(root) / name))
+                self.assertEqual(len(launches), 1)
+                self.assertEqual((Path(root) / "writeback.dxf").read_bytes(), b"dxf of dwg v1")
+
+                source.write_bytes(b"dwg v2")
+                cad.dwg_to_work_dxf(str(source), str(Path(root) / "edited.dxf"))
+                self.assertEqual(len(launches), 2)
+                self.assertEqual((Path(root) / "edited.dxf").read_bytes(), b"dxf of dwg v2")
+
     def test_oda_working_dxf_uses_an_oda_output_identifier(self):
         self.assertEqual(cad.WORK_DXF_VERSION, "ACAD2010")
         self.assertIn(cad.WORK_DXF_VERSION, cad.ODA_OUTPUT_VERSIONS)

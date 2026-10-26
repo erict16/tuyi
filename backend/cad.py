@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import subprocess
@@ -13,11 +14,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
+from backend import app_meta
 from backend.storage import atomic_output_path
 
 # ODA File Converter accepts its own ``ACAD*`` identifiers, not ezdxf's
 # ``R2010`` DXF-version label.  This value is passed to ODA directly.
 WORK_DXF_VERSION = "ACAD2010"
+# Each ODA run is a visible app launch on macOS. One translation reads the same
+# DWG more than once (extract, write-back, PDF), so keep the newest work DXFs.
+WORK_DXF_CACHE_ENTRIES = 16
 ODA_OUTPUT_VERSIONS = ("ACAD9", "ACAD10", "ACAD12", "ACAD13", "ACAD14", "ACAD2000", "ACAD2004", "ACAD2007", "ACAD2010", "ACAD2013", "ACAD2018")
 
 # Windows 安装包推荐目录结构（与主程序 exe 同级）：
@@ -509,10 +514,37 @@ def convert_with_odafc(source: str, destination: str, *, version: str, audit: bo
         odafc.convert(str(staged_source), destination, version=version, audit=audit, replace=replace)
 
 
+def _work_dxf_cache_path(dwg_path: str) -> Path:
+    """Cache key is the DWG's bytes, so an edited or replaced drawing converts again."""
+    digest = hashlib.sha256(f"{WORK_DXF_VERSION}\0".encode("ascii"))
+    with open(dwg_path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return app_meta.ODA_CACHE_DIR / f"{digest.hexdigest()}.dxf"
+
+
+def _store_work_dxf(work_dxf_path: str, cached: Path) -> None:
+    try:
+        with atomic_output_path(cached) as temporary:
+            shutil.copyfile(work_dxf_path, temporary)
+        entries = sorted(cached.parent.glob("*.dxf"), key=lambda path: path.stat().st_mtime, reverse=True)
+        for stale in entries[WORK_DXF_CACHE_ENTRIES:]:
+            stale.unlink(missing_ok=True)
+    except OSError:
+        pass  # The cache only saves ODA launches; a read-only home must not fail the job.
+
+
 def dwg_to_work_dxf(dwg_path: str, work_dxf_path: str, log: LogFn = None) -> None:
     require_odafc(log)
+    cached = _work_dxf_cache_path(dwg_path)
+    if cached.is_file():
+        shutil.copyfile(cached, work_dxf_path)
+        os.utime(cached)
+        _log(log, "DWG 已转换为 DXF 中间文件（复用缓存，未再启动 ODA）")
+        return
     _log(log, "DWG → DXF AutoCAD 2010（工作副本）...")
     convert_with_odafc(dwg_path, work_dxf_path, version=WORK_DXF_VERSION, audit=True, replace=True)
+    _store_work_dxf(work_dxf_path, cached)
     _log(log, "DWG 已转换为 DXF 中间文件")
 
 

@@ -20,6 +20,7 @@ CONFIG_PATH = Path.home() / ".tuyi_config.json"
 QUEUE_PATH = Path.home() / ".tuyi_queue.json"
 ASSETS_PATH = Path.home() / ".tuyi_language_assets.sqlite3"
 DROPPED_FILES_DIR = Path.home() / ".tuyi_dropped_files"
+ODA_CACHE_DIR = Path.home() / ".tuyi_oda_cache"
 OUTPUT_DIR_NAME = "Tuyi output"
 
 # One-time copy from Honsen filenames. Do not write new files here.
