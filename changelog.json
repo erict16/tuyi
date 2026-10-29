@@ -1,6 +1,16 @@
 {
   "changelog": [
     {
+      "version": "0.1.14",
+      "date": "2026年10月",
+      "title": "标题栏：CV2 OLTC，公司名两行",
+      "content": [
+        "[修复] 标题栏「型有载分接开关」写成 OLTC，按正常字宽排在型号后面，不再被拉宽；「型无励磁分接开关」写成 OCTC",
+        "[修复] 公司名「Shanghai Huaming Power Equipment Co., Ltd.」在标题栏里排成两行，不出格、不压扁",
+        "[优化] 翻译一张 DWG 时 ODA 只启动一次，同一张图再译或导出 PDF 不再反复弹出"
+      ]
+    },
+    {
       "version": "0.1.13",
       "date": "2026年10月",
       "title": "界面重做，重复的字每处都译",
