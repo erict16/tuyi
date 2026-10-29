@@ -165,7 +165,7 @@ TITLE_BLOCK_ZH_TO_EN = {
     "中性点引出环": "Current take-off ring",
     "钟罩式安装法兰": "Bell-type mounting flange",
     "型无载分接开关": "OCTC",
-    "型无励磁分接开关": "DETC",
+    "型无励磁分接开关": "OCTC",
 }
 
 

@@ -64,6 +64,13 @@ class GlossaryAccuracyTests(unittest.TestCase):
         self.assertEqual(self.hit("无励磁分接开关"), "DETC")
         self.assertEqual(self.hit("无载分接开关"), "OCTC")
 
+    def test_title_block_type_line_is_oltc_or_octc(self):
+        # Title block "CV2 型有载分接开关" prints as "CV2 OLTC"; Eric wants the
+        # off-circuit family as OCTC there, whichever Chinese name the engineer used.
+        self.assertEqual(self.hit("型有载分接开关"), "OLTC")
+        self.assertEqual(self.hit("型无载分接开关"), "OCTC")
+        self.assertEqual(self.hit("型无励磁分接开关"), "OCTC")
+
     def test_company_name_on_every_frame(self):
         self.assertEqual(self.hit("上海华明电力设备制造有限公司"), "Shanghai Huaming Power Equipment Co., Ltd.")
 

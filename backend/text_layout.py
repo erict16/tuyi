@@ -6,6 +6,54 @@ import re
 
 from backend.styles import CJK_RE, register_cjk_font
 
+# Long title-block names that read better as two lines than squeezed into one.
+# The cell beside the HM logo is about 2.5x the CJK text height, so two lines
+# at 62% of that height fit without touching the rules above or below.
+TWO_LINE_LABELS = {
+    "Shanghai Huaming Power Equipment Co., Ltd.": ("Shanghai Huaming Power", "Equipment Co., Ltd."),
+}
+TWO_LINE_HEIGHT = 0.62
+TWO_LINE_PITCH = 1.6
+
+
+def _split_two_lines(entity, font, lines, budget, height, width_factor) -> bool:
+    """Stack a TEXT label as two lines centred on its original band."""
+    from ezdxf.enums import TextEntityAlignment
+
+    dxf = entity.dxf
+    halign = dxf.get("halign", 0)
+    if dxf.get("valign", 0) or dxf.get("rotation", 0) or halign == 4:
+        return False
+    if halign in {1, 2}:
+        x, base = dxf.align_point.x, dxf.align_point.y
+        align = TextEntityAlignment.CENTER if halign == 1 else TextEntityAlignment.RIGHT
+    else:
+        # Left, ALIGNED and FIT all start at the insert point.
+        x, base = dxf.insert.x, dxf.insert.y
+        align = TextEntityAlignment.LEFT
+    line_height = height * TWO_LINE_HEIGHT
+    if align == TextEntityAlignment.LEFT:
+        # The taller first line would otherwise touch the logo's ® mark.
+        indent = line_height * 0.3
+        x += indent
+        budget -= indent
+    pitch = line_height * TWO_LINE_PITCH
+    widest = max(font.text_width(line) for line in lines) * line_height * width_factor
+    if widest > budget:
+        width_factor *= budget / widest
+    top = base + height / 2 + pitch / 2 - line_height / 2
+    layout = entity.get_layout()
+    if layout is None:
+        return False
+    second = entity.copy()
+    layout.add_entity(second)
+    for text, line, baseline in ((entity, lines[0], top), (second, lines[1], top - pitch)):
+        text.dxf.text = line
+        text.dxf.height = line_height
+        text.dxf.width = width_factor
+        text.set_placement((x, baseline), align=align)
+    return True
+
 
 def fit_translated_labels(doc, rows) -> int:
     """Shrink only expanded CJK-to-Latin labels; never enlarge text or move geometry.
@@ -14,7 +62,10 @@ def fit_translated_labels(doc, rows) -> int:
     explicit column width, so a longer translation cannot create extra lines on
     top of the next annotation. Rich height/width/font runs and multiline notes
     are left intact because their runs need a separate layout decision.
+    FIT/ALIGNED text that got shorter is left-aligned instead of stretched, and
+    the names in TWO_LINE_LABELS are stacked as two lines instead of squeezed.
     """
+    from ezdxf.enums import TextEntityAlignment
     from ezdxf.fonts import fonts
 
     font_path = register_cjk_font()
@@ -58,7 +109,20 @@ def fit_translated_labels(doc, rows) -> int:
             if span > 0:
                 budget = span
         needed = font.text_width(target) * height * width_factor
-        if not needed or not budget or needed <= budget:
+        if not needed or not budget:
+            continue
+        stretched = not is_mtext and entity.dxf.get("halign", 0) in {3, 5}
+        if needed <= budget:
+            if stretched and needed < budget:
+                # FIT/ALIGNED would stretch a short code such as "OLTC" across
+                # the whole width the Chinese took; keep it at its own width.
+                entity.set_placement(entity.dxf.insert, align=TextEntityAlignment.LEFT)
+                changed += 1
+            continue
+        lines = TWO_LINE_LABELS.get(target)
+        if (lines and kind == "TEXT"
+                and _split_two_lines(entity, font, lines, budget, height, width_factor)):
+            changed += 1
             continue
         ratio = budget / needed
         height_scale = ratio * 0.9 if is_mtext else max(0.65, math.sqrt(ratio))

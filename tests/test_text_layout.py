@@ -59,6 +59,45 @@ class TranslationLayoutTests(unittest.TestCase):
         self.assertEqual(number.dxf.height,4)
         self.assertEqual(number.dxf.width,1)
 
+    def test_company_name_wraps_to_two_lines_inside_its_band(self):
+        from ezdxf.enums import TextEntityAlignment
+        from ezdxf.fonts import fonts
+        doc = ezdxf.new()
+        block = doc.blocks.new("FRAME")
+        source = "上海华明电力设备制造有限公司"
+        target = "Shanghai Huaming Power Equipment Co., Ltd."
+        # Real CV2 frame: FIT text from x -43.8 to -1.3, baseline 15.1, height 5.8,
+        # in a cell from y 11.8 to 26.
+        name = block.add_text(target, height=5.8)
+        name.set_placement((-43.8, 15.1), (-1.3, 15.1), align=TextEntityAlignment.FIT)
+        count = fit_translated_labels(doc, [dict(handle=name.dxf.handle, source=source, target=target)])
+        self.assertEqual(count, 1)
+        texts = sorted(block.query("TEXT"), key=lambda t: -t.dxf.insert.y)
+        self.assertEqual([t.dxf.text for t in texts], ["Shanghai Huaming Power", "Equipment Co., Ltd."])
+        font = fonts.make_font(str(register_cjk_font()), cap_height=1)
+        for text in texts:
+            self.assertEqual(text.dxf.halign, 0)
+            self.assertAlmostEqual(text.dxf.insert.x, texts[0].dxf.insert.x)
+            self.assertGreater(text.dxf.insert.x, -43.8)
+            self.assertGreaterEqual(text.dxf.height, 3.5)
+            self.assertLessEqual(text.dxf.insert.x + font.text_width(text.dxf.text) * text.dxf.height * text.dxf.width, -1.3 + 1e-6)
+        top = texts[0].dxf.insert.y + texts[0].dxf.height
+        bottom = texts[1].dxf.insert.y - 0.3 * texts[1].dxf.height  # descenders
+        self.assertLess(top, 26)
+        self.assertGreater(bottom, 11.8)
+        self.assertGreater(texts[0].dxf.insert.y - texts[1].dxf.insert.y, texts[1].dxf.height)
+
+    def test_short_fit_code_is_not_stretched(self):
+        from ezdxf.enums import TextEntityAlignment
+        doc = ezdxf.new()
+        code = doc.modelspace().add_text("OLTC", height=5, dxfattribs={"width": 0.7})
+        code.set_placement((10, 3), (60, 3), align=TextEntityAlignment.FIT)
+        fit_translated_labels(doc, [dict(handle=code.dxf.handle, source="型有载分接开关", target="OLTC")])
+        self.assertEqual(code.dxf.halign, 0)
+        self.assertEqual(tuple(code.dxf.insert)[:2], (10, 3))
+        self.assertEqual(code.dxf.height, 5)
+        self.assertEqual(code.dxf.width, 0.7)
+
     def test_rich_multiline_mtext_is_preserved(self):
         doc = ezdxf.new()
         raw = r"{\C1;First\PSecond}"
