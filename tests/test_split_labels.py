@@ -91,16 +91,10 @@ class TitleFitTests(unittest.TestCase):
         doc, msp = self._sheet(3000)
         target = "Outline Drawing"
         title = msp.add_mtext(target, dxfattribs={"insert": (0, 150), "char_height": 10})
-        from ezdxf.fonts import fonts
-        from backend.styles import register_cjk_font
-        from backend.text_layout import _free_width, _obstacles, _rendered_width
-        font = fonts.make_font(str(register_cjk_font()), cap_height=1.0)
-        used = font.text_width("外形图") * 10
-        found = _obstacles(msp)
-        probe = (used, _rendered_width(title, "外形图"), _rendered_width(title, target),
-                 font.text_width(target) * 10, len(found), _free_width(title, 10, used, {}))
-        fit_translated_labels(doc, [{"handle": title.dxf.handle, "source": "外形图", "target": target}])
-        self.assertEqual(title.dxf.char_height, 10, f"used, rendered src/tgt, measured tgt, obstacles, room: {probe}")
+        # Five characters: 2.5x their width clears the English with any CJK font
+        # (CI on Windows measures CJK narrower than the bundled Noto).
+        fit_translated_labels(doc, [{"handle": title.dxf.handle, "source": "外形尺寸图", "target": target}])
+        self.assertEqual(title.dxf.char_height, 10)
 
     def test_shrunk_free_label_keeps_its_baseline(self):
         doc, msp = self._sheet(120)
