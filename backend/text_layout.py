@@ -137,29 +137,40 @@ def _split_two_lines(entity, font, lines, budget, height, width_factor) -> bool:
     return True
 
 
-def _room_budget(entity, height: float, used: float, target: str, font, cache: dict) -> float | None:
-    """Free width after a column-less MTEXT, in the same units as ``used``.
-
-    ``used`` comes from the fallback CJK font, which runs wider than the font the
-    drawing really renders with, so convert through the rendered width of the
-    translation (ezdxf measures it with the entity's own style) before comparing
-    with real geometry, then convert back.
-    """
+def _rendered_width(entity, text: str) -> float:
+    """Width ezdxf gives ``text`` in this MTEXT's own style and font code."""
     from ezdxf.tools.text_size import mtext_size
 
+    lead = LEAD_FONT_RE.match(entity.text or "")
+    try:
+        probe = entity.copy()
+        probe.text = (lead.group(0).lstrip("{") if lead else "") + text
+        return float(mtext_size(probe).total_width)
+    except Exception:
+        return 0.0
+
+
+def _room_budget(entity, height: float, used: float, source: str, target: str, font,
+                 cache: dict) -> float | None:
+    """Free width after a column-less MTEXT, in the same units as ``used``.
+
+    ``used`` comes from the bundled CJK font, but the drawing renders with the
+    entity's own style, whose widths differ per platform. Measure the Chinese
+    and the translation with that same renderer, find the free space in drawing
+    units, then convert it back to the bundled-font units the fit works in.
+    """
     measured = font.text_width(target) * height
     if measured <= 0:
         return None
-    try:
-        rendered = mtext_size(entity).total_width
-    except Exception:
-        rendered = 0.0
-    # A style font ezdxf cannot load measures as nothing; fall back to ours.
-    scale = rendered / measured if rendered > 0 else 1.0
-    room = _free_width(entity, height, used * scale, cache)
+    rendered_target = _rendered_width(entity, target)
+    rendered_source = _rendered_width(entity, source)
+    if rendered_target <= 0 or rendered_source <= 0:
+        # A style font ezdxf cannot load measures as nothing; use ours.
+        rendered_target, rendered_source = measured, used
+    room = _free_width(entity, height, rendered_source, cache)
     if room is None:
         return None
-    return max(0.0, room - height) / scale
+    return max(0.0, room - height) * measured / rendered_target
 
 
 TWIN_DIGITS_RE = re.compile(r"\d+")
@@ -253,7 +264,7 @@ def fit_translated_labels(doc, rows) -> int:
                 # No column: a drawing title, say. It may run on into empty
                 # space up to whatever comes next on its line (often the sheet
                 # frame), so it never crosses the border as an unfitted title did.
-                room = _room_budget(entity, height, budget, target, font, obstacles)
+                room = _room_budget(entity, height, budget, source, target, font, obstacles)
                 if room is not None:
                     budget = max(budget, min(room, budget * ROOM_CAP))
                     measured_room = True
