@@ -40,34 +40,36 @@ def _obstacles(layout) -> list[tuple[str, float, float, float, float]]:
 
     Blocks are exploded and lines/polylines are split into segments, so a sheet
     frame counts as four thin rules instead of one box around the whole drawing.
+    An entity that cannot be measured is skipped on its own.
     """
     from ezdxf import bbox, disassemble
 
     found = []
     try:
-        for entity in disassemble.recursive_decompose(layout):
+        primitives = list(disassemble.recursive_decompose(layout))
+    except Exception:
+        primitives = list(layout)
+    for entity in primitives:
+        try:
             kind = entity.dxftype()
             handle = entity.dxf.get("handle", "") or ""
             if kind == "LINE":
                 segments = [(entity.dxf.start, entity.dxf.end)]
             elif kind == "LWPOLYLINE":
-                vertices = [entity.ocs().to_wcs((x, y, entity.dxf.elevation)) for x, y in entity.get_points("xy")]
-                if entity.closed and vertices:
-                    vertices.append(vertices[0])
-                segments = list(zip(vertices, vertices[1:]))
+                points = [(float(x), float(y)) for x, y in entity.get_points("xy")]
+                if entity.closed and points:
+                    points.append(points[0])
+                segments = list(zip(points, points[1:]))
             else:
-                try:
-                    ext = bbox.extents([entity])
-                except Exception:
-                    continue
+                ext = bbox.extents([entity])
                 if ext.has_data:
                     found.append((handle, ext.extmin.x, ext.extmin.y, ext.extmax.x, ext.extmax.y))
                 continue
             for start, end in segments:
                 found.append((handle, min(start[0], end[0]), min(start[1], end[1]),
                               max(start[0], end[0]), max(start[1], end[1])))
-    except Exception:
-        return []
+        except Exception:
+            continue
     return found
 
 
