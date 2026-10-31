@@ -323,6 +323,118 @@ def item_passes_text_filters(
     return True
 
 
+SPLIT_CJK_RE = re.compile(r"[㐀-鿿]")
+
+
+def _single_cjk_geometry(doc, row: dict):
+    """Placement of a one-character CJK TEXT/MTEXT row, or None."""
+    if row.get("field", "text") != "text" or row.get("type") not in {"TEXT", "MTEXT"}:
+        return None
+    char = _as_text(row.get("source")).strip()
+    if len(char) != 1 or not SPLIT_CJK_RE.match(char):
+        return None
+    entity = _entity_from_handle(doc, row.get("handle") or "")
+    if entity is None:
+        return None
+    dxf = entity.dxf
+    height = float(dxf.get("char_height" if entity.dxftype() == "MTEXT" else "height", 0) or 0)
+    if height <= 0:
+        return None
+    insert = dxf.get("insert")
+    if insert is None:
+        return None
+    return {
+        "owner": dxf.get("owner", ""),
+        "layer": dxf.get("layer", ""),
+        "style": dxf.get("style", ""),
+        "kind": entity.dxftype(),
+        "rotation": round(float(dxf.get("rotation", 0) or 0), 3),
+        "height": height,
+        "x": float(insert.x),
+        "y": float(insert.y),
+        "char": char,
+    }
+
+
+def merge_split_cjk_runs(doc, rows: list[dict]) -> list[dict]:
+    """Join labels a CAD program wrote one character per entity.
+
+    CAXA stores a detail label such as 「输出端子尺寸」 as six MTEXTs on one
+    baseline. Translated one by one they become six unrelated words (or stay
+    Chinese, since a single character rarely has a glossary entry), so a run of
+    single CJK characters in the same block, layer, style, height and rotation,
+    on one baseline and evenly spaced, becomes one row. The first entity takes
+    the translation; ``run_handles`` lists the others, which write-back clears.
+    """
+    geometry = {}
+    for index, row in enumerate(rows):
+        geo = _single_cjk_geometry(doc, row)
+        if geo is not None and not geo["rotation"]:
+            geometry[index] = geo
+    if len(geometry) < 2:
+        return rows
+    buckets: dict[tuple, list[int]] = {}
+    for index, geo in geometry.items():
+        key = (geo["owner"], geo["layer"], geo["style"], geo["kind"], round(geo["height"], 2))
+        buckets.setdefault(key, []).append(index)
+    absorbed: dict[int, list[int]] = {}
+    skip = set()
+    for indexes in buckets.values():
+        indexes.sort(key=lambda i: (round(geometry[i]["y"], 1), geometry[i]["x"]))
+        run = [indexes[0]]
+        for index in indexes[1:] + [None]:
+            if index is not None:
+                prev, cur = geometry[run[-1]], geometry[index]
+                gap = cur["x"] - prev["x"]
+                if abs(cur["y"] - prev["y"]) <= 0.1 * cur["height"] and 0.5 * cur["height"] <= gap <= 1.6 * cur["height"]:
+                    run.append(index)
+                    continue
+            if len(run) > 1:
+                absorbed[run[0]] = run[1:]
+                skip.update(run[1:])
+            if index is not None:
+                run = [index]
+    if not absorbed:
+        return rows
+    merged = []
+    for index, row in enumerate(rows):
+        if index in skip:
+            continue
+        if index in absorbed:
+            members = [index] + absorbed[index]
+            text = "".join(geometry[i]["char"] for i in members)
+            row = {
+                **row,
+                "source": text,
+                "raw": text,
+                "run_handles": [rows[i].get("handle") or "" for i in members[1:]],
+            }
+        merged.append(row)
+    seen = set()
+    for index, row in enumerate(merged):
+        row["id"] = index
+        row["duplicate"] = row["source"] in seen
+        row["selected"] = not row["duplicate"]
+        seen.add(row["source"])
+    return merged
+
+
+def clear_run_members(doc, items: list[dict]) -> int:
+    """Blank the trailing characters of a merged run; the lead holds the translation."""
+    cleared = 0
+    for item in items:
+        for handle in item.get("run_handles") or []:
+            entity = _entity_from_handle(doc, handle)
+            if entity is None:
+                continue
+            if entity.dxftype() == "MTEXT":
+                entity.text = ""
+            else:
+                entity.dxf.text = ""
+            cleared += 1
+    return cleared
+
+
 def extract_preview(
     path: str,
     *,
@@ -399,6 +511,7 @@ def extract_preview(
                     "via": "",
                 }
             )
+        rows = merge_split_cjk_runs(doc, rows)
         rows = [
             row
             for row in rows
@@ -638,6 +751,7 @@ def writeback_rows(
                 if field == "tag":
                     translator._sync_attrib_tags(doc, item.get("source") or "", target)
                 written += 1
+        clear_run_members(doc, writable)
         rewrite_shx_styles(doc, translator.safe_log)
         from backend.text_layout import fit_translated_labels
         fit_translated_labels(doc, writable)
@@ -900,6 +1014,29 @@ def _symbol_style(doc) -> str:
     return _SYMBOL_STYLE
 
 
+# One plain font code wrapping a whole label, as CAXA writes on titles:
+# \fPingFang SC Light|b0|i0|c134|p0;Title
+_LONE_PLAIN_FONT = re.compile(r"^(\{?)\\f[^|;\\]*\|b0\|i0\|[^;\\]*;(.*?)(\}?)$", re.S)
+
+
+def _drop_lone_font_code(text: str) -> str:
+    """Let ezdxf draw a one-font label as plain MTEXT.
+
+    Any inline code sends MTEXT down ezdxf's complex renderer, which cannot find
+    fonts such as PingFang SC Light, falls back to an italic face and lays words
+    out with the other font's widths: spaces vanish or double and the last word
+    wraps although the MTEXT has no column. A lone non-bold, non-italic font code
+    adds nothing the text style does not, so the plot drops it.
+    """
+    match = _LONE_PLAIN_FONT.match(text)
+    if not match or bool(match.group(1)) != bool(match.group(3)):
+        return text
+    body = match.group(2)
+    if "\\" in body or "{" in body or "}" in body:
+        return text
+    return body
+
+
 def _prepare_plot_text(doc) -> None:
     greek = []
     for entity in list(doc.entitydb.values()):
@@ -910,6 +1047,11 @@ def _prepare_plot_text(doc) -> None:
         if "\\M+" in raw.upper():
             text = _legacy_plot_text(raw)
             entity.dxf.text = text
+        if entity.dxftype() == "MTEXT":
+            plain = _drop_lone_font_code(text)
+            if plain != text:
+                text = plain
+                entity.dxf.text = text
         if any(char in text for char in _GREEK_DELTA):
             greek.append(entity)
     if not greek:
