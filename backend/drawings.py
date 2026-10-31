@@ -1014,6 +1014,29 @@ def _symbol_style(doc) -> str:
     return _SYMBOL_STYLE
 
 
+# One plain font code wrapping a whole label, as CAXA writes on titles:
+# \fPingFang SC Light|b0|i0|c134|p0;Title
+_LONE_PLAIN_FONT = re.compile(r"^(\{?)\\f[^|;\\]*\|b0\|i0\|[^;\\]*;(.*?)(\}?)$", re.S)
+
+
+def _drop_lone_font_code(text: str) -> str:
+    """Let ezdxf draw a one-font label as plain MTEXT.
+
+    Any inline code sends MTEXT down ezdxf's complex renderer, which cannot find
+    fonts such as PingFang SC Light, falls back to an italic face and lays words
+    out with the other font's widths: spaces vanish or double and the last word
+    wraps although the MTEXT has no column. A lone non-bold, non-italic font code
+    adds nothing the text style does not, so the plot drops it.
+    """
+    match = _LONE_PLAIN_FONT.match(text)
+    if not match or bool(match.group(1)) != bool(match.group(3)):
+        return text
+    body = match.group(2)
+    if "\\" in body or "{" in body or "}" in body:
+        return text
+    return body
+
+
 def _prepare_plot_text(doc) -> None:
     greek = []
     for entity in list(doc.entitydb.values()):
@@ -1024,6 +1047,11 @@ def _prepare_plot_text(doc) -> None:
         if "\\M+" in raw.upper():
             text = _legacy_plot_text(raw)
             entity.dxf.text = text
+        if entity.dxftype() == "MTEXT":
+            plain = _drop_lone_font_code(text)
+            if plain != text:
+                text = plain
+                entity.dxf.text = text
         if any(char in text for char in _GREEK_DELTA):
             greek.append(entity)
     if not greek:

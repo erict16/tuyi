@@ -7,7 +7,7 @@ from pathlib import Path
 import ezdxf
 from ezdxf.tools.text_size import mtext_size
 
-from backend.drawings import extract_preview, translate_drawing
+from backend.drawings import _drop_lone_font_code, extract_preview, translate_drawing
 from backend.text_layout import fit_translated_labels
 
 
@@ -100,6 +100,30 @@ class TitleFitTests(unittest.TestCase):
         height = label.dxf.char_height
         self.assertLess(height, 10)
         self.assertAlmostEqual(label.dxf.insert.y - height, 100 - 10)
+
+    def test_twin_labels_share_the_smaller_size(self):
+        doc, msp = self._sheet(3000)
+        msp.add_line((180, 120), (180, 200))  # a dimension close after the left label
+        left = msp.add_mtext("Mounting dimensions, 10 contacts", dxfattribs={"insert": (0, 160), "char_height": 10})
+        right = msp.add_mtext("Mounting dimensions, 12 contacts", dxfattribs={"insert": (1200, 160), "char_height": 10})
+        fit_translated_labels(doc, [
+            {"handle": left.dxf.handle, "source": "10个触头安装尺寸图", "target": "Mounting dimensions, 10 contacts"},
+            {"handle": right.dxf.handle, "source": "12个触头安装尺寸图", "target": "Mounting dimensions, 12 contacts"},
+        ])
+        self.assertLess(left.dxf.char_height, 10)
+        self.assertAlmostEqual(left.dxf.char_height, right.dxf.char_height)
+        self.assertAlmostEqual(right.dxf.insert.y - right.dxf.char_height, 160 - 10)
+
+
+class PlotFontCodeTests(unittest.TestCase):
+    def test_lone_plain_font_code_is_dropped_for_plotting(self):
+        self.assertEqual(_drop_lone_font_code(r"\fPingFang SC Light|b0|i0|c134|p0;CV2 W Bell"), "CV2 W Bell")
+        self.assertEqual(_drop_lone_font_code(r"{\fArial|b0|i0|c0|p0;A B}"), "A B")
+
+    def test_styled_or_mixed_font_codes_are_kept(self):
+        for text in (r"\fArial|b1|i0|c0|p0;Bold", r"\fArial|b0|i1|c0|p0;Italic",
+                     r"\fArial|b0|i0|c0|p0;A\PB", r"\fArial|b0|i0|c0|p0;A{\C1;B}"):
+            self.assertEqual(_drop_lone_font_code(text), text)
 
 
 if __name__ == "__main__":

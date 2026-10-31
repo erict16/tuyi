@@ -161,13 +161,41 @@ def _room_budget(entity, height: float, used: float, target: str, font, cache: d
     return max(0.0, room - height) / scale
 
 
+TWIN_DIGITS_RE = re.compile(r"\d+")
+
+
+def _match_twin_labels(labels) -> int:
+    """Give twin free labels one size: the smallest any of them needed.
+
+    Side-by-side views carry labels that differ only in a number (「10个触头安装
+    尺寸图」 and 「12个触头安装尺寸图」). Free space differs per view, so each
+    would otherwise fit to its own size and the pair would look mismatched.
+    """
+    groups: dict[tuple, list] = {}
+    for entity, source, height in labels:
+        key = (TWIN_DIGITS_RE.sub("#", source), round(height, 4), entity.dxf.get("layer", ""))
+        groups.setdefault(key, []).append(entity)
+    changed = 0
+    for members in groups.values():
+        if len(members) < 2:
+            continue
+        smallest = min(float(entity.dxf.char_height) for entity in members)
+        for entity in members:
+            current = float(entity.dxf.char_height)
+            if current > smallest + 1e-9:
+                entity.dxf.char_height = smallest
+                _keep_mtext_baseline(entity, current - smallest)
+                changed += 1
+    return changed
+
+
 def fit_translated_labels(doc, rows) -> int:
     """Shrink only expanded CJK-to-Latin labels; never enlarge text or move geometry.
 
     A shrunk column-less MTEXT attached at the top or middle drops by the height
     it lost so it keeps its baseline. A column-less MTEXT (a sheet title) may
     first use the empty space after it on its line, up to the next text, rule
-    or frame.
+    or frame; twin labels that differ only in a number then share one size.
 
     The original text width is the safe budget for TEXT. MTEXT also respects its
     explicit column width, so a longer translation cannot create extra lines on
@@ -186,6 +214,7 @@ def fit_translated_labels(doc, rows) -> int:
     changed = 0
     seen = set()
     obstacles: dict = {}
+    free_labels = []
     for row in rows:
         handle = row.get("handle") or ""
         source = row.get("source") or ""
@@ -234,6 +263,8 @@ def fit_translated_labels(doc, rows) -> int:
         needed = font.text_width(target) * height * width_factor
         if not needed or not budget:
             continue
+        if is_mtext and not float(entity.dxf.get("width", 0) or 0):
+            free_labels.append((entity, source, height))
         stretched = not is_mtext and entity.dxf.get("halign", 0) in {3, 5}
         if needed <= budget:
             if stretched and needed < budget:
@@ -260,4 +291,4 @@ def fit_translated_labels(doc, rows) -> int:
         if not is_mtext and entity.dxf.get("halign", 0) not in {3, 5}:
             entity.dxf.width = width_factor * ratio / height_scale
         changed += 1
-    return changed
+    return changed + _match_twin_labels(free_labels)
