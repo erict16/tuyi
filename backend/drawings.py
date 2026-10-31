@@ -919,6 +919,8 @@ def translate_drawing(
         "glossary": translated["glossary"],
         "mt": translated["mt"],
         "skipped": translated["skipped"],
+        "has_engine": translated["has_engine"],
+        "provider": provider,
         "untranslated": left,
     }
 

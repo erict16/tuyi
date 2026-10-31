@@ -373,6 +373,37 @@ class EngineAndGlossaryTests(unittest.TestCase):
         self.assertGreaterEqual(result["skipped"], 1)
         self.assertFalse(result["has_engine"])
 
+    def test_deepl_env_var_keeps_engine_when_config_key_empty(self):
+        """configure_engine must fall back to DEEPL_API_KEY env var when the
+        saved config has no key, so CLI runs that only set the env var still
+        translate terms that miss the glossary."""
+        with patch.dict("os.environ", {"DEEPL_API_KEY": "dummy-key-for-test-xxxx:fx"}, clear=False):
+            with patch("deepl.Translator") as deepl_cls:
+                deepl_cls.return_value = object()
+                translator = CADChineseTranslator()
+                translator.configure_engine("deepl", deepl_key="")
+                self.assertTrue(translator.has_mt())
+
+    def test_deepl_env_var_ignored_for_other_providers(self):
+        """When provider is azure/ollama/openai, a stray DEEPL_API_KEY env var
+        must not silently switch the engine to DeepL."""
+        with patch.dict("os.environ", {"DEEPL_API_KEY": "dummy-key-for-test-xxxx:fx"}, clear=False):
+            translator = CADChineseTranslator()
+            translator.configure_engine("azure", azure_key="", azure_region="")
+            self.assertFalse(translator.has_mt())
+
+    def test_deepl_env_var_loses_to_explicit_key(self):
+        """An explicit deepl_key still wins over the env var."""
+        with patch.dict("os.environ", {"DEEPL_API_KEY": "env-key"}, clear=False):
+            with patch("deepl.Translator") as deepl_cls:
+                deepl_cls.return_value = object()
+                translator = CADChineseTranslator()
+                translator.configure_engine("deepl", deepl_key="explicit-key")
+                self.assertTrue(translator.has_mt())
+                # configure_engine should configure DeepL with the explicit key,
+                # not the env var.
+                self.assertEqual(translator.deepl_api_key, "explicit-key")
+
     def test_empty_cloud_keys_skip_mt_and_do_not_call_network(self):
         with patch("urllib.request.urlopen") as open_url, patch("deepl.Translator") as deepl_cls:
             open_url.side_effect = AssertionError("empty key must not call the network")
