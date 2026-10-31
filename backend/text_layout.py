@@ -148,13 +148,14 @@ def _room_budget(entity, height: float, used: float, target: str, font, cache: d
     from ezdxf.tools.text_size import mtext_size
 
     measured = font.text_width(target) * height
+    if measured <= 0:
+        return None
     try:
         rendered = mtext_size(entity).total_width
     except Exception:
-        return None
-    if measured <= 0 or rendered <= 0:
-        return None
-    scale = rendered / measured
+        rendered = 0.0
+    # A style font ezdxf cannot load measures as nothing; fall back to ours.
+    scale = rendered / measured if rendered > 0 else 1.0
     room = _free_width(entity, height, used * scale, cache)
     if room is None:
         return None

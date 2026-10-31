@@ -8,6 +8,7 @@ import ezdxf
 from ezdxf.tools.text_size import mtext_size
 
 from backend.drawings import _drop_lone_font_code, extract_preview, translate_drawing
+from backend.styles import rewrite_shx_styles
 from backend.text_layout import fit_translated_labels
 
 
@@ -68,6 +69,8 @@ class SplitCjkLabelTests(unittest.TestCase):
 class TitleFitTests(unittest.TestCase):
     def _sheet(self, frame_x):
         doc = ezdxf.new()
+        # Write-back maps SHX styles to the bundled CJK font before fitting.
+        rewrite_shx_styles(doc)
         msp = doc.modelspace()
         msp.add_lwpolyline([(-10, -10), (frame_x, -10), (frame_x, 200), (-10, 200)], close=True)
         return doc, msp
